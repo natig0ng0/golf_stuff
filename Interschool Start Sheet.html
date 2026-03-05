@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inter-Schools Golf Tournament – Start Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#c9a84c;--gold-l:#e8d08a;--dark:#0b1e0d;--green-d:#1a3a1e;
+  --green-m:#2d5a35;--parchment:#f5f0e8;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--dark);font-family:'Source Sans 3',sans-serif;color:#1a1a1a;}
+.hero{background:linear-gradient(160deg,var(--green-d) 0%,#0b2e0e 55%,#0e1a10 100%);
+  padding:40px 30px 0;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(201,168,76,.22) 0%,transparent 70%);
+  pointer-events:none;}
+.crown{font-size:28px;margin-bottom:8px;opacity:.85;}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(20px,3.5vw,38px);
+  font-weight:900;color:#fff;letter-spacing:.03em;line-height:1.15;margin-bottom:6px;}
+.hero-sub{font-size:11px;font-weight:300;color:var(--gold-l);letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:24px;}
+.tabs{display:flex;justify-content:center;gap:0;}
+.tab{padding:12px 32px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  cursor:pointer;border:none;background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);
+  transition:all .2s;border-radius:8px 8px 0 0;margin:0 3px;}
+.tab.active{background:var(--parchment);color:var(--green-d);}
+.tab:hover:not(.active){background:rgba(255,255,255,.14);color:rgba(255,255,255,.8);}
+.tab-badge{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:20px;
+  font-size:10px;background:rgba(201,168,76,.25);color:var(--gold-l);}
+.tab.active .tab-badge{background:var(--green-m);color:#fff;}
+.legend-bar{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;
+  padding:18px 20px;background:var(--parchment);border-bottom:1px solid #ddd8ce;}
+.leg{display:flex;align-items:center;gap:7px;font-size:11px;color:#555;letter-spacing:.04em;}
+.swatch{width:30px;height:10px;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,.1);}
+.draw-panel{display:none;}
+.draw-panel.active{display:block;}
+.sheet{background:var(--parchment);padding:28px 18px 50px;}
+.section-label{font-family:'Playfair Display',serif;font-size:10px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--green-m);margin-bottom:16px;padding-bottom:6px;
+  border-bottom:1px solid rgba(45,90,53,.2);max-width:1200px;margin-left:auto;margin-right:auto;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+  gap:12px;max-width:1200px;margin:0 auto;}
+.card{background:#fff;border-radius:8px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04);
+  transition:transform .15s,box-shadow .15s;}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12);}
+.card-head{background:var(--green-d);padding:8px 13px;
+  display:flex;align-items:center;justify-content:space-between;}
+.fnum{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;
+  color:var(--gold);letter-spacing:.05em;}
+.ftee{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;}
+.favg{font-family:'DM Mono',monospace;font-size:10px;color:rgba(201,168,76,.7);}
+.prow{display:flex;align-items:center;padding:8px 13px;border-bottom:1px solid #f0ece4;gap:9px;}
+.prow:last-child{border-bottom:none;}
+.bar{width:4px;border-radius:2px;align-self:stretch;min-height:26px;flex-shrink:0;}
+.pinfo{flex:1;min-width:0;}
+.pname{font-size:13px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pschool{font-size:9px;color:#999;letter-spacing:.05em;text-transform:uppercase;margin-top:1px;}
+.hcpbox{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;
+  color:#fff;border-radius:5px;padding:2px 8px;flex-shrink:0;min-width:36px;text-align:center;}
+footer{text-align:center;padding:18px;background:var(--dark);
+  color:rgba(255,255,255,.25);font-size:10px;letter-spacing:.12em;text-transform:uppercase;}
+@media print{
+  body{background:#fff;}
+  .tabs,.legend-bar{display:none;}
+  .draw-panel{display:block!important;}
+  .hero{background:#1a3a1e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .card-head{background:#1a3a1e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .bar,.hcpbox{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="crown">⛳</div>
+  <h1>Inter-Schools Golf Tournament</h1>
+  <div class="hero-sub">Official Start Sheet &nbsp;·&nbsp; 6 Schools &nbsp;·&nbsp; 72 Players &nbsp;·&nbsp; 24 Flights</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('random')">Random Draw <span class="tab-badge">24 flights</span></button>
+    <button class="tab" onclick="switchTab('asc')">Ascending Handicap <span class="tab-badge">24 flights</span></button>
+  </div>
+</div>
+<div class="legend-bar">
+  <div class="leg"><div class="swatch" style="background:#cc1111"></div>Mfantsipim · Red</div>
+  <div class="leg"><div class="swatch" style="background:linear-gradient(90deg,#111 50%,#ccc 50%)"></div>Adisadel · Black &amp; White</div>
+  <div class="leg"><div class="swatch" style="background:#7a4828"></div>Achimota · Brown</div>
+  <div class="leg"><div class="swatch" style="background:#1a44bb"></div>PRESEC · Blue</div>
+  <div class="leg"><div class="swatch" style="background:#3a5fa0"></div>Accra Academy · Blue &amp; Brown</div>
+  <div class="leg"><div class="swatch" style="background:linear-gradient(90deg,#2e7d32 50%,#f9c800 50%)"></div>Prempeh · Green &amp; Yellow</div>
+</div>
+<div id="panel-random" class="draw-panel active">
+  <div class="sheet">
+    <div class="section-label">Randomised Draw — Flights 01–24</div>
+    <div class="grid" id="grid-random"></div>
+  </div>
+</div>
+<div id="panel-asc" class="draw-panel">
+  <div class="sheet">
+    <div class="section-label">Ascending Handicap Order — Flight 01 = Lowest · Flight 24 = Highest</div>
+    <div class="grid" id="grid-asc"></div>
+  </div>
+</div>
+<footer>Each flight · 3 players · 3 different schools &nbsp;|&nbsp; Each school · 12 players · 12 flights</footer>
+<script>
+const SC={
+  MFN:{col:"#cc1111",name:"Mfantsipim"},
+  ADS:{col:"#444",name:"Adisadel"},
+  ACH:{col:"#7a4828",name:"Achimota"},
+  PRE:{col:"#1a44bb",name:"PRESEC"},
+  ACC:{col:"#3a5fa0",name:"Accra Academy"},
+  PRM:{col:"#2e7d32",name:"Prempeh"},
+};
+const RANDOM_DATA=[{"flight": 1, "tee": "1st", "name": "Bismark Ahenkoarah", "school": "MFN", "hcp": 13.6}, {"flight": 1, "tee": "1st", "name": "Fiifi Thompson", "school": "ADS", "hcp": 12.9}, {"flight": 1, "tee": "1st", "name": "Michael Bortei-Doku", "school": "ACH", "hcp": 24.0}, {"flight": 2, "tee": "1st", "name": "Martin Osei", "school": "MFN", "hcp": 6.7}, {"flight": 2, "tee": "1st", "name": "Alex Abrokwah", "school": "ADS", "hcp": 15.9}, {"flight": 2, "tee": "1st", "name": "Rodney Oddoye", "school": "PRE", "hcp": 19.7}, {"flight": 3, "tee": "1st", "name": "Mike Aggrey", "school": "MFN", "hcp": 9.7}, {"flight": 3, "tee": "1st", "name": "Nana Bamfo", "school": "ADS", "hcp": 11.3}, {"flight": 3, "tee": "1st", "name": "Sackitey Crabbe", "school": "ACC", "hcp": 27.3}, {"flight": 4, "tee": "1st", "name": "Ernest Asimenu", "school": "MFN", "hcp": 14.3}, {"flight": 4, "tee": "1st", "name": "Solomon Allotey", "school": "ADS", "hcp": 6.4}, {"flight": 4, "tee": "1st", "name": "Ernest Owusu", "school": "PRM", "hcp": 28.0}, {"flight": 5, "tee": "1st", "name": "Kobby Bright O.A.", "school": "MFN", "hcp": 11.5}, {"flight": 5, "tee": "1st", "name": "Fred Duvor", "school": "ACH", "hcp": 9.8}, {"flight": 5, "tee": "1st", "name": "Spike Boaitey", "school": "PRE", "hcp": 25.6}, {"flight": 6, "tee": "1st", "name": "Joe Tieku", "school": "MFN", "hcp": 15.3}, {"flight": 6, "tee": "1st", "name": "Samuel Ocran", "school": "ACH", "hcp": 15.0}, {"flight": 6, "tee": "1st", "name": "Frank Tetteh", "school": "ACC", "hcp": 15.9}, {"flight": 7, "tee": "1st", "name": "Samuel Yeboah", "school": "MFN", "hcp": 14.9}, {"flight": 7, "tee": "1st", "name": "Tutu Agyare", "school": "ACH", "hcp": 13.1}, {"flight": 7, "tee": "1st", "name": "Ben\u00e9e Tagboto", "school": "PRM", "hcp": 10.5}, {"flight": 8, "tee": "1st", "name": "Kojo Ansah", "school": "MFN", "hcp": 8.2}, {"flight": 8, "tee": "1st", "name": "Alex Fiagome", "school": "PRE", "hcp": 13.3}, {"flight": 8, "tee": "1st", "name": "Richard Torku", "school": "ACC", "hcp": 15.5}, {"flight": 9, "tee": "1st", "name": "Percival Ampomah", "school": "MFN", "hcp": 8.2}, {"flight": 9, "tee": "1st", "name": "Isaac Aninakwah", "school": "PRE", "hcp": 10.3}, {"flight": 9, "tee": "1st", "name": "Paul Dwimoh", "school": "PRM", "hcp": 21.6}, {"flight": 10, "tee": "1st", "name": "Kofi Intsiful", "school": "MFN", "hcp": 4.8}, {"flight": 10, "tee": "1st", "name": "Joshua Asaabil Dadzie", "school": "ACC", "hcp": 24.0}, {"flight": 10, "tee": "1st", "name": "Samuel Addai", "school": "PRM", "hcp": 20.7}, {"flight": 11, "tee": "1st", "name": "Kwaku Appietu-Ankrah", "school": "ADS", "hcp": 9.0}, {"flight": 11, "tee": "1st", "name": "Henry Okoe Tackie", "school": "ACH", "hcp": 19.0}, {"flight": 11, "tee": "1st", "name": "Tony Ntiador", "school": "PRE", "hcp": 30.9}, {"flight": 12, "tee": "1st", "name": "Kofi Amoabeng", "school": "ADS", "hcp": 17.0}, {"flight": 12, "tee": "1st", "name": "Princess Nkansah-Boadu", "school": "ACH", "hcp": 17.4}, {"flight": 12, "tee": "1st", "name": "Chris Atadika", "school": "ACC", "hcp": 22.5}, {"flight": 13, "tee": "10th", "name": "Nanabanyin Dennis", "school": "ADS", "hcp": 19.3}, {"flight": 13, "tee": "10th", "name": "John Blay", "school": "ACH", "hcp": 20.0}, {"flight": 13, "tee": "10th", "name": "Ebenezer Asabere", "school": "PRM", "hcp": 6.1}, {"flight": 14, "tee": "10th", "name": "Sammy Laing", "school": "ADS", "hcp": 22.2}, {"flight": 14, "tee": "10th", "name": "Mathais Dorfe", "school": "PRE", "hcp": 14.4}, {"flight": 14, "tee": "10th", "name": "Daniel Addo", "school": "ACC", "hcp": 15.6}, {"flight": 15, "tee": "10th", "name": "Francis Kojo Bannerman", "school": "ADS", "hcp": 14.7}, {"flight": 15, "tee": "10th", "name": "Toni Bakawu", "school": "PRE", "hcp": 15.6}, {"flight": 15, "tee": "10th", "name": "Ren\u00e9 Plahar", "school": "PRM", "hcp": 30.0}, {"flight": 16, "tee": "10th", "name": "George Amissah", "school": "ADS", "hcp": 10.8}, {"flight": 16, "tee": "10th", "name": "Larry Odonkor", "school": "ACC", "hcp": 25.5}, {"flight": 16, "tee": "10th", "name": "Bismark N. Dapaah", "school": "PRM", "hcp": 7.2}, {"flight": 17, "tee": "10th", "name": "Harrison Akpabli", "school": "ACH", "hcp": 15.3}, {"flight": 17, "tee": "10th", "name": "John Entsua", "school": "PRE", "hcp": 6.2}, {"flight": 17, "tee": "10th", "name": "Charles Okyere", "school": "ACC", "hcp": 18.5}, {"flight": 18, "tee": "10th", "name": "Kobina Yankey", "school": "ACH", "hcp": 21.8}, {"flight": 18, "tee": "10th", "name": "Nana Antwi Darkwa", "school": "PRE", "hcp": 13.2}, {"flight": 18, "tee": "10th", "name": "Isaac Asante", "school": "PRM", "hcp": 9.8}, {"flight": 19, "tee": "10th", "name": "Kofi Osafo Sampong", "school": "ACH", "hcp": 18.0}, {"flight": 19, "tee": "10th", "name": "Felix Addo", "school": "ACC", "hcp": 24.4}, {"flight": 19, "tee": "10th", "name": "Kojo Acheampong", "school": "PRM", "hcp": 16.4}, {"flight": 20, "tee": "10th", "name": "Nash Antwi", "school": "PRE", "hcp": 12.1}, {"flight": 20, "tee": "10th", "name": "Emmanuel Quarcoo", "school": "ACC", "hcp": 12.3}, {"flight": 20, "tee": "10th", "name": "Nana Kwabena Kwarteng", "school": "PRM", "hcp": 21.9}, {"flight": 21, "tee": "10th", "name": "Isaac Simpson", "school": "MFN", "hcp": 5.9}, {"flight": 21, "tee": "10th", "name": "David Atuwo", "school": "ADS", "hcp": 15.8}, {"flight": 21, "tee": "10th", "name": "Kobby Addai", "school": "ACH", "hcp": 11.5}, {"flight": 22, "tee": "10th", "name": "Nathan Donkor", "school": "MFN", "hcp": 17.6}, {"flight": 22, "tee": "10th", "name": "Samuel Koranteng", "school": "PRE", "hcp": 20.7}, {"flight": 22, "tee": "10th", "name": "Paul Ayitiah", "school": "ACC", "hcp": 27.8}, {"flight": 23, "tee": "10th", "name": "Maxwell Darkwah", "school": "ADS", "hcp": 9.7}, {"flight": 23, "tee": "10th", "name": "Jojo Ampadu", "school": "PRE", "hcp": 15.4}, {"flight": 23, "tee": "10th", "name": "Eric Ofosu-Hene", "school": "PRM", "hcp": 11.9}, {"flight": 24, "tee": "10th", "name": "Kisseih Antonio", "school": "ACH", "hcp": 19.5}, {"flight": 24, "tee": "10th", "name": "Charles Darkwa", "school": "ACC", "hcp": 8.8}, {"flight": 24, "tee": "10th", "name": "Ebo Anderson", "school": "PRM", "hcp": 9.0}];
+const ASC_DATA=[{"flight": 1, "tee": "1st", "name": "Kofi Intsiful", "school": "MFN", "hcp": 4.8}, {"flight": 1, "tee": "1st", "name": "Solomon Allotey", "school": "ADS", "hcp": 6.4}, {"flight": 1, "tee": "1st", "name": "Fred Duvor", "school": "ACH", "hcp": 9.8}, {"flight": 2, "tee": "1st", "name": "Isaac Simpson", "school": "MFN", "hcp": 5.9}, {"flight": 2, "tee": "1st", "name": "Kwaku Appietu-Ankrah", "school": "ADS", "hcp": 9.0}, {"flight": 2, "tee": "1st", "name": "John Entsua", "school": "PRE", "hcp": 6.2}, {"flight": 3, "tee": "1st", "name": "Martin Osei", "school": "MFN", "hcp": 6.7}, {"flight": 3, "tee": "1st", "name": "Maxwell Darkwah", "school": "ADS", "hcp": 9.7}, {"flight": 3, "tee": "1st", "name": "Charles Darkwa", "school": "ACC", "hcp": 8.8}, {"flight": 4, "tee": "1st", "name": "Percival Ampomah", "school": "MFN", "hcp": 8.2}, {"flight": 4, "tee": "1st", "name": "George Amissah", "school": "ADS", "hcp": 10.8}, {"flight": 4, "tee": "1st", "name": "Ebenezer Asabere", "school": "PRM", "hcp": 6.1}, {"flight": 5, "tee": "1st", "name": "Kojo Ansah", "school": "MFN", "hcp": 8.2}, {"flight": 5, "tee": "1st", "name": "Kobby Addai", "school": "ACH", "hcp": 11.5}, {"flight": 5, "tee": "1st", "name": "Isaac Aninakwah", "school": "PRE", "hcp": 10.3}, {"flight": 6, "tee": "1st", "name": "Mike Aggrey", "school": "MFN", "hcp": 9.7}, {"flight": 6, "tee": "1st", "name": "Tutu Agyare", "school": "ACH", "hcp": 13.1}, {"flight": 6, "tee": "1st", "name": "Emmanuel Quarcoo", "school": "ACC", "hcp": 12.3}, {"flight": 7, "tee": "1st", "name": "Kobby Bright O.A.", "school": "MFN", "hcp": 11.5}, {"flight": 7, "tee": "1st", "name": "Samuel Ocran", "school": "ACH", "hcp": 15.0}, {"flight": 7, "tee": "1st", "name": "Bismark N. Dapaah", "school": "PRM", "hcp": 7.2}, {"flight": 8, "tee": "1st", "name": "Bismark Ahenkoarah", "school": "MFN", "hcp": 13.6}, {"flight": 8, "tee": "1st", "name": "Nash Antwi", "school": "PRE", "hcp": 12.1}, {"flight": 8, "tee": "1st", "name": "Richard Torku", "school": "ACC", "hcp": 15.5}, {"flight": 9, "tee": "1st", "name": "Ernest Asimenu", "school": "MFN", "hcp": 14.3}, {"flight": 9, "tee": "1st", "name": "Nana Antwi Darkwa", "school": "PRE", "hcp": 13.2}, {"flight": 9, "tee": "1st", "name": "Ebo Anderson", "school": "PRM", "hcp": 9.0}, {"flight": 10, "tee": "1st", "name": "Samuel Yeboah", "school": "MFN", "hcp": 14.9}, {"flight": 10, "tee": "1st", "name": "Daniel Addo", "school": "ACC", "hcp": 15.6}, {"flight": 10, "tee": "1st", "name": "Isaac Asante", "school": "PRM", "hcp": 9.8}, {"flight": 11, "tee": "1st", "name": "Nana Bamfo", "school": "ADS", "hcp": 11.3}, {"flight": 11, "tee": "1st", "name": "Harrison Akpabli", "school": "ACH", "hcp": 15.3}, {"flight": 11, "tee": "1st", "name": "Alex Fiagome", "school": "PRE", "hcp": 13.3}, {"flight": 12, "tee": "1st", "name": "Fiifi Thompson", "school": "ADS", "hcp": 12.9}, {"flight": 12, "tee": "1st", "name": "Princess Nkansah-Boadu", "school": "ACH", "hcp": 17.4}, {"flight": 12, "tee": "1st", "name": "Frank Tetteh", "school": "ACC", "hcp": 15.9}, {"flight": 13, "tee": "10th", "name": "Francis Kojo Bannerman", "school": "ADS", "hcp": 14.7}, {"flight": 13, "tee": "10th", "name": "Kofi Osafo Sampong", "school": "ACH", "hcp": 18.0}, {"flight": 13, "tee": "10th", "name": "Ben\u00e9e Tagboto", "school": "PRM", "hcp": 10.5}, {"flight": 14, "tee": "10th", "name": "David Atuwo", "school": "ADS", "hcp": 15.8}, {"flight": 14, "tee": "10th", "name": "Mathais Dorfe", "school": "PRE", "hcp": 14.4}, {"flight": 14, "tee": "10th", "name": "Charles Okyere", "school": "ACC", "hcp": 18.5}, {"flight": 15, "tee": "10th", "name": "Alex Abrokwah", "school": "ADS", "hcp": 15.9}, {"flight": 15, "tee": "10th", "name": "Jojo Ampadu", "school": "PRE", "hcp": 15.4}, {"flight": 15, "tee": "10th", "name": "Eric Ofosu-Hene", "school": "PRM", "hcp": 11.9}, {"flight": 16, "tee": "10th", "name": "Kofi Amoabeng", "school": "ADS", "hcp": 17.0}, {"flight": 16, "tee": "10th", "name": "Chris Atadika", "school": "ACC", "hcp": 22.5}, {"flight": 16, "tee": "10th", "name": "Kojo Acheampong", "school": "PRM", "hcp": 16.4}, {"flight": 17, "tee": "10th", "name": "Henry Okoe Tackie", "school": "ACH", "hcp": 19.0}, {"flight": 17, "tee": "10th", "name": "Toni Bakawu", "school": "PRE", "hcp": 15.6}, {"flight": 17, "tee": "10th", "name": "Joshua Asaabil Dadzie", "school": "ACC", "hcp": 24.0}, {"flight": 18, "tee": "10th", "name": "Kisseih Antonio", "school": "ACH", "hcp": 19.5}, {"flight": 18, "tee": "10th", "name": "Rodney Oddoye", "school": "PRE", "hcp": 19.7}, {"flight": 18, "tee": "10th", "name": "Samuel Addai", "school": "PRM", "hcp": 20.7}, {"flight": 19, "tee": "10th", "name": "John Blay", "school": "ACH", "hcp": 20.0}, {"flight": 19, "tee": "10th", "name": "Felix Addo", "school": "ACC", "hcp": 24.4}, {"flight": 19, "tee": "10th", "name": "Paul Dwimoh", "school": "PRM", "hcp": 21.6}, {"flight": 20, "tee": "10th", "name": "Samuel Koranteng", "school": "PRE", "hcp": 20.7}, {"flight": 20, "tee": "10th", "name": "Larry Odonkor", "school": "ACC", "hcp": 25.5}, {"flight": 20, "tee": "10th", "name": "Nana Kwabena Kwarteng", "school": "PRM", "hcp": 21.9}, {"flight": 21, "tee": "10th", "name": "Joe Tieku", "school": "MFN", "hcp": 15.3}, {"flight": 21, "tee": "10th", "name": "Nanabanyin Dennis", "school": "ADS", "hcp": 19.3}, {"flight": 21, "tee": "10th", "name": "Kobina Yankey", "school": "ACH", "hcp": 21.8}, {"flight": 22, "tee": "10th", "name": "Nathan Donkor", "school": "MFN", "hcp": 17.6}, {"flight": 22, "tee": "10th", "name": "Spike Boaitey", "school": "PRE", "hcp": 25.6}, {"flight": 22, "tee": "10th", "name": "Sackitey Crabbe", "school": "ACC", "hcp": 27.3}, {"flight": 23, "tee": "10th", "name": "Sammy Laing", "school": "ADS", "hcp": 22.2}, {"flight": 23, "tee": "10th", "name": "Tony Ntiador", "school": "PRE", "hcp": 30.9}, {"flight": 23, "tee": "10th", "name": "Ernest Owusu", "school": "PRM", "hcp": 28.0}, {"flight": 24, "tee": "10th", "name": "Michael Bortei-Doku", "school": "ACH", "hcp": 24.0}, {"flight": 24, "tee": "10th", "name": "Paul Ayitiah", "school": "ACC", "hcp": 27.8}, {"flight": 24, "tee": "10th", "name": "Ren\u00e9 Plahar", "school": "PRM", "hcp": 30.0}];
+
+function buildGrid(id,data){
+  const g=document.getElementById(id);
+  const flights={};
+  data.forEach(p=>{
+    if(!flights[p.flight]) flights[p.flight]={tee:p.tee,players:[]};
+    flights[p.flight].players.push(p);
+  });
+  Object.entries(flights).forEach(([fn,f])=>{
+    const avg=(f.players.reduce((s,p)=>s+p.hcp,0)/f.players.length).toFixed(1);
+    let rows='';
+    f.players.forEach(p=>{
+      const c=SC[p.school].col;
+      rows+=`<div class="prow">
+        <div class="bar" style="background:${c}"></div>
+        <div class="pinfo">
+          <div class="pname">${p.name}</div>
+          <div class="pschool">${SC[p.school].name}</div>
+        </div>
+        <div class="hcpbox" style="background:${c}">${p.hcp}</div>
+      </div>`;
+    });
+    const card=document.createElement('div');
+    card.className='card';
+    card.innerHTML=`<div class="card-head">
+      <span class="fnum">Flight ${String(fn).padStart(2,'0')}</span>
+      <span class="favg">Avg ${avg}</span>
+      <span class="ftee">Tee ${f.tee}</span>
+    </div>${rows}`;
+    g.appendChild(card);
+  });
+}
+buildGrid('grid-random',RANDOM_DATA);
+buildGrid('grid-asc',ASC_DATA);
+function switchTab(w){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===(w==='random'?0:1)));
+  document.querySelectorAll('.draw-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+w).classList.add('active');
+}
+</script>
+</body>
+</html>
