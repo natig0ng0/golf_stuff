@@ -6,57 +6,41 @@
 <title>Inter-Schools Golf Tournament – Start Sheet</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --gold:#c9a84c;--gold-l:#e8d08a;--dark:#0b1e0d;--green-d:#1a3a1e;
-  --green-m:#2d5a35;--parchment:#f5f0e8;
-}
+:root{--gold:#c9a84c;--gold-l:#e8d08a;--dark:#0b1e0d;--green-d:#1a3a1e;--green-m:#2d5a35;--parchment:#f5f0e8;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--dark);font-family:'Source Sans 3',sans-serif;color:#1a1a1a;}
-.hero{background:linear-gradient(160deg,var(--green-d) 0%,#0b2e0e 55%,#0e1a10 100%);
-  padding:44px 30px 32px;text-align:center;position:relative;overflow:hidden;}
-.hero::before{content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(201,168,76,.22) 0%,transparent 70%);
-  pointer-events:none;}
+.hero{background:linear-gradient(160deg,var(--green-d) 0%,#0b2e0e 55%,#0e1a10 100%);padding:44px 30px 32px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(201,168,76,.22) 0%,transparent 70%);pointer-events:none;}
 .crown{font-size:30px;margin-bottom:10px;opacity:.9;}
-.hero h1{font-family:'Playfair Display',serif;font-size:clamp(20px,3.5vw,40px);
-  font-weight:900;color:#fff;letter-spacing:.03em;line-height:1.15;margin-bottom:8px;}
-.hero-sub{font-size:11px;font-weight:300;color:var(--gold-l);letter-spacing:.2em;
-  text-transform:uppercase;margin-bottom:10px;}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(20px,3.5vw,40px);font-weight:900;color:#fff;letter-spacing:.03em;line-height:1.15;margin-bottom:8px;}
+.hero-sub{font-size:11px;font-weight:300;color:var(--gold-l);letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;}
 .hero-rule{width:60px;height:1px;background:var(--gold);margin:0 auto 14px;opacity:.5;}
 .hero-meta{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
 .meta-item{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;}
 .meta-item span{color:var(--gold-l);font-weight:600;}
 .filter-row{display:flex;justify-content:center;gap:8px;margin-top:20px;flex-wrap:wrap;}
-.fpill{padding:7px 20px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.1em;
-  text-transform:uppercase;cursor:pointer;border:1.5px solid transparent;transition:all .2s;}
+.fpill{padding:7px 20px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:1.5px solid transparent;transition:all .2s;}
 .fpill.all{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.15);}
 .fpill.scoring{background:rgba(45,90,53,.3);color:rgba(180,230,180,.7);border-color:rgba(45,90,53,.5);}
 .fpill.support{background:rgba(160,100,0,.3);color:rgba(255,210,100,.7);border-color:rgba(160,100,0,.5);}
 .fpill.all.active{background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4);}
 .fpill.scoring.active{background:var(--green-m);color:#fff;border-color:var(--green-m);}
 .fpill.support.active{background:#a06010;color:#fff;border-color:#a06010;}
-.legend-bar{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;
-  padding:14px 20px;background:var(--parchment);border-bottom:1px solid #ddd8ce;}
+.legend-bar{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;padding:14px 20px;background:var(--parchment);border-bottom:1px solid #ddd8ce;}
 .leg{display:flex;align-items:center;gap:7px;font-size:11px;color:#555;letter-spacing:.04em;}
 .swatch{width:28px;height:10px;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,.1);}
 .sheet{background:var(--parchment);padding:24px 18px 60px;}
-.section-label{font-family:'Playfair Display',serif;font-size:10px;letter-spacing:.22em;
-  text-transform:uppercase;color:var(--green-m);margin-bottom:16px;padding-bottom:6px;
-  border-bottom:1px solid rgba(45,90,53,.2);max-width:1200px;margin-left:auto;margin-right:auto;}
+.section-label{font-family:'Playfair Display',serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--green-m);margin-bottom:16px;padding-bottom:6px;border-bottom:1px solid rgba(45,90,53,.2);max-width:1200px;margin-left:auto;margin-right:auto;}
 .group-divider{max-width:1200px;margin:28px auto 16px;display:flex;align-items:center;gap:14px;}
 .divider-line{flex:1;height:1px;}
 .divider-line.scoring{background:rgba(45,90,53,.25);}
 .divider-line.support{background:rgba(160,100,0,.25);}
-.divider-tag{padding:5px 16px;border-radius:4px;font-size:10px;font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;}
+.divider-tag{padding:5px 16px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;}
 .divider-tag.scoring{background:var(--green-m);color:#fff;}
 .divider-tag.support{background:#a06010;color:#fff;}
 .divider-sub{font-size:10px;color:#aaa;letter-spacing:.06em;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));
-  gap:12px;max-width:1200px;margin:0 auto;}
-.card{background:#fff;border-radius:8px;overflow:hidden;
-  box-shadow:0 2px 8px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04);
-  transition:transform .15s,box-shadow .15s;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:12px;max-width:1200px;margin:0 auto;}
+.card{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04);transition:transform .15s,box-shadow .15s;}
 .card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12);}
 .card-head{padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
 .card-head.scoring{background:var(--green-d);}
@@ -70,17 +54,13 @@ body{background:var(--dark);font-family:'Source Sans 3',sans-serif;color:#1a1a1a
 .pinfo{flex:1;min-width:0;}
 .pname{font-size:13px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pschool{font-size:9px;color:#999;letter-spacing:.05em;text-transform:uppercase;margin-top:1px;}
-.hcpbox{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:#fff;
-  border-radius:5px;padding:2px 8px;flex-shrink:0;min-width:36px;text-align:center;}
-.sg-badge{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  padding:5px 13px;text-align:center;border-top:1px solid #f0ece4;}
+.hcpbox{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:#fff;border-radius:5px;padding:2px 8px;flex-shrink:0;min-width:36px;text-align:center;}
+.sg-badge{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 13px;text-align:center;border-top:1px solid #f0ece4;}
 .sg-badge.scoring{color:rgba(45,90,53,.55);background:#fafaf8;}
 .sg-badge.support{color:rgba(160,96,16,.65);background:#fdf8f0;}
-footer{text-align:center;padding:18px;background:var(--dark);
-  color:rgba(255,255,255,.25);font-size:10px;letter-spacing:.12em;text-transform:uppercase;}
+footer{text-align:center;padding:18px;background:var(--dark);color:rgba(255,255,255,.25);font-size:10px;letter-spacing:.12em;text-transform:uppercase;}
 @media print{
-  body{background:#fff;}
-  .filter-row{display:none;}
+  body{background:#fff;}.filter-row{display:none;}
   .hero{background:#1a3a1e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .card-head,.bar,.hcpbox,.sg-badge,.divider-tag{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
@@ -97,8 +77,8 @@ footer{text-align:center;padding:18px;background:var(--dark);
     <div class="meta-item"><span>34</span> Flights</div>
     <div class="meta-item"><span>103</span> Players</div>
     <div class="meta-item">Hole <span>1</span></div>
-    <div class="meta-item"><span>9:00 AM</span> – <span>11:45 AM</span></div>
-    <div class="meta-item"><span>5-min</span> intervals</div>
+    <div class="meta-item"><span>9:00 AM</span> – <span>12:51 PM</span></div>
+    <div class="meta-item"><span>7-min</span> intervals</div>
   </div>
   <div class="filter-row">
     <button class="fpill all active" onclick="filter('all')">All Flights</button>
@@ -115,88 +95,48 @@ footer{text-align:center;padding:18px;background:var(--dark);
   <div class="leg"><div class="swatch" style="background:linear-gradient(90deg,#2e7d32 50%,#f9c800 50%)"></div>Prempeh</div>
 </div>
 <div class="sheet">
-  <div class="section-label" id="section-label">All 34 Flights — Hole 1 — 9:00 AM to 11:45 AM — 5-Minute Intervals</div>
+  <div class="section-label" id="section-label">All 34 Flights — Hole 1 — 9:00 AM to 12:51 PM — 7-Minute Intervals</div>
   <div id="main-grid"></div>
 </div>
-<footer>Scoring Group: Flights 01–24 · 9:00 AM – 10:55 AM &nbsp;|&nbsp; Support Group: Flights 25–34 · 11:00 AM – 11:45 AM &nbsp;|&nbsp; All Hole 1 · 5-min intervals</footer>
+<footer>Scoring Group: Flights 01–24 · 9:00 AM – 11:41 AM &nbsp;|&nbsp; Support Group: Flights 25–34 · 11:48 AM – 12:51 PM &nbsp;|&nbsp; All Hole 1 · 7-min intervals</footer>
 <script>
-const SC={
-  MFN:{col:"#cc1111",name:"Mfantsipim"},ADS:{col:"#444",name:"Adisadel"},
-  ACH:{col:"#7a4828",name:"Achimota"},PRE:{col:"#1a44bb",name:"PRESEC"},
-  ACC:{col:"#3a5fa0",name:"Accra Academy"},PRM:{col:"#2e7d32",name:"Prempeh"},
-};
-const DATA=[{"flight": 1, "time": "9:00 AM", "group": "Scoring Group", "name": "David Atuwo", "school": "ADS", "hcp": 15.8}, {"flight": 1, "time": "9:00 AM", "group": "Scoring Group", "name": "Princess Nkansah-Boadu", "school": "ACH", "hcp": 17.4}, {"flight": 1, "time": "9:00 AM", "group": "Scoring Group", "name": "Larry Odonkor", "school": "ACC", "hcp": 25.5}, {"flight": 2, "time": "9:05 AM", "group": "Scoring Group", "name": "Kofi Intsiful", "school": "MFN", "hcp": 4.8}, {"flight": 2, "time": "9:05 AM", "group": "Scoring Group", "name": "George Amissah", "school": "ADS", "hcp": 10.8}, {"flight": 2, "time": "9:05 AM", "group": "Scoring Group", "name": "Fred Duvor", "school": "ACH", "hcp": 9.8}, {"flight": 3, "time": "9:10 AM", "group": "Scoring Group", "name": "Isaac Simpson", "school": "MFN", "hcp": 5.9}, {"flight": 3, "time": "9:10 AM", "group": "Scoring Group", "name": "Nana Bamfo", "school": "ADS", "hcp": 11.3}, {"flight": 3, "time": "9:10 AM", "group": "Scoring Group", "name": "John Entsua", "school": "PRE", "hcp": 6.2}, {"flight": 4, "time": "9:15 AM", "group": "Scoring Group", "name": "Martin Osei", "school": "MFN", "hcp": 6.7}, {"flight": 4, "time": "9:15 AM", "group": "Scoring Group", "name": "Fiifi Thompson", "school": "ADS", "hcp": 12.9}, {"flight": 4, "time": "9:15 AM", "group": "Scoring Group", "name": "Charles Darkwa", "school": "ACC", "hcp": 8.8}, {"flight": 5, "time": "9:20 AM", "group": "Scoring Group", "name": "Percival Ampomah", "school": "MFN", "hcp": 8.2}, {"flight": 5, "time": "9:20 AM", "group": "Scoring Group", "name": "Francis Kojo Bannerman", "school": "ADS", "hcp": 14.7}, {"flight": 5, "time": "9:20 AM", "group": "Scoring Group", "name": "Ebenezer Asabere", "school": "PRM", "hcp": 6.1}, {"flight": 6, "time": "9:25 AM", "group": "Scoring Group", "name": "Kojo Ansah", "school": "MFN", "hcp": 8.2}, {"flight": 6, "time": "9:25 AM", "group": "Scoring Group", "name": "Kobby Addai", "school": "ACH", "hcp": 11.5}, {"flight": 6, "time": "9:25 AM", "group": "Scoring Group", "name": "Mathais Dorfe", "school": "PRE", "hcp": 14.4}, {"flight": 7, "time": "9:30 AM", "group": "Scoring Group", "name": "Mike Aggrey", "school": "MFN", "hcp": 9.7}, {"flight": 7, "time": "9:30 AM", "group": "Scoring Group", "name": "Tutu Agyare", "school": "ACH", "hcp": 13.1}, {"flight": 7, "time": "9:30 AM", "group": "Scoring Group", "name": "Emmanuel Quarcoo (Jupiter)", "school": "ACC", "hcp": 12.3}, {"flight": 8, "time": "9:35 AM", "group": "Scoring Group", "name": "Kobby Bright O.A.", "school": "MFN", "hcp": 11.5}, {"flight": 8, "time": "9:35 AM", "group": "Scoring Group", "name": "Samuel Ocran", "school": "ACH", "hcp": 15.0}, {"flight": 8, "time": "9:35 AM", "group": "Scoring Group", "name": "Bismark N. Dapaah", "school": "PRM", "hcp": 7.2}, {"flight": 9, "time": "9:40 AM", "group": "Scoring Group", "name": "Ernest Asimenu", "school": "MFN", "hcp": 14.3}, {"flight": 9, "time": "9:40 AM", "group": "Scoring Group", "name": "Isaac Aninakwah", "school": "PRE", "hcp": 10.3}, {"flight": 9, "time": "9:40 AM", "group": "Scoring Group", "name": "Richard Torku", "school": "ACC", "hcp": 15.5}, {"flight": 10, "time": "9:45 AM", "group": "Scoring Group", "name": "Samuel Yeboah", "school": "MFN", "hcp": 14.9}, {"flight": 10, "time": "9:45 AM", "group": "Scoring Group", "name": "Jojo Ampadu", "school": "PRE", "hcp": 15.4}, {"flight": 10, "time": "9:45 AM", "group": "Scoring Group", "name": "Ebo Anderson", "school": "PRM", "hcp": 9.0}, {"flight": 11, "time": "9:50 AM", "group": "Scoring Group", "name": "Joe Tieku", "school": "MFN", "hcp": 15.3}, {"flight": 11, "time": "9:50 AM", "group": "Scoring Group", "name": "Felix Addo", "school": "ACC", "hcp": 24.4}, {"flight": 11, "time": "9:50 AM", "group": "Scoring Group", "name": "Hanniel Kakraba-Ampeh", "school": "PRM", "hcp": 9.4}, {"flight": 12, "time": "9:55 AM", "group": "Scoring Group", "name": "Alex Abrokwah", "school": "ADS", "hcp": 15.9}, {"flight": 12, "time": "9:55 AM", "group": "Scoring Group", "name": "Harrison Akpabli", "school": "ACH", "hcp": 15.3}, {"flight": 12, "time": "9:55 AM", "group": "Scoring Group", "name": "Nana Antwi Darkwa", "school": "PRE", "hcp": 13.2}, {"flight": 13, "time": "10:00 AM", "group": "Scoring Group", "name": "Kofi Amoabeng", "school": "ADS", "hcp": 17.0}, {"flight": 13, "time": "10:00 AM", "group": "Scoring Group", "name": "Kofi Osafo Sampong", "school": "ACH", "hcp": 18.0}, {"flight": 13, "time": "10:00 AM", "group": "Scoring Group", "name": "Francis Nkrumah Gyasi", "school": "PRM", "hcp": 9.4}, {"flight": 14, "time": "10:05 AM", "group": "Scoring Group", "name": "Kwaku Appietu-Ankrah", "school": "ADS", "hcp": 9.0}, {"flight": 14, "time": "10:05 AM", "group": "Scoring Group", "name": "Alex Fiagome", "school": "PRE", "hcp": 13.3}, {"flight": 14, "time": "10:05 AM", "group": "Scoring Group", "name": "Sackitey Crabbe", "school": "ACC", "hcp": 27.3}, {"flight": 15, "time": "10:10 AM", "group": "Scoring Group", "name": "Solomon Allotey", "school": "ADS", "hcp": 6.4}, {"flight": 15, "time": "10:10 AM", "group": "Scoring Group", "name": "Toni Bakawu", "school": "PRE", "hcp": 15.6}, {"flight": 15, "time": "10:10 AM", "group": "Scoring Group", "name": "Isaac Asante", "school": "PRM", "hcp": 9.8}, {"flight": 16, "time": "10:15 AM", "group": "Scoring Group", "name": "Maxwell Darkwah", "school": "ADS", "hcp": 9.7}, {"flight": 16, "time": "10:15 AM", "group": "Scoring Group", "name": "Daniel Addo", "school": "ACC", "hcp": 15.6}, {"flight": 16, "time": "10:15 AM", "group": "Scoring Group", "name": "Ben\u00e9e Tagboto", "school": "PRM", "hcp": 10.5}, {"flight": 17, "time": "10:20 AM", "group": "Scoring Group", "name": "Henry Okoe Tackie", "school": "ACH", "hcp": 19.0}, {"flight": 17, "time": "10:20 AM", "group": "Scoring Group", "name": "Samuel Koranteng", "school": "PRE", "hcp": 20.7}, {"flight": 17, "time": "10:20 AM", "group": "Scoring Group", "name": "Frank Tetteh", "school": "ACC", "hcp": 15.9}, {"flight": 18, "time": "10:25 AM", "group": "Scoring Group", "name": "Kisseih Antonio", "school": "ACH", "hcp": 19.5}, {"flight": 18, "time": "10:25 AM", "group": "Scoring Group", "name": "Rodney Oddoye", "school": "PRE", "hcp": 19.7}, {"flight": 18, "time": "10:25 AM", "group": "Scoring Group", "name": "Eric Ofosu-Hene", "school": "PRM", "hcp": 11.9}, {"flight": 19, "time": "10:30 AM", "group": "Scoring Group", "name": "John Blay", "school": "ACH", "hcp": 20.0}, {"flight": 19, "time": "10:30 AM", "group": "Scoring Group", "name": "Charles Okyere", "school": "ACC", "hcp": 18.5}, {"flight": 19, "time": "10:30 AM", "group": "Scoring Group", "name": "Kojo Acheampong", "school": "PRM", "hcp": 16.4}, {"flight": 20, "time": "10:35 AM", "group": "Scoring Group", "name": "Nash Antwi", "school": "PRE", "hcp": 12.1}, {"flight": 20, "time": "10:35 AM", "group": "Scoring Group", "name": "Joshua Asaabil Dadzie", "school": "ACC", "hcp": 24.0}, {"flight": 20, "time": "10:35 AM", "group": "Scoring Group", "name": "Samuel Addai", "school": "PRM", "hcp": 20.7}, {"flight": 21, "time": "10:40 AM", "group": "Scoring Group", "name": "Nathan Donkor", "school": "MFN", "hcp": 17.6}, {"flight": 21, "time": "10:40 AM", "group": "Scoring Group", "name": "Sammy Laing", "school": "ADS", "hcp": 22.2}, {"flight": 21, "time": "10:40 AM", "group": "Scoring Group", "name": "Kobina Yankey", "school": "ACH", "hcp": 21.8}, {"flight": 22, "time": "10:45 AM", "group": "Scoring Group", "name": "M K Parker", "school": "MFN", "hcp": 18.0}, {"flight": 22, "time": "10:45 AM", "group": "Scoring Group", "name": "Spike Boaitey", "school": "PRE", "hcp": 25.6}, {"flight": 22, "time": "10:45 AM", "group": "Scoring Group", "name": "Chris Atadika", "school": "ACC", "hcp": 22.5}, {"flight": 23, "time": "10:50 AM", "group": "Scoring Group", "name": "Nanabanyin Dennis", "school": "ADS", "hcp": 19.3}, {"flight": 23, "time": "10:50 AM", "group": "Scoring Group", "name": "Tony Ntiador", "school": "PRE", "hcp": 30.9}, {"flight": 23, "time": "10:50 AM", "group": "Scoring Group", "name": "Paul Dwimoh", "school": "PRM", "hcp": 21.6}, {"flight": 24, "time": "10:55 AM", "group": "Scoring Group", "name": "Michael Bortei-Doku", "school": "ACH", "hcp": 24.0}, {"flight": 24, "time": "10:55 AM", "group": "Scoring Group", "name": "Paul Ayitiah", "school": "ACC", "hcp": 27.8}, {"flight": 24, "time": "10:55 AM", "group": "Scoring Group", "name": "Nana Kwabena Kwarteng", "school": "PRM", "hcp": 21.9}, {"flight": 25, "time": "11:00 AM", "group": "Support Group", "name": "Alex Oppong Baffoe", "school": "PRE", "hcp": 10.1}, {"flight": 25, "time": "11:00 AM", "group": "Support Group", "name": "Samuel Acquah", "school": "MFN", "hcp": 18.7}, {"flight": 25, "time": "11:00 AM", "group": "Support Group", "name": "Michael Abbey", "school": "ACC", "hcp": 21.1}, {"flight": 26, "time": "11:05 AM", "group": "Support Group", "name": "William Nanka-Bruce", "school": "PRE", "hcp": 15.3}, {"flight": 26, "time": "11:05 AM", "group": "Support Group", "name": "Smyly Bannerman", "school": "MFN", "hcp": 18.9}, {"flight": 26, "time": "11:05 AM", "group": "Support Group", "name": "Edward Abrokwah", "school": "ADS", "hcp": 14.5}, {"flight": 27, "time": "11:10 AM", "group": "Support Group", "name": "Fred Darko", "school": "PRE", "hcp": 16.4}, {"flight": 27, "time": "11:10 AM", "group": "Support Group", "name": "Philip Attuquayefio", "school": "ACC", "hcp": 21.9}, {"flight": 27, "time": "11:10 AM", "group": "Support Group", "name": "Frank Tackie", "school": "MFN", "hcp": 19.2}, {"flight": 28, "time": "11:15 AM", "group": "Support Group", "name": "Stephen Amanor", "school": "PRE", "hcp": 17.5}, {"flight": 28, "time": "11:15 AM", "group": "Support Group", "name": "Kojo Acquaah-Harrison", "school": "ADS", "hcp": 20.0}, {"flight": 28, "time": "11:15 AM", "group": "Support Group", "name": "Richard Okrah", "school": "ACC", "hcp": 23.0}, {"flight": 29, "time": "11:20 AM", "group": "Support Group", "name": "Eric Quartey", "school": "PRE", "hcp": 19.5}, {"flight": 29, "time": "11:20 AM", "group": "Support Group", "name": "Roger Adamah", "school": "MFN", "hcp": 20.9}, {"flight": 29, "time": "11:20 AM", "group": "Support Group", "name": "Nana Yaw Kaitoo", "school": "ADS", "hcp": 24.9}, {"flight": 30, "time": "11:25 AM", "group": "Support Group", "name": "Leonard Nii Adom", "school": "PRE", "hcp": 20.1}, {"flight": 30, "time": "11:25 AM", "group": "Support Group", "name": "Hubert Potakey", "school": "ACC", "hcp": 28.0}, {"flight": 30, "time": "11:25 AM", "group": "Support Group", "name": "Robert Dovlo", "school": "MFN", "hcp": 21.9}, {"flight": 31, "time": "11:30 AM", "group": "Support Group", "name": "Benjamin Ofori", "school": "PRE", "hcp": 23.2}, {"flight": 31, "time": "11:30 AM", "group": "Support Group", "name": "Kwadwo A. Ankrah", "school": "ADS", "hcp": 34.0}, {"flight": 31, "time": "11:30 AM", "group": "Support Group", "name": "Edward Laryea", "school": "ACC", "hcp": 28.0}, {"flight": 32, "time": "11:35 AM", "group": "Support Group", "name": "Kwasi Asiedu", "school": "PRE", "hcp": 24.3}, {"flight": 32, "time": "11:35 AM", "group": "Support Group", "name": "Brian Quartey", "school": "ACH", "hcp": "N/A"}, {"flight": 32, "time": "11:35 AM", "group": "Support Group", "name": "Richmond Aboagye", "school": "MFN", "hcp": 23.4}, {"flight": 33, "time": "11:40 AM", "group": "Support Group", "name": "Ernest Owusu", "school": "PRM", "hcp": 28.0}, {"flight": 33, "time": "11:40 AM", "group": "Support Group", "name": "Nana Kweku Essel Wilson", "school": "ADS", "hcp": "N/A"}, {"flight": 33, "time": "11:40 AM", "group": "Support Group", "name": "Emmanuel Bruce Attah", "school": "ACC", "hcp": 33.3}, {"flight": 34, "time": "11:45 AM", "group": "Support Group", "name": "Andrew Kwablah", "school": "PRE", "hcp": 25.4}, {"flight": 34, "time": "11:45 AM", "group": "Support Group", "name": "Ayitey Bulley", "school": "ACH", "hcp": "N/A"}, {"flight": 34, "time": "11:45 AM", "group": "Support Group", "name": "Kwame Appah", "school": "MFN", "hcp": 31.2}, {"flight": 34, "time": "11:45 AM", "group": "Support Group", "name": "Ren\u00e9 Plahar", "school": "PRM", "hcp": 30.0}];
+const SC={MFN:{col:"#cc1111",name:"Mfantsipim"},ADS:{col:"#444",name:"Adisadel"},ACH:{col:"#7a4828",name:"Achimota"},PRE:{col:"#1a44bb",name:"PRESEC"},ACC:{col:"#3a5fa0",name:"Accra Academy"},PRM:{col:"#2e7d32",name:"Prempeh"}};
+const DATA=[{"flight": 1, "time": "9:00 AM", "group": "Scoring Group", "name": "David Atuwo", "school": "ADS", "hcp": 15.8}, {"flight": 1, "time": "9:00 AM", "group": "Scoring Group", "name": "Princess Nkansah-Boadu", "school": "ACH", "hcp": 17.4}, {"flight": 1, "time": "9:00 AM", "group": "Scoring Group", "name": "Larry Odonkor", "school": "ACC", "hcp": 25.5}, {"flight": 2, "time": "9:07 AM", "group": "Scoring Group", "name": "Kofi Intsiful", "school": "MFN", "hcp": 4.8}, {"flight": 2, "time": "9:07 AM", "group": "Scoring Group", "name": "George Amissah", "school": "ADS", "hcp": 10.8}, {"flight": 2, "time": "9:07 AM", "group": "Scoring Group", "name": "Fred Duvor", "school": "ACH", "hcp": 9.8}, {"flight": 3, "time": "9:14 AM", "group": "Scoring Group", "name": "Isaac Simpson", "school": "MFN", "hcp": 5.9}, {"flight": 3, "time": "9:14 AM", "group": "Scoring Group", "name": "Nana Bamfo", "school": "ADS", "hcp": 11.3}, {"flight": 3, "time": "9:14 AM", "group": "Scoring Group", "name": "John Entsua", "school": "PRE", "hcp": 6.2}, {"flight": 4, "time": "9:21 AM", "group": "Scoring Group", "name": "Martin Osei", "school": "MFN", "hcp": 6.7}, {"flight": 4, "time": "9:21 AM", "group": "Scoring Group", "name": "Fiifi Thompson", "school": "ADS", "hcp": 12.9}, {"flight": 4, "time": "9:21 AM", "group": "Scoring Group", "name": "Charles Darkwa", "school": "ACC", "hcp": 8.8}, {"flight": 5, "time": "9:28 AM", "group": "Scoring Group", "name": "Percival Ampomah", "school": "MFN", "hcp": 8.2}, {"flight": 5, "time": "9:28 AM", "group": "Scoring Group", "name": "Francis Kojo Bannerman", "school": "ADS", "hcp": 14.7}, {"flight": 5, "time": "9:28 AM", "group": "Scoring Group", "name": "Ebenezer Asabere", "school": "PRM", "hcp": 6.1}, {"flight": 6, "time": "9:35 AM", "group": "Scoring Group", "name": "Kojo Ansah", "school": "MFN", "hcp": 8.2}, {"flight": 6, "time": "9:35 AM", "group": "Scoring Group", "name": "Kobby Addai", "school": "ACH", "hcp": 11.5}, {"flight": 6, "time": "9:35 AM", "group": "Scoring Group", "name": "Mathais Dorfe", "school": "PRE", "hcp": 14.4}, {"flight": 7, "time": "9:42 AM", "group": "Scoring Group", "name": "Mike Aggrey", "school": "MFN", "hcp": 9.7}, {"flight": 7, "time": "9:42 AM", "group": "Scoring Group", "name": "Tutu Agyare", "school": "ACH", "hcp": 13.1}, {"flight": 7, "time": "9:42 AM", "group": "Scoring Group", "name": "Emmanuel Quarcoo (Jupiter)", "school": "ACC", "hcp": 12.3}, {"flight": 8, "time": "9:49 AM", "group": "Scoring Group", "name": "Kobby Bright O.A.", "school": "MFN", "hcp": 11.5}, {"flight": 8, "time": "9:49 AM", "group": "Scoring Group", "name": "Samuel Ocran", "school": "ACH", "hcp": 15.0}, {"flight": 8, "time": "9:49 AM", "group": "Scoring Group", "name": "Bismark N. Dapaah", "school": "PRM", "hcp": 7.2}, {"flight": 9, "time": "9:56 AM", "group": "Scoring Group", "name": "Ernest Asimenu", "school": "MFN", "hcp": 14.3}, {"flight": 9, "time": "9:56 AM", "group": "Scoring Group", "name": "Isaac Aninakwah", "school": "PRE", "hcp": 10.3}, {"flight": 9, "time": "9:56 AM", "group": "Scoring Group", "name": "Richard Torku", "school": "ACC", "hcp": 15.5}, {"flight": 10, "time": "10:03 AM", "group": "Scoring Group", "name": "Samuel Yeboah", "school": "MFN", "hcp": 14.9}, {"flight": 10, "time": "10:03 AM", "group": "Scoring Group", "name": "Jojo Ampadu", "school": "PRE", "hcp": 15.4}, {"flight": 10, "time": "10:03 AM", "group": "Scoring Group", "name": "Ebo Anderson", "school": "PRM", "hcp": 9.0}, {"flight": 11, "time": "10:10 AM", "group": "Scoring Group", "name": "Joe Tieku", "school": "MFN", "hcp": 15.3}, {"flight": 11, "time": "10:10 AM", "group": "Scoring Group", "name": "Felix Addo", "school": "ACC", "hcp": 24.4}, {"flight": 11, "time": "10:10 AM", "group": "Scoring Group", "name": "Hanniel Kakraba-Ampeh", "school": "PRM", "hcp": 9.4}, {"flight": 12, "time": "10:17 AM", "group": "Scoring Group", "name": "Alex Abrokwah", "school": "ADS", "hcp": 15.9}, {"flight": 12, "time": "10:17 AM", "group": "Scoring Group", "name": "Harrison Akpabli", "school": "ACH", "hcp": 15.3}, {"flight": 12, "time": "10:17 AM", "group": "Scoring Group", "name": "Nana Antwi Darkwa", "school": "PRE", "hcp": 13.2}, {"flight": 13, "time": "10:24 AM", "group": "Scoring Group", "name": "Kofi Amoabeng", "school": "ADS", "hcp": 17.0}, {"flight": 13, "time": "10:24 AM", "group": "Scoring Group", "name": "Kofi Osafo Sampong", "school": "ACH", "hcp": 18.0}, {"flight": 13, "time": "10:24 AM", "group": "Scoring Group", "name": "Francis Nkrumah Gyasi", "school": "PRM", "hcp": 9.4}, {"flight": 14, "time": "10:31 AM", "group": "Scoring Group", "name": "Kwaku Appietu-Ankrah", "school": "ADS", "hcp": 9.0}, {"flight": 14, "time": "10:31 AM", "group": "Scoring Group", "name": "Alex Fiagome", "school": "PRE", "hcp": 13.3}, {"flight": 14, "time": "10:31 AM", "group": "Scoring Group", "name": "Sackitey Crabbe", "school": "ACC", "hcp": 27.3}, {"flight": 15, "time": "10:38 AM", "group": "Scoring Group", "name": "Solomon Allotey", "school": "ADS", "hcp": 6.4}, {"flight": 15, "time": "10:38 AM", "group": "Scoring Group", "name": "Toni Bakawu", "school": "PRE", "hcp": 15.6}, {"flight": 15, "time": "10:38 AM", "group": "Scoring Group", "name": "Isaac Asante", "school": "PRM", "hcp": 9.8}, {"flight": 16, "time": "10:45 AM", "group": "Scoring Group", "name": "Maxwell Darkwah", "school": "ADS", "hcp": 9.7}, {"flight": 16, "time": "10:45 AM", "group": "Scoring Group", "name": "Daniel Addo", "school": "ACC", "hcp": 15.6}, {"flight": 16, "time": "10:45 AM", "group": "Scoring Group", "name": "Ben\u00e9e Tagboto", "school": "PRM", "hcp": 10.5}, {"flight": 17, "time": "10:52 AM", "group": "Scoring Group", "name": "Henry Okoe Tackie", "school": "ACH", "hcp": 19.0}, {"flight": 17, "time": "10:52 AM", "group": "Scoring Group", "name": "Samuel Koranteng", "school": "PRE", "hcp": 20.7}, {"flight": 17, "time": "10:52 AM", "group": "Scoring Group", "name": "Frank Tetteh", "school": "ACC", "hcp": 15.9}, {"flight": 18, "time": "10:59 AM", "group": "Scoring Group", "name": "Kisseih Antonio", "school": "ACH", "hcp": 19.5}, {"flight": 18, "time": "10:59 AM", "group": "Scoring Group", "name": "Rodney Oddoye", "school": "PRE", "hcp": 19.7}, {"flight": 18, "time": "10:59 AM", "group": "Scoring Group", "name": "Eric Ofosu-Hene", "school": "PRM", "hcp": 11.9}, {"flight": 19, "time": "11:06 AM", "group": "Scoring Group", "name": "John Blay", "school": "ACH", "hcp": 20.0}, {"flight": 19, "time": "11:06 AM", "group": "Scoring Group", "name": "Charles Okyere", "school": "ACC", "hcp": 18.5}, {"flight": 19, "time": "11:06 AM", "group": "Scoring Group", "name": "Kojo Acheampong", "school": "PRM", "hcp": 16.4}, {"flight": 20, "time": "11:13 AM", "group": "Scoring Group", "name": "Nash Antwi", "school": "PRE", "hcp": 12.1}, {"flight": 20, "time": "11:13 AM", "group": "Scoring Group", "name": "Joshua Asaabil Dadzie", "school": "ACC", "hcp": 24.0}, {"flight": 20, "time": "11:13 AM", "group": "Scoring Group", "name": "Samuel Addai", "school": "PRM", "hcp": 20.7}, {"flight": 21, "time": "11:20 AM", "group": "Scoring Group", "name": "Nathan Donkor", "school": "MFN", "hcp": 17.6}, {"flight": 21, "time": "11:20 AM", "group": "Scoring Group", "name": "Sammy Laing", "school": "ADS", "hcp": 22.2}, {"flight": 21, "time": "11:20 AM", "group": "Scoring Group", "name": "Kobina Yankey", "school": "ACH", "hcp": 21.8}, {"flight": 22, "time": "11:27 AM", "group": "Scoring Group", "name": "M K Parker", "school": "MFN", "hcp": 18.0}, {"flight": 22, "time": "11:27 AM", "group": "Scoring Group", "name": "Spike Boaitey", "school": "PRE", "hcp": 25.6}, {"flight": 22, "time": "11:27 AM", "group": "Scoring Group", "name": "Chris Atadika", "school": "ACC", "hcp": 22.5}, {"flight": 23, "time": "11:34 AM", "group": "Scoring Group", "name": "Nanabanyin Dennis", "school": "ADS", "hcp": 19.3}, {"flight": 23, "time": "11:34 AM", "group": "Scoring Group", "name": "Tony Ntiador", "school": "PRE", "hcp": 30.9}, {"flight": 23, "time": "11:34 AM", "group": "Scoring Group", "name": "Paul Dwimoh", "school": "PRM", "hcp": 21.6}, {"flight": 24, "time": "11:41 AM", "group": "Scoring Group", "name": "Michael Bortei-Doku", "school": "ACH", "hcp": 24.0}, {"flight": 24, "time": "11:41 AM", "group": "Scoring Group", "name": "Paul Ayitiah", "school": "ACC", "hcp": 27.8}, {"flight": 24, "time": "11:41 AM", "group": "Scoring Group", "name": "Nana Kwabena Kwarteng", "school": "PRM", "hcp": 21.9}, {"flight": 25, "time": "11:48 AM", "group": "Support Group", "name": "Alex Oppong Baffoe", "school": "PRE", "hcp": 10.1}, {"flight": 25, "time": "11:48 AM", "group": "Support Group", "name": "Samuel Acquah", "school": "MFN", "hcp": 18.7}, {"flight": 25, "time": "11:48 AM", "group": "Support Group", "name": "Michael Abbey", "school": "ACC", "hcp": 21.1}, {"flight": 26, "time": "11:55 AM", "group": "Support Group", "name": "William Nanka-Bruce", "school": "PRE", "hcp": 15.3}, {"flight": 26, "time": "11:55 AM", "group": "Support Group", "name": "Smyly Bannerman", "school": "MFN", "hcp": 18.9}, {"flight": 26, "time": "11:55 AM", "group": "Support Group", "name": "Edward Abrokwah", "school": "ADS", "hcp": 14.5}, {"flight": 27, "time": "12:02 PM", "group": "Support Group", "name": "Fred Darko", "school": "PRE", "hcp": 16.4}, {"flight": 27, "time": "12:02 PM", "group": "Support Group", "name": "Philip Attuquayefio", "school": "ACC", "hcp": 21.9}, {"flight": 27, "time": "12:02 PM", "group": "Support Group", "name": "Frank Tackie", "school": "MFN", "hcp": 19.2}, {"flight": 28, "time": "12:09 PM", "group": "Support Group", "name": "Stephen Amanor", "school": "PRE", "hcp": 17.5}, {"flight": 28, "time": "12:09 PM", "group": "Support Group", "name": "Kojo Acquaah-Harrison", "school": "ADS", "hcp": 20.0}, {"flight": 28, "time": "12:09 PM", "group": "Support Group", "name": "Richard Okrah", "school": "ACC", "hcp": 23.0}, {"flight": 29, "time": "12:16 PM", "group": "Support Group", "name": "Eric Quartey", "school": "PRE", "hcp": 19.5}, {"flight": 29, "time": "12:16 PM", "group": "Support Group", "name": "Roger Adamah", "school": "MFN", "hcp": 20.9}, {"flight": 29, "time": "12:16 PM", "group": "Support Group", "name": "Nana Yaw Kaitoo", "school": "ADS", "hcp": 24.9}, {"flight": 30, "time": "12:23 PM", "group": "Support Group", "name": "Leonard Nii Adom", "school": "PRE", "hcp": 20.1}, {"flight": 30, "time": "12:23 PM", "group": "Support Group", "name": "Hubert Potakey", "school": "ACC", "hcp": 28.0}, {"flight": 30, "time": "12:23 PM", "group": "Support Group", "name": "Robert Dovlo", "school": "MFN", "hcp": 21.9}, {"flight": 31, "time": "12:30 PM", "group": "Support Group", "name": "Benjamin Ofori", "school": "PRE", "hcp": 23.2}, {"flight": 31, "time": "12:30 PM", "group": "Support Group", "name": "Kwadwo A. Ankrah", "school": "ADS", "hcp": 34.0}, {"flight": 31, "time": "12:30 PM", "group": "Support Group", "name": "Edward Laryea", "school": "ACC", "hcp": 28.0}, {"flight": 32, "time": "12:37 PM", "group": "Support Group", "name": "Kwasi Asiedu", "school": "PRE", "hcp": 24.3}, {"flight": 32, "time": "12:37 PM", "group": "Support Group", "name": "Brian Quartey", "school": "ACH", "hcp": "N/A"}, {"flight": 32, "time": "12:37 PM", "group": "Support Group", "name": "Richmond Aboagye", "school": "MFN", "hcp": 23.4}, {"flight": 33, "time": "12:44 PM", "group": "Support Group", "name": "Ernest Owusu", "school": "PRM", "hcp": 28.0}, {"flight": 33, "time": "12:44 PM", "group": "Support Group", "name": "Nana Kweku Essel Wilson", "school": "ADS", "hcp": "N/A"}, {"flight": 33, "time": "12:44 PM", "group": "Support Group", "name": "Emmanuel Bruce Attah", "school": "ACC", "hcp": 33.3}, {"flight": 34, "time": "12:51 PM", "group": "Support Group", "name": "Andrew Kwablah", "school": "PRE", "hcp": 25.4}, {"flight": 34, "time": "12:51 PM", "group": "Support Group", "name": "Ayitey Bulley", "school": "ACH", "hcp": "N/A"}, {"flight": 34, "time": "12:51 PM", "group": "Support Group", "name": "Kwame Appah", "school": "MFN", "hcp": 31.2}, {"flight": 34, "time": "12:51 PM", "group": "Support Group", "name": "Ren\u00e9 Plahar", "school": "PRM", "hcp": 30.0}];
 const flights={};
-DATA.forEach(p=>{
-  if(!flights[p.flight]) flights[p.flight]={time:p.time,group:p.group,players:[]};
-  flights[p.flight].players.push(p);
-});
+DATA.forEach(p=>{if(!flights[p.flight])flights[p.flight]={time:p.time,group:p.group,players:[]};flights[p.flight].players.push(p);});
 const container=document.getElementById('main-grid');
-let scoringDividerAdded=false, supportDividerAdded=false;
+let sDone=false,suDone=false;
 Object.entries(flights).sort((a,b)=>+a[0]-+b[0]).forEach(([fn,f])=>{
   const isSc=f.group==='Scoring Group';
-  if(isSc && !scoringDividerAdded){
-    const d=document.createElement('div');
-    d.className='group-divider'; d.dataset.divider='scoring';
-    d.innerHTML=`<div class="divider-line scoring"></div>
-      <span class="divider-tag scoring">Scoring Group</span>
-      <span class="divider-sub">Flights 01–24 &nbsp;·&nbsp; 9:00 AM – 10:55 AM</span>
-      <div class="divider-line scoring"></div>`;
-    container.appendChild(d); scoringDividerAdded=true;
-    const g=document.createElement('div'); g.className='grid'; g.id='grid-scoring';
-    container.appendChild(g);
+  if(isSc&&!sDone){
+    const d=document.createElement('div');d.className='group-divider';d.dataset.divider='scoring';
+    d.innerHTML=`<div class="divider-line scoring"></div><span class="divider-tag scoring">Scoring Group</span><span class="divider-sub">Flights 01–24 &nbsp;·&nbsp; 9:00 AM – 11:41 AM</span><div class="divider-line scoring"></div>`;
+    container.appendChild(d);sDone=true;
+    const g=document.createElement('div');g.className='grid';g.id='grid-scoring';container.appendChild(g);
   }
-  if(!isSc && !supportDividerAdded){
-    const d=document.createElement('div');
-    d.className='group-divider'; d.dataset.divider='support';
-    d.innerHTML=`<div class="divider-line support"></div>
-      <span class="divider-tag support">Support Group</span>
-      <span class="divider-sub">Flights 25–34 &nbsp;·&nbsp; 11:00 AM – 11:45 AM</span>
-      <div class="divider-line support"></div>`;
-    container.appendChild(d); supportDividerAdded=true;
-    const g=document.createElement('div'); g.className='grid'; g.id='grid-support';
-    container.appendChild(g);
+  if(!isSc&&!suDone){
+    const d=document.createElement('div');d.className='group-divider';d.dataset.divider='support';
+    d.innerHTML=`<div class="divider-line support"></div><span class="divider-tag support">Support Group</span><span class="divider-sub">Flights 25–34 &nbsp;·&nbsp; 11:48 AM – 12:51 PM</span><div class="divider-line support"></div>`;
+    container.appendChild(d);suDone=true;
+    const g=document.createElement('div');g.className='grid';g.id='grid-support';container.appendChild(g);
   }
   let rows='';
-  f.players.forEach(p=>{
-    const c=SC[p.school]?.col||"#888";
-    const sname=SC[p.school]?.name||p.school;
-    rows+=`<div class="prow">
-      <div class="bar" style="background:${c}"></div>
-      <div class="pinfo">
-        <div class="pname">${p.name}</div>
-        <div class="pschool">${sname}</div>
-      </div>
-      <div class="hcpbox" style="background:${c}">${p.hcp}</div>
-    </div>`;
-  });
+  f.players.forEach(p=>{const c=SC[p.school]?.col||"#888";rows+=`<div class="prow"><div class="bar" style="background:${c}"></div><div class="pinfo"><div class="pname">${p.name}</div><div class="pschool">${SC[p.school]?.name||p.school}</div></div><div class="hcpbox" style="background:${c}">${p.hcp}</div></div>`;});
   const gc=isSc?'scoring':'support';
-  const card=document.createElement('div');
-  card.className='card'; card.dataset.group=gc;
-  card.innerHTML=`<div class="card-head ${gc}">
-    <span class="fnum">Flight ${String(fn).padStart(2,'0')}</span>
-    <span class="ftime">${f.time}</span>
-    <span class="fhole">Hole 1</span>
-  </div>${rows}
-  <div class="sg-badge ${gc}">${f.group}</div>`;
+  const card=document.createElement('div');card.className='card';card.dataset.group=gc;
+  card.innerHTML=`<div class="card-head ${gc}"><span class="fnum">Flight ${String(fn).padStart(2,'0')}</span><span class="ftime">${f.time}</span><span class="fhole">Hole 1</span></div>${rows}<div class="sg-badge ${gc}">${f.group}</div>`;
   document.getElementById(`grid-${gc}`).appendChild(card);
 });
 function filter(g){
   document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('active'));
   document.querySelector(`.fpill.${g==='all'?'all':g}`).classList.add('active');
-  document.querySelectorAll('.card').forEach(c=>{
-    c.style.display=(g==='all'||c.dataset.group===g)?'':'none';
-  });
-  document.querySelectorAll('.group-divider').forEach(d=>{
-    d.style.display=(g==='all'||d.dataset.divider===g)?'':'none';
-  });
-  document.querySelectorAll('.grid').forEach(gd=>{
-    gd.style.display=(g==='all'||gd.id===`grid-${g}`)?'':'none';
-  });
+  document.querySelectorAll('.card').forEach(c=>{c.style.display=(g==='all'||c.dataset.group===g)?'':'none';});
+  document.querySelectorAll('.group-divider').forEach(d=>{d.style.display=(g==='all'||d.dataset.divider===g)?'':'none';});
+  document.querySelectorAll('.grid').forEach(gd=>{gd.style.display=(g==='all'||gd.id===`grid-${g}`)?'':'none';});
   const lbl=document.getElementById('section-label');
-  if(g==='all') lbl.textContent='All 34 Flights — Hole 1 — 9:00 AM to 11:45 AM — 5-Minute Intervals';
-  else if(g==='scoring') lbl.textContent='Scoring Group — Flights 01–24 — 9:00 AM to 10:55 AM';
-  else lbl.textContent='Support Group — Flights 25–34 — 11:00 AM to 11:45 AM';
+  if(g==='all')lbl.textContent='All 34 Flights — Hole 1 — 9:00 AM to 12:51 PM — 7-Minute Intervals';
+  else if(g==='scoring')lbl.textContent='Scoring Group — Flights 01–24 — 9:00 AM to 11:41 AM';
+  else lbl.textContent='Support Group — Flights 25–34 — 11:48 AM to 12:51 PM';
 }
 </script>
 </body>
