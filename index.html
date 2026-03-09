@@ -1,519 +1,678 @@
-import { useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TVET Institutional Scorecard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --crimson: #8B1A2B;
+    --gold: #C17F24;
+    --teal: #2E6B5E;
+    --navy: #1E4060;
+    --ink: #1a1a2e;
+    --parchment: #f8f5f0;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --muted: #64748b;
+    --light: #f1f5f9;
+  }
 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--parchment);
+    color: #1a1a1a;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(45deg,
+      rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px,
+      transparent 1px, transparent 14px);
+  }
+  .header-inner {
+    position: relative;
+    max-width: 980px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .header-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.4rem;
+  }
+  .header-bar { width: 3px; height: 22px; background: var(--gold); border-radius: 2px; }
+  .header-tag {
+    color: var(--gold);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    color: white;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .header-sub { color: #94a3b8; font-size: 0.82rem; margin-top: 0.25rem; }
+
+  .meta-fields { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .meta-input {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 7px;
+    padding: 0.45rem 0.75rem;
+    color: white;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.8rem;
+    outline: none;
+    width: 180px;
+    transition: border-color 0.2s;
+  }
+  .meta-input::placeholder { color: rgba(255,255,255,0.35); }
+  .meta-input:focus { border-color: var(--gold); }
+
+  /* ── MAIN LAYOUT ── */
+  .main { max-width: 980px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  .grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* ── DOMAIN CARDS ── */
+  .domain-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: box-shadow 0.25s, border-color 0.25s, transform 0.25s;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: fadeUp 0.4s forwards;
+  }
+  .domain-card:hover { transform: translateY(-2px); }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-head {
+    padding: 0.8rem 1rem;
+    border-bottom: 2.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .card-category {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+  .score-badge {
+    width: 38px; height: 38px;
+    border-radius: 9px;
+    background: var(--light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 0.25s, color 0.25s;
+  }
+
+  .card-body { padding: 0.75rem 1rem 0.85rem; }
+  .level-buttons { display: flex; gap: 5px; margin-bottom: 0.5rem; }
+  .lvl-btn {
+    flex: 1; height: 30px;
+    border: none; border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700; font-size: 0.82rem;
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--light);
+    transition: background 0.15s, transform 0.12s, color 0.15s;
+  }
+  .lvl-btn:hover { transform: scale(1.06); }
+  .lvl-btn.active { color: white; transform: scale(1.08); }
+
+  .level-desc {
+    min-height: 30px;
+    font-size: 0.68rem;
+    color: var(--muted);
+    line-height: 1.45;
+    transition: opacity 0.15s;
+  }
+  .level-desc strong { font-weight: 700; }
+
+  /* ── BOTTOM GRID ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 640px) { .bottom-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .panel-label {
+    font-size: 0.6rem;
+    color: #94a3b8;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+  }
+
+  /* Radar panel */
+  .radar-wrap { display: flex; justify-content: center; }
+  .radar-legend {
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
+    justify-content: center; margin-top: 0.75rem;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 0.58rem; color: var(--muted);
+  }
+  .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* Summary panel */
+  .summary-panel {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    border-radius: 12px;
+    padding: 1.25rem;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .overall-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.2rem;
+    font-weight: 400;
+    line-height: 1;
+  }
+  .overall-score span { font-size: 1rem; color: #94a3b8; font-family: 'Source Sans 3', sans-serif; margin-left: 4px; }
+  .overall-level { font-size: 0.9rem; font-weight: 600; }
+  .progress-bar-bg {
+    height: 7px; background: rgba(255,255,255,0.1);
+    border-radius: 4px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, var(--gold), #e8a84c);
+    transition: width 0.5s ease;
+  }
+  .progress-meta {
+    display: flex; justify-content: space-between;
+    font-size: 0.63rem; color: #94a3b8; margin-bottom: 3px;
+  }
+
+  /* Bar breakdown */
+  .bars-panel { display: flex; flex-direction: column; gap: 0.45rem; }
+  .bar-row { display: flex; align-items: center; gap: 8px; }
+  .bar-label { font-size: 0.65rem; color: #374151; width: 88px; flex-shrink: 0; line-height: 1.3; }
+  .bar-track { flex: 1; height: 8px; background: var(--light); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .bar-score { font-size: 0.7rem; font-weight: 700; width: 14px; text-align: right; }
+
+  /* Legend strip */
+  .legend-strip {
+    background: white;
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+  }
+  .legend-cell { text-align: center; }
+  .legend-num {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 0.4rem;
+  }
+  .legend-name { font-size: 0.7rem; font-weight: 700; color: #374151; margin-bottom: 2px; }
+  .legend-desc-text { font-size: 0.58rem; color: var(--muted); line-height: 1.35; }
+
+  /* ── ACTIONS ── */
+  .actions {
+    display: flex; gap: 0.75rem; flex-wrap: wrap;
+    margin-top: 1.25rem; align-items: center;
+  }
+  .btn {
+    padding: 0.6rem 1.3rem;
+    border-radius: 8px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .btn-primary {
+    background: var(--crimson);
+    color: white;
+  }
+  .btn-primary:hover { background: #6e1421; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(139,26,43,0.3); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--crimson); color: var(--crimson); }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    body { background: white !important; }
+    .no-print { display: none !important; }
+    .site-header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .domain-card { opacity: 1 !important; transform: none !important; page-break-inside: avoid; }
+    .summary-panel { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .panel { page-break-inside: avoid; }
+    @page { size: A4 portrait; margin: 12mm 10mm; }
+    .main { padding: 0.5rem; }
+    .btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-eyebrow">
+        <div class="header-bar"></div>
+        <span class="header-tag">Assessment Framework</span>
+      </div>
+      <h1>TVET Institutional Scorecard</h1>
+      <p class="header-sub">Rate each domain — 1 (Supply-Oriented) to 5 (Systems-Embedded)</p>
+    </div>
+    <div class="meta-fields no-print">
+      <input class="meta-input" id="assessorName" placeholder="Assessor name" />
+      <input class="meta-input" id="orgName" placeholder="Organisation" />
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DOMAIN CARDS -->
+  <div class="grid-cards" id="cardGrid"></div>
+
+  <!-- BOTTOM: Radar + Summary + Bars -->
+  <div class="bottom-grid">
+
+    <!-- Radar -->
+    <div class="panel">
+      <div class="panel-label">Domain Profile</div>
+      <div class="radar-wrap">
+        <svg id="radar" viewBox="0 0 300 300" width="260" height="260"></svg>
+      </div>
+      <div class="radar-legend" id="radarLegend"></div>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:0.85rem;">
+
+      <!-- Overall score -->
+      <div class="summary-panel" id="summaryPanel">
+        <div class="panel-label" style="color:#94a3b8;">Overall Score</div>
+        <div class="overall-score" id="avgScore">—<span>/5</span></div>
+        <div class="overall-level" id="overallLevel" style="color:var(--gold);">Rate all domains to see your level</div>
+        <div>
+          <div class="progress-meta">
+            <span id="totalFraction">0 / 40</span>
+            <span id="pctLabel">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+          </div>
+        </div>
+        <div style="font-size:0.63rem;color:#475569;" id="ratedCount">0 / 8 domains rated</div>
+      </div>
+
+      <!-- Bar breakdown -->
+      <div class="panel">
+        <div class="panel-label">Domain Breakdown</div>
+        <div class="bars-panel" id="barsPanel"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scoring Scale -->
+  <div class="legend-strip">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Actions -->
+  <div class="actions no-print">
+    <button class="btn btn-primary" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Export PDF
+    </button>
+    <button class="btn btn-secondary" onclick="resetScores()">Reset scores</button>
+  </div>
+
+</main>
+
+<script>
 const DOMAINS = [
-  {
-    id: "market_assessment",
-    label: "Market Assessment",
-    short: "Market",
-    color: "#8B1A2B",
-    bg: "#fdf0f2",
-    icon: "✓",
-    category: "Strategic & Operational Planning",
-  },
-  {
-    id: "curriculum_design",
-    label: "Curriculum Design",
-    short: "Curriculum Design",
-    color: "#C17F24",
-    bg: "#fdf6ec",
-    icon: "🎓",
-    category: "Curriculum & Training",
-  },
-  {
-    id: "curriculum_delivery",
-    label: "Curriculum Delivery",
-    short: "Delivery",
-    color: "#C17F24",
-    bg: "#fdf6ec",
-    icon: "📚",
-    category: "Curriculum & Training",
-  },
-  {
-    id: "work_based_learning",
-    label: "Work-Based Learning",
-    short: "WBL",
-    color: "#C17F24",
-    bg: "#fdf6ec",
-    icon: "🔧",
-    category: "Curriculum & Training",
-  },
-  {
-    id: "management",
-    label: "Management",
-    short: "Management",
-    color: "#3A6B5E",
-    bg: "#edf5f3",
-    icon: "⚙",
-    category: "Stakeholder Management",
-  },
-  {
-    id: "monitoring_evaluation",
-    label: "Monitoring & Evaluation",
-    short: "M&E",
-    color: "#3A6B5E",
-    bg: "#edf5f3",
-    icon: "📊",
-    category: "Stakeholder Management",
-  },
-  {
-    id: "financial_sustainability",
-    label: "Financial Sustainability",
-    short: "Finance",
-    color: "#1E4060",
-    bg: "#eef3f8",
-    icon: "💰",
-    category: "Institutional Capacity",
-  },
-  {
-    id: "governance",
-    label: "Governance",
-    short: "Governance",
-    color: "#1E4060",
-    bg: "#eef3f8",
-    icon: "🏛",
-    category: "Institutional Capacity",
-  },
+  { id:"market_assessment",       label:"Market Assessment",       short:"Market",      color:"#8B1A2B", bg:"#fdf0f2", category:"Strategic & Operational Planning" },
+  { id:"curriculum_design",       label:"Curriculum Design",       short:"Curr. Design",color:"#C17F24", bg:"#fdf6ec", category:"Curriculum & Training" },
+  { id:"curriculum_delivery",     label:"Curriculum Delivery",     short:"Delivery",    color:"#C17F24", bg:"#fdf6ec", category:"Curriculum & Training" },
+  { id:"work_based_learning",     label:"Work-Based Learning",     short:"WBL",         color:"#C17F24", bg:"#fdf6ec", category:"Curriculum & Training" },
+  { id:"management",              label:"Management",              short:"Management",  color:"#2E6B5E", bg:"#edf5f3", category:"Stakeholder Management" },
+  { id:"monitoring_evaluation",   label:"Monitoring & Evaluation", short:"M&E",         color:"#2E6B5E", bg:"#edf5f3", category:"Stakeholder Management" },
+  { id:"financial_sustainability",label:"Financial Sustainability",short:"Finance",     color:"#1E4060", bg:"#eef3f8", category:"Institutional Capacity" },
+  { id:"governance",              label:"Governance",              short:"Governance",  color:"#1E4060", bg:"#eef3f8", category:"Institutional Capacity" },
 ];
 
 const LEVELS = [
-  { value: 1, label: "Supply-Oriented", desc: "Indifferent to market; basic provision" },
-  { value: 2, label: "Demand-Responsive", desc: "Actively uses market feedback" },
-  { value: 3, label: "TVET-Led", desc: "Public & private TVETs engaged" },
-  { value: 4, label: "Employer-Engaged", desc: "Employers driving co-design" },
-  { value: 5, label: "Systems-Embedded", desc: "Government & ecosystem aligned" },
+  { v:1, label:"Supply-Oriented",   desc:"Indifferent to market; basic provision only", bgColor:"#c0392b" },
+  { v:2, label:"Demand-Responsive", desc:"Actively uses market feedback to adapt",       bgColor:"#d35400" },
+  { v:3, label:"TVET-Led",          desc:"Public & private TVETs actively engaged",      bgColor:"#C17F24" },
+  { v:4, label:"Employer-Engaged",  desc:"Employers drive co-design of programmes",      bgColor:"#2E6B5E" },
+  { v:5, label:"Systems-Embedded",  desc:"Government & full ecosystem fully aligned",    bgColor:"#1E4060" },
 ];
 
-const RadarChart = ({ scores }) => {
-  const cx = 150, cy = 150, r = 100;
-  const n = DOMAINS.length;
+const OVERALL_LABELS = [
+  { min:4.5, label:"Systems-Embedded",   color:"#1E4060" },
+  { min:3.5, label:"Employer-Engaged",   color:"#2E6B5E" },
+  { min:2.5, label:"TVET-Led",           color:"#C17F24" },
+  { min:1.5, label:"Demand-Responsive",  color:"#d35400" },
+  { min:0,   label:"Supply-Oriented",    color:"#8B1A2B" },
+];
 
-  const getPoint = (index, value, maxR) => {
-    const angle = (Math.PI * 2 * index) / n - Math.PI / 2;
-    const dist = (value / 5) * maxR;
-    return {
-      x: cx + dist * Math.cos(angle),
-      y: cy + dist * Math.sin(angle),
-    };
-  };
+let scores = {};
 
-  const gridLevels = [1, 2, 3, 4, 5];
-  const axisPoints = DOMAINS.map((_, i) => getPoint(i, 5, r));
-
-  const scorePoints = DOMAINS.map((d, i) => getPoint(i, scores[d.id] || 0, r));
-  const scorePath = scorePoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
-
-  return (
-    <svg viewBox="0 0 300 300" className="w-full max-w-xs mx-auto">
-      {gridLevels.map((lvl) => {
-        const pts = DOMAINS.map((_, i) => getPoint(i, lvl, r));
-        const path = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
-        return <path key={lvl} d={path} fill="none" stroke="#e2e8f0" strokeWidth={lvl === 5 ? 1.5 : 0.8} />;
-      })}
-
-      {axisPoints.map((p, i) => (
-        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#cbd5e1" strokeWidth={0.8} />
-      ))}
-
-      <path d={scorePath} fill="rgba(139,26,43,0.15)" stroke="#8B1A2B" strokeWidth={2} />
-
-      {scorePoints.map((p, i) => (
-        scores[DOMAINS[i].id] > 0 && (
-          <circle key={i} cx={p.x} cy={p.y} r={4} fill={DOMAINS[i].color} stroke="white" strokeWidth={1.5} />
-        )
-      ))}
-
-      {axisPoints.map((p, i) => {
-        const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
-        const lx = cx + (r + 22) * Math.cos(angle);
-        const ly = cy + (r + 22) * Math.sin(angle);
-        return (
-          <text
-            key={i}
-            x={lx}
-            y={ly}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize="8"
-            fontFamily="'Georgia', serif"
-            fill="#374151"
-            fontWeight="500"
-          >
-            {DOMAINS[i].short}
-          </text>
-        );
-      })}
-    </svg>
-  );
-};
-
-export default function TVETDashboard() {
-  const [scores, setScores] = useState({});
-  const [hoveredLevel, setHoveredLevel] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const [animIn, setAnimIn] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => setAnimIn(true), 100);
-  }, []);
-
-  const scoredCount = Object.keys(scores).length;
-  const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
-  const avgScore = scoredCount > 0 ? (totalScore / scoredCount).toFixed(1) : "—";
-  const maxPossible = DOMAINS.length * 5;
-  const pct = scoredCount === DOMAINS.length ? Math.round((totalScore / maxPossible) * 100) : null;
-
-  const handleScore = (domainId, value) => {
-    setScores((prev) => ({ ...prev, [domainId]: value }));
-  };
-
-  const getScoreLabel = (avg) => {
-    if (avg >= 4.5) return { text: "Systems-Embedded", color: "#1E4060" };
-    if (avg >= 3.5) return { text: "Employer-Engaged", color: "#3A6B5E" };
-    if (avg >= 2.5) return { text: "TVET-Led", color: "#C17F24" };
-    if (avg >= 1.5) return { text: "Demand-Responsive", color: "#8B6A00" };
-    return { text: "Supply-Oriented", color: "#8B1A2B" };
-  };
-
-  const overallLabel = scoredCount === DOMAINS.length ? getScoreLabel(parseFloat(avgScore)) : null;
-
-  return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#f8f5f0",
-        fontFamily: "'Georgia', 'Times New Roman', serif",
-        opacity: animIn ? 1 : 0,
-        transition: "opacity 0.6s ease",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-          padding: "2.5rem 2rem 2rem",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: 0, left: 0, right: 0, bottom: 0,
-            backgroundImage: "repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 12px)",
-          }}
-        />
-        <div style={{ position: "relative", maxWidth: 900, margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
-            <div style={{ width: 3, height: 28, background: "#C17F24", borderRadius: 2 }} />
-            <span style={{ color: "#C17F24", fontSize: "0.7rem", letterSpacing: "0.2em", fontFamily: "sans-serif", fontWeight: 700, textTransform: "uppercase" }}>
-              Assessment Framework
-            </span>
-          </div>
-          <h1 style={{ color: "white", fontSize: "clamp(1.4rem, 3vw, 2rem)", margin: "0 0 0.5rem", fontWeight: 400, letterSpacing: "-0.01em" }}>
-            TVET Institutional Scorecard
-          </h1>
-          <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: 0, fontFamily: "sans-serif" }}>
-            Rate each domain across 8 key institutional levers of change
-          </p>
+// ── Build cards ──────────────────────────────────────────────────────────────
+function buildCards() {
+  const grid = document.getElementById('cardGrid');
+  DOMAINS.forEach((d, di) => {
+    const card = document.createElement('div');
+    card.className = 'domain-card';
+    card.id = 'card-' + d.id;
+    card.style.animationDelay = (di * 0.07) + 's';
+    card.innerHTML = `
+      <div class="card-head" id="head-${d.id}" style="background:${d.bg}; border-bottom-color:${d.color}">
+        <div>
+          <div class="card-category" style="color:${d.color}">${d.category}</div>
+          <div class="card-title">${d.label}</div>
+        </div>
+        <div class="score-badge" id="badge-${d.id}">—</div>
+      </div>
+      <div class="card-body">
+        <div class="level-buttons" id="btns-${d.id}">
+          ${LEVELS.map(l => `
+            <button class="lvl-btn" id="btn-${d.id}-${l.v}"
+              style="color:${d.color}"
+              onmouseenter="showDesc('${d.id}',${l.v},'${d.color}')"
+              onmouseleave="restoreDesc('${d.id}')"
+              onclick="setScore('${d.id}',${l.v},'${d.color}','${d.bg}')"
+            >${l.v}</button>
+          `).join('')}
+        </div>
+        <div class="level-desc" id="desc-${d.id}">
+          <span style="color:${d.color};font-weight:600">Click a number to score</span>
         </div>
       </div>
-
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "1.5rem 1rem 3rem" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1rem" }}>
-
-          {/* Score Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
-            {DOMAINS.map((domain, di) => {
-              const current = scores[domain.id];
-              return (
-                <div
-                  key={domain.id}
-                  style={{
-                    background: "white",
-                    borderRadius: 12,
-                    overflow: "hidden",
-                    boxShadow: current ? `0 2px 12px ${domain.color}22` : "0 1px 4px rgba(0,0,0,0.08)",
-                    border: `1px solid ${current ? domain.color + "44" : "#e5e7eb"}`,
-                    transition: "all 0.3s ease",
-                    opacity: animIn ? 1 : 0,
-                    transform: animIn ? "translateY(0)" : "translateY(12px)",
-                    transitionDelay: `${di * 0.06}s`,
-                  }}
-                >
-                  {/* Card Header */}
-                  <div
-                    style={{
-                      background: domain.bg,
-                      borderBottom: `2px solid ${domain.color}`,
-                      padding: "0.75rem 1rem",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: "0.6rem", color: domain.color, fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 2 }}>
-                        {domain.category}
-                      </div>
-                      <div style={{ fontSize: "0.95rem", fontWeight: 600, color: "#1a1a1a" }}>
-                        {domain.label}
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        width: 36, height: 36, borderRadius: 8,
-                        background: current ? domain.color : "#f1f5f9",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "1rem",
-                        transition: "background 0.3s ease",
-                      }}
-                    >
-                      {current ? (
-                        <span style={{ color: "white", fontWeight: 700, fontSize: "0.9rem", fontFamily: "sans-serif" }}>{current}</span>
-                      ) : (
-                        <span style={{ fontSize: "1rem" }}>—</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Level Buttons */}
-                  <div style={{ padding: "0.75rem 1rem" }}>
-                    <div style={{ display: "flex", gap: "0.3rem", marginBottom: "0.5rem" }}>
-                      {LEVELS.map((lvl) => {
-                        const isSelected = current === lvl.value;
-                        const isHovered = hoveredLevel[domain.id] === lvl.value;
-                        return (
-                          <button
-                            key={lvl.value}
-                            onClick={() => handleScore(domain.id, lvl.value)}
-                            onMouseEnter={() => setHoveredLevel((p) => ({ ...p, [domain.id]: lvl.value }))}
-                            onMouseLeave={() => setHoveredLevel((p) => ({ ...p, [domain.id]: null }))}
-                            style={{
-                              flex: 1,
-                              height: 28,
-                              border: "none",
-                              borderRadius: 5,
-                              cursor: "pointer",
-                              background: isSelected ? domain.color : isHovered ? domain.color + "33" : "#f1f5f9",
-                              color: isSelected ? "white" : domain.color,
-                              fontWeight: 700,
-                              fontSize: "0.8rem",
-                              fontFamily: "sans-serif",
-                              transition: "all 0.15s ease",
-                              transform: isSelected ? "scale(1.05)" : "scale(1)",
-                            }}
-                          >
-                            {lvl.value}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Level description */}
-                    <div style={{ minHeight: 28 }}>
-                      {(hoveredLevel[domain.id] || current) && (
-                        <div style={{ fontSize: "0.7rem", color: "#64748b", fontFamily: "sans-serif", lineHeight: 1.4 }}>
-                          <span style={{ fontWeight: 700, color: domain.color }}>
-                            {LEVELS[(hoveredLevel[domain.id] || current) - 1].label}:
-                          </span>{" "}
-                          {LEVELS[(hoveredLevel[domain.id] || current) - 1].desc}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Summary Panel */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "1rem",
-              marginTop: "0.5rem",
-            }}
-          >
-            {/* Radar */}
-            <div
-              style={{
-                background: "white",
-                borderRadius: 12,
-                padding: "1.25rem",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                border: "1px solid #e5e7eb",
-              }}
-            >
-              <div style={{ fontSize: "0.65rem", color: "#94a3b8", fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
-                Domain Profile
-              </div>
-              <RadarChart scores={scores} />
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginTop: "0.75rem", justifyContent: "center" }}>
-                {DOMAINS.map((d) => (
-                  <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.6rem", fontFamily: "sans-serif", color: "#64748b" }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: d.color }} />
-                    {d.short}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Score Summary */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-              {/* Overall */}
-              <div
-                style={{
-                  background: "linear-gradient(135deg, #1a1a2e, #0f3460)",
-                  borderRadius: 12,
-                  padding: "1.25rem",
-                  color: "white",
-                  flex: 1,
-                }}
-              >
-                <div style={{ fontSize: "0.65rem", color: "#94a3b8", fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
-                  Overall Score
-                </div>
-                <div style={{ fontSize: "3rem", fontWeight: 400, lineHeight: 1, marginBottom: "0.25rem" }}>
-                  {avgScore}
-                  <span style={{ fontSize: "1rem", color: "#94a3b8", marginLeft: 4, fontFamily: "sans-serif" }}>/5</span>
-                </div>
-                {overallLabel && (
-                  <div style={{ fontSize: "0.85rem", color: "#C17F24", fontWeight: 600, marginTop: "0.25rem" }}>
-                    {overallLabel.text}
-                  </div>
-                )}
-                {pct !== null && (
-                  <div style={{ marginTop: "0.75rem" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.65rem", fontFamily: "sans-serif", color: "#94a3b8", marginBottom: 4 }}>
-                      <span>Total: {totalScore}/{maxPossible}</span>
-                      <span>{pct}%</span>
-                    </div>
-                    <div style={{ height: 6, background: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" }}>
-                      <div
-                        style={{
-                          height: "100%",
-                          width: `${pct}%`,
-                          background: "linear-gradient(90deg, #C17F24, #e8a84c)",
-                          borderRadius: 3,
-                          transition: "width 0.5s ease",
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-                <div style={{ fontSize: "0.65rem", fontFamily: "sans-serif", color: "#475569", marginTop: "0.75rem" }}>
-                  {scoredCount}/{DOMAINS.length} domains rated
-                </div>
-              </div>
-
-              {/* Per-domain scores */}
-              <div
-                style={{
-                  background: "white",
-                  borderRadius: 12,
-                  padding: "1.25rem",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                  border: "1px solid #e5e7eb",
-                  flex: 2,
-                }}
-              >
-                <div style={{ fontSize: "0.65rem", color: "#94a3b8", fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
-                  Domain Breakdown
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-                  {DOMAINS.map((d) => {
-                    const s = scores[d.id] || 0;
-                    return (
-                      <div key={d.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <div style={{ fontSize: "0.65rem", fontFamily: "sans-serif", color: "#374151", width: 90, flexShrink: 0, lineHeight: 1.2 }}>
-                          {d.short}
-                        </div>
-                        <div style={{ flex: 1, height: 8, background: "#f1f5f9", borderRadius: 4, overflow: "hidden" }}>
-                          <div
-                            style={{
-                              height: "100%",
-                              width: `${(s / 5) * 100}%`,
-                              background: s > 0 ? d.color : "transparent",
-                              borderRadius: 4,
-                              transition: "width 0.4s ease",
-                            }}
-                          />
-                        </div>
-                        <div style={{ fontSize: "0.7rem", fontFamily: "sans-serif", fontWeight: 700, color: s > 0 ? d.color : "#cbd5e1", width: 16, textAlign: "right" }}>
-                          {s || "—"}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Reset */}
-              {scoredCount > 0 && (
-                <button
-                  onClick={() => setScores({})}
-                  style={{
-                    background: "transparent",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: 8,
-                    padding: "0.6rem 1rem",
-                    fontSize: "0.75rem",
-                    fontFamily: "sans-serif",
-                    color: "#94a3b8",
-                    cursor: "pointer",
-                    transition: "all 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => { e.target.style.borderColor = "#8B1A2B"; e.target.style.color = "#8B1A2B"; }}
-                  onMouseLeave={(e) => { e.target.style.borderColor = "#e5e7eb"; e.target.style.color = "#94a3b8"; }}
-                >
-                  Reset scores
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Level Legend */}
-          <div
-            style={{
-              background: "white",
-              borderRadius: 12,
-              padding: "1.25rem",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            <div style={{ fontSize: "0.65rem", color: "#94a3b8", fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "1rem" }}>
-              Scoring Scale
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0.75rem" }}>
-              {LEVELS.map((lvl) => (
-                <div key={lvl.value} style={{ textAlign: "center" }}>
-                  <div
-                    style={{
-                      width: 36, height: 36,
-                      borderRadius: "50%",
-                      background: `hsl(${200 + lvl.value * 20}, 60%, ${55 - lvl.value * 6}%)`,
-                      color: "white",
-                      fontWeight: 700,
-                      fontSize: "1rem",
-                      fontFamily: "sans-serif",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "0 auto 0.4rem",
-                    }}
-                  >
-                    {lvl.value}
-                  </div>
-                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#374151", marginBottom: 2 }}>{lvl.label}</div>
-                  <div style={{ fontSize: "0.6rem", color: "#94a3b8", fontFamily: "sans-serif", lineHeight: 1.3 }}>{lvl.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    `;
+    grid.appendChild(card);
+  });
 }
+
+function showDesc(domainId, val, color) {
+  const lvl = LEVELS.find(l => l.v === val);
+  const el = document.getElementById('desc-' + domainId);
+  el.innerHTML = `<strong style="color:${color}">${lvl.label}:</strong> ${lvl.desc}`;
+}
+
+function restoreDesc(domainId) {
+  if (scores[domainId]) {
+    const d = DOMAINS.find(x => x.id === domainId);
+    showDesc(domainId, scores[domainId], d.color);
+  } else {
+    const d = DOMAINS.find(x => x.id === domainId);
+    document.getElementById('desc-' + domainId).innerHTML =
+      `<span style="color:${d.color};font-weight:600">Click a number to score</span>`;
+  }
+}
+
+function setScore(domainId, val, color, bg) {
+  scores[domainId] = val;
+  const d = DOMAINS.find(x => x.id === domainId);
+
+  // Badge
+  const badge = document.getElementById('badge-' + domainId);
+  badge.textContent = val;
+  badge.style.background = color;
+  badge.style.color = 'white';
+
+  // Card border highlight
+  const card = document.getElementById('card-' + domainId);
+  card.style.borderColor = color + '55';
+  card.style.boxShadow = `0 3px 14px ${color}22`;
+
+  // Button states
+  LEVELS.forEach(l => {
+    const btn = document.getElementById(`btn-${domainId}-${l.v}`);
+    if (l.v === val) {
+      btn.classList.add('active');
+      btn.style.background = color;
+      btn.style.color = 'white';
+    } else if (l.v < val) {
+      btn.classList.remove('active');
+      btn.style.background = color + '25';
+      btn.style.color = color;
+    } else {
+      btn.classList.remove('active');
+      btn.style.background = '#f1f5f9';
+      btn.style.color = color;
+    }
+  });
+
+  showDesc(domainId, val, color);
+  updateSummary();
+  drawRadar();
+}
+
+// ── Summary ──────────────────────────────────────────────────────────────────
+function updateSummary() {
+  const vals = Object.values(scores);
+  const count = vals.length;
+  const total = vals.reduce((a,b) => a+b, 0);
+  const avg = count > 0 ? (total / count) : 0;
+  const maxPossible = DOMAINS.length * 5;
+  const pct = Math.round((total / maxPossible) * 100);
+
+  document.getElementById('avgScore').innerHTML =
+    count > 0 ? `${avg.toFixed(1)}<span>/5</span>` : `—<span>/5</span>`;
+  document.getElementById('ratedCount').textContent = `${count} / ${DOMAINS.length} domains rated`;
+  document.getElementById('totalFraction').textContent = `Total: ${total} / ${maxPossible}`;
+  document.getElementById('pctLabel').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  const levelEl = document.getElementById('overallLevel');
+  if (count === DOMAINS.length) {
+    const lbl = OVERALL_LABELS.find(l => avg >= l.min);
+    levelEl.textContent = lbl.label;
+    levelEl.style.color = lbl.color === '#1E4060' ? '#7cb4d9' : lbl.color;
+  } else {
+    levelEl.textContent = `Rate all domains to see overall level`;
+    levelEl.style.color = 'var(--gold)';
+  }
+
+  updateBars();
+}
+
+function updateBars() {
+  const panel = document.getElementById('barsPanel');
+  panel.innerHTML = '';
+  DOMAINS.forEach(d => {
+    const s = scores[d.id] || 0;
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    row.innerHTML = `
+      <div class="bar-label">${d.short}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${(s/5)*100}%;background:${s>0?d.color:'#e5e7eb'}"></div>
+      </div>
+      <div class="bar-score" style="color:${s>0?d.color:'#cbd5e1'}">${s||'—'}</div>
+    `;
+    panel.appendChild(row);
+  });
+}
+
+// ── Radar ─────────────────────────────────────────────────────────────────────
+function drawRadar() {
+  const svg = document.getElementById('radar');
+  const cx=150, cy=150, r=95, n=DOMAINS.length;
+
+  const pt = (i, val) => {
+    const a = (Math.PI*2*i/n) - Math.PI/2;
+    return { x: cx + (val/5)*r*Math.cos(a), y: cy + (val/5)*r*Math.sin(a) };
+  };
+  const axPt = (i) => pt(i, 5);
+
+  let html = '';
+
+  // Grid
+  [1,2,3,4,5].forEach(lvl => {
+    const pts = DOMAINS.map((_,i) => axPt(i)).map((_,i) => pt(i,lvl));
+    html += `<path d="${pts.map((p,i)=>`${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')} Z"
+      fill="none" stroke="#e2e8f0" stroke-width="${lvl===5?1.5:0.7}" />`;
+  });
+
+  // Axes
+  DOMAINS.forEach((_,i) => {
+    const p = axPt(i);
+    html += `<line x1="${cx}" y1="${cy}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="#d1d5db" stroke-width="0.7" />`;
+  });
+
+  // Score polygon
+  const spts = DOMAINS.map((d,i) => pt(i, scores[d.id]||0));
+  html += `<path d="${spts.map((p,i)=>`${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')} Z"
+    fill="rgba(139,26,43,0.13)" stroke="#8B1A2B" stroke-width="2" />`;
+
+  // Dots
+  DOMAINS.forEach((d,i) => {
+    if (!scores[d.id]) return;
+    const p = pt(i, scores[d.id]);
+    html += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="${d.color}" stroke="white" stroke-width="1.5" />`;
+  });
+
+  // Labels
+  DOMAINS.forEach((d,i) => {
+    const a = (Math.PI*2*i/n) - Math.PI/2;
+    const lx = (cx + (r+26)*Math.cos(a)).toFixed(1);
+    const ly = (cy + (r+26)*Math.sin(a)).toFixed(1);
+    html += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle"
+      font-size="9.5" font-family="Georgia,serif" fill="#374151" font-weight="600">${d.short}</text>`;
+  });
+
+  svg.innerHTML = html;
+
+  // Legend
+  const leg = document.getElementById('radarLegend');
+  leg.innerHTML = DOMAINS.map(d =>
+    `<div class="legend-item">
+      <div class="legend-dot" style="background:${d.color}"></div>
+      ${d.short}
+    </div>`
+  ).join('');
+}
+
+// ── Legend strip ──────────────────────────────────────────────────────────────
+function buildLegend() {
+  const strip = document.querySelector('.legend-strip');
+  const topLabel = document.createElement('div');
+  topLabel.style.cssText = 'grid-column:1/-1;font-size:0.6rem;color:#94a3b8;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.25rem;';
+  topLabel.textContent = 'Scoring Scale';
+  strip.appendChild(topLabel);
+
+  LEVELS.forEach(l => {
+    const cell = document.createElement('div');
+    cell.className = 'legend-cell';
+    cell.innerHTML = `
+      <div class="legend-num" style="background:${l.bgColor}">${l.v}</div>
+      <div class="legend-name">${l.label}</div>
+      <div class="legend-desc-text">${l.desc}</div>
+    `;
+    strip.appendChild(cell);
+  });
+}
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+function resetScores() {
+  scores = {};
+  DOMAINS.forEach(d => {
+    const badge = document.getElementById('badge-' + d.id);
+    badge.textContent = '—';
+    badge.style.background = '#f1f5f9';
+    badge.style.color = '#1a1a1a';
+    document.getElementById('card-'+d.id).style.borderColor = '#e5e7eb';
+    document.getElementById('card-'+d.id).style.boxShadow = '';
+    LEVELS.forEach(l => {
+      const btn = document.getElementById(`btn-${d.id}-${l.v}`);
+      btn.classList.remove('active');
+      btn.style.background = '#f1f5f9';
+      btn.style.color = d.color;
+    });
+    restoreDesc(d.id);
+  });
+  updateSummary();
+  drawRadar();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildCards();
+buildLegend();
+updateBars();
+drawRadar();
+</script>
+</body>
+</html>
