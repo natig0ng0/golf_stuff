@@ -1,129 +1,519 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inter-Schools Golf Tournament – Start Sheet</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--gold:#c9a84c;--gold-l:#e8d08a;--dark:#0b1e0d;--green-d:#1a3a1e;--green-m:#2d5a35;--parchment:#f5f0e8;}
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--dark);font-family:'Source Sans 3',sans-serif;color:#1a1a1a;}
-.hero{background:linear-gradient(160deg,var(--green-d) 0%,#0b2e0e 55%,#0e1a10 100%);padding:44px 30px 32px;text-align:center;position:relative;overflow:hidden;}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(201,168,76,.22) 0%,transparent 70%);pointer-events:none;}
-.crown{font-size:30px;margin-bottom:10px;opacity:.9;}
-.hero h1{font-family:'Playfair Display',serif;font-size:clamp(20px,3.5vw,40px);font-weight:900;color:#fff;letter-spacing:.03em;line-height:1.15;margin-bottom:8px;}
-.hero-sub{font-size:11px;font-weight:300;color:var(--gold-l);letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;}
-.hero-rule{width:60px;height:1px;background:var(--gold);margin:0 auto 14px;opacity:.5;}
-.hero-meta{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
-.meta-item{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase;}
-.meta-item span{color:var(--gold-l);font-weight:600;}
-.filter-row{display:flex;justify-content:center;gap:8px;margin-top:20px;flex-wrap:wrap;}
-.fpill{padding:7px 20px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:1.5px solid transparent;transition:all .2s;}
-.fpill.all{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.15);}
-.fpill.scoring{background:rgba(45,90,53,.3);color:rgba(180,230,180,.7);border-color:rgba(45,90,53,.5);}
-.fpill.support{background:rgba(160,100,0,.3);color:rgba(255,210,100,.7);border-color:rgba(160,100,0,.5);}
-.fpill.all.active{background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.4);}
-.fpill.scoring.active{background:var(--green-m);color:#fff;border-color:var(--green-m);}
-.fpill.support.active{background:#a06010;color:#fff;border-color:#a06010;}
-.legend-bar{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;padding:14px 20px;background:var(--parchment);border-bottom:1px solid #ddd8ce;}
-.leg{display:flex;align-items:center;gap:7px;font-size:11px;color:#555;letter-spacing:.04em;}
-.swatch{width:28px;height:10px;border-radius:3px;flex-shrink:0;border:1px solid rgba(0,0,0,.1);}
-.sheet{background:var(--parchment);padding:24px 18px 60px;}
-.section-label{font-family:'Playfair Display',serif;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--green-m);margin-bottom:16px;padding-bottom:6px;border-bottom:1px solid rgba(45,90,53,.2);max-width:1200px;margin-left:auto;margin-right:auto;}
-.group-divider{max-width:1200px;margin:28px auto 16px;display:flex;align-items:center;gap:14px;}
-.divider-line{flex:1;height:1px;}
-.divider-line.scoring{background:rgba(45,90,53,.25);}
-.divider-line.support{background:rgba(160,100,0,.25);}
-.divider-tag{padding:5px 16px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;}
-.divider-tag.scoring{background:var(--green-m);color:#fff;}
-.divider-tag.support{background:#a06010;color:#fff;}
-.divider-sub{font-size:10px;color:#aaa;letter-spacing:.06em;}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:12px;max-width:1200px;margin:0 auto;}
-.card{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04);transition:transform .15s,box-shadow .15s;}
-.card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12);}
-.card-head{padding:9px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.card-head.scoring{background:var(--green-d);}
-.card-head.support{background:#5c3a00;}
-.fnum{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.05em;}
-.ftime{font-family:'DM Mono',monospace;font-size:12px;color:rgba(255,255,255,.85);font-weight:500;}
-.fhole{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase;}
-.prow{display:flex;align-items:center;padding:8px 13px;border-bottom:1px solid #f0ece4;gap:9px;}
-.prow:last-child{border-bottom:none;}
-.bar{width:4px;border-radius:2px;align-self:stretch;min-height:26px;flex-shrink:0;}
-.pinfo{flex:1;min-width:0;}
-.pname{font-size:13px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pschool{font-size:9px;color:#999;letter-spacing:.05em;text-transform:uppercase;margin-top:1px;}
-.hcpbox{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:#fff;border-radius:5px;padding:2px 8px;flex-shrink:0;min-width:36px;text-align:center;}
-.sg-badge{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 13px;text-align:center;border-top:1px solid #f0ece4;}
-.sg-badge.scoring{color:rgba(45,90,53,.55);background:#fafaf8;}
-.sg-badge.support{color:rgba(160,96,16,.65);background:#fdf8f0;}
-footer{text-align:center;padding:18px;background:var(--dark);color:rgba(255,255,255,.25);font-size:10px;letter-spacing:.12em;text-transform:uppercase;}
-@media print{body{background:#fff;}.filter-row{display:none;}.hero{background:#1a3a1e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}.card-head,.bar,.hcpbox,.sg-badge,.divider-tag{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
-</style>
-</head>
-<body>
-<div class="hero">
-  <div class="crown">⛳</div>
-  <h1>Inter-Schools Golf Tournament</h1>
-  <div class="hero-sub">Official Start Sheet &nbsp;·&nbsp; Ascending Handicap Order</div>
-  <div class="hero-rule"></div>
-  <div class="hero-meta">
-    <div class="meta-item"><span>6</span> Schools</div>
-    <div class="meta-item"><span>34</span> Flights</div>
-    <div class="meta-item"><span>103</span> Players</div>
-    <div class="meta-item">Hole <span>1</span></div>
-    <div class="meta-item"><span>9:00 AM</span> – <span>12:51 PM</span></div>
-    <div class="meta-item"><span>7-min</span> intervals</div>
-  </div>
-  <div class="filter-row">
-    <button class="fpill all active" onclick="filter('all')">All Flights</button>
-    <button class="fpill scoring" onclick="filter('scoring')">⛳ Scoring Group &nbsp; F01–F24</button>
-    <button class="fpill support" onclick="filter('support')">🏌️ Support Group &nbsp; F25–F34</button>
-  </div>
-</div>
-<div class="legend-bar">
-  <div class="leg"><div class="swatch" style="background:#cc1111"></div>Mfantsipim</div>
-  <div class="leg"><div class="swatch" style="background:linear-gradient(90deg,#111 50%,#ccc 50%)"></div>Adisadel</div>
-  <div class="leg"><div class="swatch" style="background:#7a4828"></div>Achimota</div>
-  <div class="leg"><div class="swatch" style="background:#1a44bb"></div>PRESEC</div>
-  <div class="leg"><div class="swatch" style="background:#3a5fa0"></div>Accra Academy</div>
-  <div class="leg"><div class="swatch" style="background:linear-gradient(90deg,#2e7d32 50%,#f9c800 50%)"></div>Prempeh</div>
-</div>
-<div class="sheet">
-  <div class="section-label" id="section-label">All 34 Flights — Hole 1 — 9:00 AM to 12:51 PM — 7-Minute Intervals</div>
-  <div id="main-grid"></div>
-</div>
-<footer>Scoring Group: Flights 01–24 · 9:00 AM – 11:41 AM &nbsp;|&nbsp; Support Group: Flights 25–34 · 11:48 AM – 12:51 PM &nbsp;|&nbsp; All Hole 1 · 7-min intervals</footer>
-<script>
-const SC={MFN:{col:"#cc1111",name:"Mfantsipim"},ADS:{col:"#444",name:"Adisadel"},ACH:{col:"#7a4828",name:"Achimota"},PRE:{col:"#1a44bb",name:"PRESEC"},ACC:{col:"#3a5fa0",name:"Accra Academy"},PRM:{col:"#2e7d32",name:"Prempeh"}};
-const DATA=[{"flight": 1, "time": "9:00 AM", "group": "Scoring Group", "name": "David Atuwo", "school": "ADS", "hcp": 15.8}, {"flight": 1, "time": "9:00 AM", "group": "Scoring Group", "name": "Princess Nkansah-Boadu", "school": "ACH", "hcp": 17.4}, {"flight": 1, "time": "9:00 AM", "group": "Scoring Group", "name": "Larry Odonkor", "school": "ACC", "hcp": 25.5}, {"flight": 2, "time": "9:07 AM", "group": "Scoring Group", "name": "Kofi Intsiful", "school": "MFN", "hcp": 4.8}, {"flight": 2, "time": "9:07 AM", "group": "Scoring Group", "name": "George Amissah", "school": "ADS", "hcp": 10.8}, {"flight": 2, "time": "9:07 AM", "group": "Scoring Group", "name": "Fred Duvor", "school": "ACH", "hcp": 9.8}, {"flight": 3, "time": "9:14 AM", "group": "Scoring Group", "name": "Isaac Simpson", "school": "MFN", "hcp": 5.9}, {"flight": 3, "time": "9:14 AM", "group": "Scoring Group", "name": "Nana Bamfo", "school": "ADS", "hcp": 11.3}, {"flight": 3, "time": "9:14 AM", "group": "Scoring Group", "name": "John Entsua", "school": "PRE", "hcp": 6.2}, {"flight": 4, "time": "9:21 AM", "group": "Scoring Group", "name": "Martin Osei", "school": "MFN", "hcp": 6.7}, {"flight": 4, "time": "9:21 AM", "group": "Scoring Group", "name": "Fiifi Thompson", "school": "ADS", "hcp": 12.9}, {"flight": 4, "time": "9:21 AM", "group": "Scoring Group", "name": "Charles Darkwa", "school": "ACC", "hcp": 8.8}, {"flight": 5, "time": "9:28 AM", "group": "Scoring Group", "name": "Percival Ampomah", "school": "MFN", "hcp": 8.2}, {"flight": 5, "time": "9:28 AM", "group": "Scoring Group", "name": "Francis Kojo Bannerman", "school": "ADS", "hcp": 14.7}, {"flight": 5, "time": "9:28 AM", "group": "Scoring Group", "name": "Ebenezer Asabere", "school": "PRM", "hcp": 6.1}, {"flight": 6, "time": "9:35 AM", "group": "Scoring Group", "name": "Kojo Ansah", "school": "MFN", "hcp": 8.2}, {"flight": 6, "time": "9:35 AM", "group": "Scoring Group", "name": "Kobby Addai", "school": "ACH", "hcp": 11.5}, {"flight": 6, "time": "9:35 AM", "group": "Scoring Group", "name": "Mathais Dorfe", "school": "PRE", "hcp": 14.4}, {"flight": 7, "time": "9:42 AM", "group": "Scoring Group", "name": "Mike Aggrey", "school": "MFN", "hcp": 9.7}, {"flight": 7, "time": "9:42 AM", "group": "Scoring Group", "name": "Tutu Agyare", "school": "ACH", "hcp": 13.1}, {"flight": 7, "time": "9:42 AM", "group": "Scoring Group", "name": "Emmanuel Quarcoo (Jupiter)", "school": "ACC", "hcp": 12.3}, {"flight": 8, "time": "9:49 AM", "group": "Scoring Group", "name": "Kobby Bright O.A.", "school": "MFN", "hcp": 11.5}, {"flight": 8, "time": "9:49 AM", "group": "Scoring Group", "name": "Samuel Ocran", "school": "ACH", "hcp": 15.0}, {"flight": 8, "time": "9:49 AM", "group": "Scoring Group", "name": "Bismark N. Dapaah", "school": "PRM", "hcp": 7.2}, {"flight": 9, "time": "9:56 AM", "group": "Scoring Group", "name": "Ernest Asimenu", "school": "MFN", "hcp": 14.3}, {"flight": 9, "time": "9:56 AM", "group": "Scoring Group", "name": "Isaac Aninakwah", "school": "PRE", "hcp": 10.3}, {"flight": 9, "time": "9:56 AM", "group": "Scoring Group", "name": "Richard Torku", "school": "ACC", "hcp": 15.5}, {"flight": 10, "time": "10:03 AM", "group": "Scoring Group", "name": "Samuel Yeboah", "school": "MFN", "hcp": 14.9}, {"flight": 10, "time": "10:03 AM", "group": "Scoring Group", "name": "Jojo Ampadu", "school": "PRE", "hcp": 15.4}, {"flight": 10, "time": "10:03 AM", "group": "Scoring Group", "name": "Ebo Anderson", "school": "PRM", "hcp": 9.0}, {"flight": 11, "time": "10:10 AM", "group": "Scoring Group", "name": "Joe Tieku", "school": "MFN", "hcp": 15.3}, {"flight": 11, "time": "10:10 AM", "group": "Scoring Group", "name": "Felix Addo", "school": "ACC", "hcp": 24.4}, {"flight": 23, "time": "11:34 AM", "group": "Scoring Group", "name": "Hanniel Kakraba-Ampeh", "school": "PRM", "hcp": 9.4}, {"flight": 12, "time": "10:17 AM", "group": "Scoring Group", "name": "Alex Abrokwah", "school": "ADS", "hcp": 15.9}, {"flight": 12, "time": "10:17 AM", "group": "Scoring Group", "name": "Harrison Akpabli", "school": "ACH", "hcp": 15.3}, {"flight": 12, "time": "10:17 AM", "group": "Scoring Group", "name": "Nana Antwi Darkwa", "school": "PRE", "hcp": 13.2}, {"flight": 13, "time": "10:24 AM", "group": "Scoring Group", "name": "Kofi Amoabeng", "school": "ADS", "hcp": 17.0}, {"flight": 13, "time": "10:24 AM", "group": "Scoring Group", "name": "Kofi Osafo Sampong", "school": "ACH", "hcp": 18.0}, {"flight": 13, "time": "10:24 AM", "group": "Scoring Group", "name": "Francis Nkrumah Gyasi", "school": "PRM", "hcp": 9.4}, {"flight": 14, "time": "10:31 AM", "group": "Scoring Group", "name": "Kwaku Appietu-Ankrah", "school": "ADS", "hcp": 9.0}, {"flight": 14, "time": "10:31 AM", "group": "Scoring Group", "name": "Alex Fiagome", "school": "PRE", "hcp": 13.3}, {"flight": 14, "time": "10:31 AM", "group": "Scoring Group", "name": "Sackitey Crabbe", "school": "ACC", "hcp": 27.3}, {"flight": 15, "time": "10:38 AM", "group": "Scoring Group", "name": "Solomon Allotey", "school": "ADS", "hcp": 6.4}, {"flight": 15, "time": "10:38 AM", "group": "Scoring Group", "name": "Toni Bakawu", "school": "PRE", "hcp": 15.6}, {"flight": 15, "time": "10:38 AM", "group": "Scoring Group", "name": "Isaac Asante", "school": "PRM", "hcp": 9.8}, {"flight": 16, "time": "10:45 AM", "group": "Scoring Group", "name": "Maxwell Darkwah", "school": "ADS", "hcp": 9.7}, {"flight": 16, "time": "10:45 AM", "group": "Scoring Group", "name": "Daniel Addo", "school": "ACC", "hcp": 15.6}, {"flight": 16, "time": "10:45 AM", "group": "Scoring Group", "name": "Ben\u00e9e Tagboto", "school": "PRM", "hcp": 10.5}, {"flight": 17, "time": "10:52 AM", "group": "Scoring Group", "name": "Henry Okoe Tackie", "school": "ACH", "hcp": 19.0}, {"flight": 17, "time": "10:52 AM", "group": "Scoring Group", "name": "Samuel Koranteng", "school": "PRE", "hcp": 20.7}, {"flight": 17, "time": "10:52 AM", "group": "Scoring Group", "name": "Frank Tetteh", "school": "ACC", "hcp": 15.9}, {"flight": 18, "time": "10:59 AM", "group": "Scoring Group", "name": "Kisseih Antonio", "school": "ACH", "hcp": 19.5}, {"flight": 18, "time": "10:59 AM", "group": "Scoring Group", "name": "Rodney Oddoye", "school": "PRE", "hcp": 19.7}, {"flight": 18, "time": "10:59 AM", "group": "Scoring Group", "name": "Eric Ofosu-Hene", "school": "PRM", "hcp": 11.9}, {"flight": 19, "time": "11:06 AM", "group": "Scoring Group", "name": "John Blay", "school": "ACH", "hcp": 20.0}, {"flight": 19, "time": "11:06 AM", "group": "Scoring Group", "name": "Charles Okyere", "school": "ACC", "hcp": 18.5}, {"flight": 19, "time": "11:06 AM", "group": "Scoring Group", "name": "Kojo Acheampong", "school": "PRM", "hcp": 16.4}, {"flight": 20, "time": "11:13 AM", "group": "Scoring Group", "name": "Nash Antwi", "school": "PRE", "hcp": 12.1}, {"flight": 20, "time": "11:13 AM", "group": "Scoring Group", "name": "Joshua Asaabil Dadzie", "school": "ACC", "hcp": 24.0}, {"flight": 20, "time": "11:13 AM", "group": "Scoring Group", "name": "Samuel Addai", "school": "PRM", "hcp": 20.7}, {"flight": 21, "time": "11:20 AM", "group": "Scoring Group", "name": "Nathan Donkor", "school": "MFN", "hcp": 17.6}, {"flight": 21, "time": "11:20 AM", "group": "Scoring Group", "name": "Sammy Laing", "school": "ADS", "hcp": 22.2}, {"flight": 21, "time": "11:20 AM", "group": "Scoring Group", "name": "Kobina Yankey", "school": "ACH", "hcp": 21.8}, {"flight": 22, "time": "11:27 AM", "group": "Scoring Group", "name": "M K Parker", "school": "MFN", "hcp": 18.0}, {"flight": 22, "time": "11:27 AM", "group": "Scoring Group", "name": "Spike Boaitey", "school": "PRE", "hcp": 25.6}, {"flight": 22, "time": "11:27 AM", "group": "Scoring Group", "name": "Chris Atadika", "school": "ACC", "hcp": 22.5}, {"flight": 23, "time": "11:34 AM", "group": "Scoring Group", "name": "Nanabanyin Dennis", "school": "ADS", "hcp": 19.3}, {"flight": 23, "time": "11:34 AM", "group": "Scoring Group", "name": "Tony Ntiador", "school": "PRE", "hcp": 30.9}, {"flight": 11, "time": "10:10 AM", "group": "Scoring Group", "name": "Paul Dwimoh", "school": "PRM", "hcp": 21.6}, {"flight": 24, "time": "11:41 AM", "group": "Scoring Group", "name": "Michael Bortei-Doku", "school": "ACH", "hcp": 24.0}, {"flight": 24, "time": "11:41 AM", "group": "Scoring Group", "name": "Paul Ayitiah", "school": "ACC", "hcp": 27.8}, {"flight": 24, "time": "11:41 AM", "group": "Scoring Group", "name": "Nana Kwabena Kwarteng", "school": "PRM", "hcp": 21.9}, {"flight": 25, "time": "11:48 AM", "group": "Support Group", "name": "Alex Oppong Baffoe", "school": "PRE", "hcp": 10.1}, {"flight": 25, "time": "11:48 AM", "group": "Support Group", "name": "Samuel Acquah", "school": "MFN", "hcp": 18.7}, {"flight": 25, "time": "11:48 AM", "group": "Support Group", "name": "Michael Abbey", "school": "ACC", "hcp": 21.1}, {"flight": 26, "time": "11:55 AM", "group": "Support Group", "name": "William Nanka-Bruce", "school": "PRE", "hcp": 15.3}, {"flight": 26, "time": "11:55 AM", "group": "Support Group", "name": "Smyly Bannerman", "school": "MFN", "hcp": 18.9}, {"flight": 26, "time": "11:55 AM", "group": "Support Group", "name": "Edward Abrokwah", "school": "ADS", "hcp": 14.5}, {"flight": 27, "time": "12:02 PM", "group": "Support Group", "name": "Fred Darko", "school": "PRE", "hcp": 16.4}, {"flight": 27, "time": "12:02 PM", "group": "Support Group", "name": "Philip Attuquayefio", "school": "ACC", "hcp": 21.9}, {"flight": 27, "time": "12:02 PM", "group": "Support Group", "name": "Frank Tackie", "school": "MFN", "hcp": 19.2}, {"flight": 28, "time": "12:09 PM", "group": "Support Group", "name": "Stephen Amanor", "school": "PRE", "hcp": 17.5}, {"flight": 28, "time": "12:09 PM", "group": "Support Group", "name": "Kojo Acquaah-Harrison", "school": "ADS", "hcp": 20.0}, {"flight": 28, "time": "12:09 PM", "group": "Support Group", "name": "Richard Okrah", "school": "ACC", "hcp": 23.0}, {"flight": 29, "time": "12:16 PM", "group": "Support Group", "name": "Eric Quartey", "school": "PRE", "hcp": 19.5}, {"flight": 29, "time": "12:16 PM", "group": "Support Group", "name": "Roger Adamah", "school": "MFN", "hcp": 20.9}, {"flight": 29, "time": "12:16 PM", "group": "Support Group", "name": "Nana Yaw Kaitoo", "school": "ADS", "hcp": 24.9}, {"flight": 30, "time": "12:23 PM", "group": "Support Group", "name": "Leonard Nii Adom", "school": "PRE", "hcp": 20.1}, {"flight": 30, "time": "12:23 PM", "group": "Support Group", "name": "Hubert Potakey", "school": "ACC", "hcp": 28.0}, {"flight": 30, "time": "12:23 PM", "group": "Support Group", "name": "Robert Dovlo", "school": "MFN", "hcp": 21.9}, {"flight": 31, "time": "12:30 PM", "group": "Support Group", "name": "Benjamin Ofori", "school": "PRE", "hcp": 23.2}, {"flight": 31, "time": "12:30 PM", "group": "Support Group", "name": "Kwadwo A. Ankrah", "school": "ADS", "hcp": 34.0}, {"flight": 31, "time": "12:30 PM", "group": "Support Group", "name": "Edward Laryea", "school": "ACC", "hcp": 28.0}, {"flight": 32, "time": "12:37 PM", "group": "Support Group", "name": "Kwasi Asiedu", "school": "PRE", "hcp": 24.3}, {"flight": 32, "time": "12:37 PM", "group": "Support Group", "name": "Brian Quartey", "school": "ACH", "hcp": "N/A"}, {"flight": 32, "time": "12:37 PM", "group": "Support Group", "name": "Richmond Aboagye", "school": "MFN", "hcp": 23.4}, {"flight": 33, "time": "12:44 PM", "group": "Support Group", "name": "Ernest Owusu", "school": "PRM", "hcp": 28.0}, {"flight": 33, "time": "12:44 PM", "group": "Support Group", "name": "Nana Kweku Essel Wilson", "school": "ADS", "hcp": "N/A"}, {"flight": 33, "time": "12:44 PM", "group": "Support Group", "name": "Emmanuel Bruce Attah", "school": "ACC", "hcp": 33.3}, {"flight": 34, "time": "12:51 PM", "group": "Support Group", "name": "Andrew Kwablah", "school": "PRE", "hcp": 25.4}, {"flight": 34, "time": "12:51 PM", "group": "Support Group", "name": "Ayitey Bulley", "school": "ACH", "hcp": "N/A"}, {"flight": 34, "time": "12:51 PM", "group": "Support Group", "name": "Kwame Appah", "school": "MFN", "hcp": 31.2}, {"flight": 34, "time": "12:51 PM", "group": "Support Group", "name": "Ren\u00e9 Plahar", "school": "PRM", "hcp": 30.0}];
-const flights={};
-DATA.forEach(p=>{if(!flights[p.flight])flights[p.flight]={time:p.time,group:p.group,players:[]};flights[p.flight].players.push(p);});
-const container=document.getElementById('main-grid');
-let sDone=false,suDone=false;
-Object.entries(flights).sort((a,b)=>+a[0]-+b[0]).forEach(([fn,f])=>{
-  const isSc=f.group==='Scoring Group';
-  if(isSc&&!sDone){const d=document.createElement('div');d.className='group-divider';d.dataset.divider='scoring';d.innerHTML=`<div class="divider-line scoring"></div><span class="divider-tag scoring">Scoring Group</span><span class="divider-sub">Flights 01–24 &nbsp;·&nbsp; 9:00 AM – 11:41 AM</span><div class="divider-line scoring"></div>`;container.appendChild(d);sDone=true;const g=document.createElement('div');g.className='grid';g.id='grid-scoring';container.appendChild(g);}
-  if(!isSc&&!suDone){const d=document.createElement('div');d.className='group-divider';d.dataset.divider='support';d.innerHTML=`<div class="divider-line support"></div><span class="divider-tag support">Support Group</span><span class="divider-sub">Flights 25–34 &nbsp;·&nbsp; 11:48 AM – 12:51 PM</span><div class="divider-line support"></div>`;container.appendChild(d);suDone=true;const g=document.createElement('div');g.className='grid';g.id='grid-support';container.appendChild(g);}
-  let rows='';
-  f.players.forEach(p=>{const c=SC[p.school]?.col||"#888";rows+=`<div class="prow"><div class="bar" style="background:${c}"></div><div class="pinfo"><div class="pname">${p.name}</div><div class="pschool">${SC[p.school]?.name||p.school}</div></div><div class="hcpbox" style="background:${c}">${p.hcp}</div></div>`;});
-  const gc=isSc?'scoring':'support';
-  const card=document.createElement('div');card.className='card';card.dataset.group=gc;
-  card.innerHTML=`<div class="card-head ${gc}"><span class="fnum">Flight ${String(fn).padStart(2,'0')}</span><span class="ftime">${f.time}</span><span class="fhole">Hole 1</span></div>${rows}<div class="sg-badge ${gc}">${f.group}</div>`;
-  document.getElementById(`grid-${gc}`).appendChild(card);
-});
-function filter(g){
-  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('active'));
-  document.querySelector(`.fpill.${g==='all'?'all':g}`).classList.add('active');
-  document.querySelectorAll('.card').forEach(c=>{c.style.display=(g==='all'||c.dataset.group===g)?'':'none';});
-  document.querySelectorAll('.group-divider').forEach(d=>{d.style.display=(g==='all'||d.dataset.divider===g)?'':'none';});
-  document.querySelectorAll('.grid').forEach(gd=>{gd.style.display=(g==='all'||gd.id===`grid-${g}`)?'':'none';});
-  const lbl=document.getElementById('section-label');
-  if(g==='all')lbl.textContent='All 34 Flights — Hole 1 — 9:00 AM to 12:51 PM — 7-Minute Intervals';
-  else if(g==='scoring')lbl.textContent='Scoring Group — Flights 01–24 — 9:00 AM to 11:41 AM';
-  else lbl.textContent='Support Group — Flights 25–34 — 11:48 AM to 12:51 PM';
+import { useState, useEffect } from "react";
+
+const DOMAINS = [
+  {
+    id: "market_assessment",
+    label: "Market Assessment",
+    short: "Market",
+    color: "#8B1A2B",
+    bg: "#fdf0f2",
+    icon: "✓",
+    category: "Strategic & Operational Planning",
+  },
+  {
+    id: "curriculum_design",
+    label: "Curriculum Design",
+    short: "Curriculum Design",
+    color: "#C17F24",
+    bg: "#fdf6ec",
+    icon: "🎓",
+    category: "Curriculum & Training",
+  },
+  {
+    id: "curriculum_delivery",
+    label: "Curriculum Delivery",
+    short: "Delivery",
+    color: "#C17F24",
+    bg: "#fdf6ec",
+    icon: "📚",
+    category: "Curriculum & Training",
+  },
+  {
+    id: "work_based_learning",
+    label: "Work-Based Learning",
+    short: "WBL",
+    color: "#C17F24",
+    bg: "#fdf6ec",
+    icon: "🔧",
+    category: "Curriculum & Training",
+  },
+  {
+    id: "management",
+    label: "Management",
+    short: "Management",
+    color: "#3A6B5E",
+    bg: "#edf5f3",
+    icon: "⚙",
+    category: "Stakeholder Management",
+  },
+  {
+    id: "monitoring_evaluation",
+    label: "Monitoring & Evaluation",
+    short: "M&E",
+    color: "#3A6B5E",
+    bg: "#edf5f3",
+    icon: "📊",
+    category: "Stakeholder Management",
+  },
+  {
+    id: "financial_sustainability",
+    label: "Financial Sustainability",
+    short: "Finance",
+    color: "#1E4060",
+    bg: "#eef3f8",
+    icon: "💰",
+    category: "Institutional Capacity",
+  },
+  {
+    id: "governance",
+    label: "Governance",
+    short: "Governance",
+    color: "#1E4060",
+    bg: "#eef3f8",
+    icon: "🏛",
+    category: "Institutional Capacity",
+  },
+];
+
+const LEVELS = [
+  { value: 1, label: "Supply-Oriented", desc: "Indifferent to market; basic provision" },
+  { value: 2, label: "Demand-Responsive", desc: "Actively uses market feedback" },
+  { value: 3, label: "TVET-Led", desc: "Public & private TVETs engaged" },
+  { value: 4, label: "Employer-Engaged", desc: "Employers driving co-design" },
+  { value: 5, label: "Systems-Embedded", desc: "Government & ecosystem aligned" },
+];
+
+const RadarChart = ({ scores }) => {
+  const cx = 150, cy = 150, r = 100;
+  const n = DOMAINS.length;
+
+  const getPoint = (index, value, maxR) => {
+    const angle = (Math.PI * 2 * index) / n - Math.PI / 2;
+    const dist = (value / 5) * maxR;
+    return {
+      x: cx + dist * Math.cos(angle),
+      y: cy + dist * Math.sin(angle),
+    };
+  };
+
+  const gridLevels = [1, 2, 3, 4, 5];
+  const axisPoints = DOMAINS.map((_, i) => getPoint(i, 5, r));
+
+  const scorePoints = DOMAINS.map((d, i) => getPoint(i, scores[d.id] || 0, r));
+  const scorePath = scorePoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+
+  return (
+    <svg viewBox="0 0 300 300" className="w-full max-w-xs mx-auto">
+      {gridLevels.map((lvl) => {
+        const pts = DOMAINS.map((_, i) => getPoint(i, lvl, r));
+        const path = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ") + " Z";
+        return <path key={lvl} d={path} fill="none" stroke="#e2e8f0" strokeWidth={lvl === 5 ? 1.5 : 0.8} />;
+      })}
+
+      {axisPoints.map((p, i) => (
+        <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#cbd5e1" strokeWidth={0.8} />
+      ))}
+
+      <path d={scorePath} fill="rgba(139,26,43,0.15)" stroke="#8B1A2B" strokeWidth={2} />
+
+      {scorePoints.map((p, i) => (
+        scores[DOMAINS[i].id] > 0 && (
+          <circle key={i} cx={p.x} cy={p.y} r={4} fill={DOMAINS[i].color} stroke="white" strokeWidth={1.5} />
+        )
+      ))}
+
+      {axisPoints.map((p, i) => {
+        const angle = (Math.PI * 2 * i) / n - Math.PI / 2;
+        const lx = cx + (r + 22) * Math.cos(angle);
+        const ly = cy + (r + 22) * Math.sin(angle);
+        return (
+          <text
+            key={i}
+            x={lx}
+            y={ly}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="8"
+            fontFamily="'Georgia', serif"
+            fill="#374151"
+            fontWeight="500"
+          >
+            {DOMAINS[i].short}
+          </text>
+        );
+      })}
+    </svg>
+  );
+};
+
+export default function TVETDashboard() {
+  const [scores, setScores] = useState({});
+  const [hoveredLevel, setHoveredLevel] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+  const [animIn, setAnimIn] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setAnimIn(true), 100);
+  }, []);
+
+  const scoredCount = Object.keys(scores).length;
+  const totalScore = Object.values(scores).reduce((a, b) => a + b, 0);
+  const avgScore = scoredCount > 0 ? (totalScore / scoredCount).toFixed(1) : "—";
+  const maxPossible = DOMAINS.length * 5;
+  const pct = scoredCount === DOMAINS.length ? Math.round((totalScore / maxPossible) * 100) : null;
+
+  const handleScore = (domainId, value) => {
+    setScores((prev) => ({ ...prev, [domainId]: value }));
+  };
+
+  const getScoreLabel = (avg) => {
+    if (avg >= 4.5) return { text: "Systems-Embedded", color: "#1E4060" };
+    if (avg >= 3.5) return { text: "Employer-Engaged", color: "#3A6B5E" };
+    if (avg >= 2.5) return { text: "TVET-Led", color: "#C17F24" };
+    if (avg >= 1.5) return { text: "Demand-Responsive", color: "#8B6A00" };
+    return { text: "Supply-Oriented", color: "#8B1A2B" };
+  };
+
+  const overallLabel = scoredCount === DOMAINS.length ? getScoreLabel(parseFloat(avgScore)) : null;
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f8f5f0",
+        fontFamily: "'Georgia', 'Times New Roman', serif",
+        opacity: animIn ? 1 : 0,
+        transition: "opacity 0.6s ease",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+          padding: "2.5rem 2rem 2rem",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundImage: "repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 12px)",
+          }}
+        />
+        <div style={{ position: "relative", maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+            <div style={{ width: 3, height: 28, background: "#C17F24", borderRadius: 2 }} />
+            <span style={{ color: "#C17F24", fontSize: "0.7rem", letterSpacing: "0.2em", fontFamily: "sans-serif", fontWeight: 700, textTransform: "uppercase" }}>
+              Assessment Framework
+            </span>
+          </div>
+          <h1 style={{ color: "white", fontSize: "clamp(1.4rem, 3vw, 2rem)", margin: "0 0 0.5rem", fontWeight: 400, letterSpacing: "-0.01em" }}>
+            TVET Institutional Scorecard
+          </h1>
+          <p style={{ color: "#94a3b8", fontSize: "0.85rem", margin: 0, fontFamily: "sans-serif" }}>
+            Rate each domain across 8 key institutional levers of change
+          </p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "1.5rem 1rem 3rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "1rem" }}>
+
+          {/* Score Cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
+            {DOMAINS.map((domain, di) => {
+              const current = scores[domain.id];
+              return (
+                <div
+                  key={domain.id}
+                  style={{
+                    background: "white",
+                    borderRadius: 12,
+                    overflow: "hidden",
+                    boxShadow: current ? `0 2px 12px ${domain.color}22` : "0 1px 4px rgba(0,0,0,0.08)",
+                    border: `1px solid ${current ? domain.color + "44" : "#e5e7eb"}`,
+                    transition: "all 0.3s ease",
+                    opacity: animIn ? 1 : 0,
+                    transform: animIn ? "translateY(0)" : "translateY(12px)",
+                    transitionDelay: `${di * 0.06}s`,
+                  }}
+                >
+                  {/* Card Header */}
+                  <div
+                    style={{
+                      background: domain.bg,
+                      borderBottom: `2px solid ${domain.color}`,
+                      padding: "0.75rem 1rem",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: "0.6rem", color: domain.color, fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 2 }}>
+                        {domain.category}
+                      </div>
+                      <div style={{ fontSize: "0.95rem", fontWeight: 600, color: "#1a1a1a" }}>
+                        {domain.label}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: 36, height: 36, borderRadius: 8,
+                        background: current ? domain.color : "#f1f5f9",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: "1rem",
+                        transition: "background 0.3s ease",
+                      }}
+                    >
+                      {current ? (
+                        <span style={{ color: "white", fontWeight: 700, fontSize: "0.9rem", fontFamily: "sans-serif" }}>{current}</span>
+                      ) : (
+                        <span style={{ fontSize: "1rem" }}>—</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Level Buttons */}
+                  <div style={{ padding: "0.75rem 1rem" }}>
+                    <div style={{ display: "flex", gap: "0.3rem", marginBottom: "0.5rem" }}>
+                      {LEVELS.map((lvl) => {
+                        const isSelected = current === lvl.value;
+                        const isHovered = hoveredLevel[domain.id] === lvl.value;
+                        return (
+                          <button
+                            key={lvl.value}
+                            onClick={() => handleScore(domain.id, lvl.value)}
+                            onMouseEnter={() => setHoveredLevel((p) => ({ ...p, [domain.id]: lvl.value }))}
+                            onMouseLeave={() => setHoveredLevel((p) => ({ ...p, [domain.id]: null }))}
+                            style={{
+                              flex: 1,
+                              height: 28,
+                              border: "none",
+                              borderRadius: 5,
+                              cursor: "pointer",
+                              background: isSelected ? domain.color : isHovered ? domain.color + "33" : "#f1f5f9",
+                              color: isSelected ? "white" : domain.color,
+                              fontWeight: 700,
+                              fontSize: "0.8rem",
+                              fontFamily: "sans-serif",
+                              transition: "all 0.15s ease",
+                              transform: isSelected ? "scale(1.05)" : "scale(1)",
+                            }}
+                          >
+                            {lvl.value}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Level description */}
+                    <div style={{ minHeight: 28 }}>
+                      {(hoveredLevel[domain.id] || current) && (
+                        <div style={{ fontSize: "0.7rem", color: "#64748b", fontFamily: "sans-serif", lineHeight: 1.4 }}>
+                          <span style={{ fontWeight: 700, color: domain.color }}>
+                            {LEVELS[(hoveredLevel[domain.id] || current) - 1].label}:
+                          </span>{" "}
+                          {LEVELS[(hoveredLevel[domain.id] || current) - 1].desc}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Summary Panel */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "1rem",
+              marginTop: "0.5rem",
+            }}
+          >
+            {/* Radar */}
+            <div
+              style={{
+                background: "white",
+                borderRadius: 12,
+                padding: "1.25rem",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                border: "1px solid #e5e7eb",
+              }}
+            >
+              <div style={{ fontSize: "0.65rem", color: "#94a3b8", fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
+                Domain Profile
+              </div>
+              <RadarChart scores={scores} />
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginTop: "0.75rem", justifyContent: "center" }}>
+                {DOMAINS.map((d) => (
+                  <div key={d.id} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.6rem", fontFamily: "sans-serif", color: "#64748b" }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: d.color }} />
+                    {d.short}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Score Summary */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {/* Overall */}
+              <div
+                style={{
+                  background: "linear-gradient(135deg, #1a1a2e, #0f3460)",
+                  borderRadius: 12,
+                  padding: "1.25rem",
+                  color: "white",
+                  flex: 1,
+                }}
+              >
+                <div style={{ fontSize: "0.65rem", color: "#94a3b8", fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
+                  Overall Score
+                </div>
+                <div style={{ fontSize: "3rem", fontWeight: 400, lineHeight: 1, marginBottom: "0.25rem" }}>
+                  {avgScore}
+                  <span style={{ fontSize: "1rem", color: "#94a3b8", marginLeft: 4, fontFamily: "sans-serif" }}>/5</span>
+                </div>
+                {overallLabel && (
+                  <div style={{ fontSize: "0.85rem", color: "#C17F24", fontWeight: 600, marginTop: "0.25rem" }}>
+                    {overallLabel.text}
+                  </div>
+                )}
+                {pct !== null && (
+                  <div style={{ marginTop: "0.75rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.65rem", fontFamily: "sans-serif", color: "#94a3b8", marginBottom: 4 }}>
+                      <span>Total: {totalScore}/{maxPossible}</span>
+                      <span>{pct}%</span>
+                    </div>
+                    <div style={{ height: 6, background: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" }}>
+                      <div
+                        style={{
+                          height: "100%",
+                          width: `${pct}%`,
+                          background: "linear-gradient(90deg, #C17F24, #e8a84c)",
+                          borderRadius: 3,
+                          transition: "width 0.5s ease",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                <div style={{ fontSize: "0.65rem", fontFamily: "sans-serif", color: "#475569", marginTop: "0.75rem" }}>
+                  {scoredCount}/{DOMAINS.length} domains rated
+                </div>
+              </div>
+
+              {/* Per-domain scores */}
+              <div
+                style={{
+                  background: "white",
+                  borderRadius: 12,
+                  padding: "1.25rem",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                  border: "1px solid #e5e7eb",
+                  flex: 2,
+                }}
+              >
+                <div style={{ fontSize: "0.65rem", color: "#94a3b8", fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.75rem" }}>
+                  Domain Breakdown
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                  {DOMAINS.map((d) => {
+                    const s = scores[d.id] || 0;
+                    return (
+                      <div key={d.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <div style={{ fontSize: "0.65rem", fontFamily: "sans-serif", color: "#374151", width: 90, flexShrink: 0, lineHeight: 1.2 }}>
+                          {d.short}
+                        </div>
+                        <div style={{ flex: 1, height: 8, background: "#f1f5f9", borderRadius: 4, overflow: "hidden" }}>
+                          <div
+                            style={{
+                              height: "100%",
+                              width: `${(s / 5) * 100}%`,
+                              background: s > 0 ? d.color : "transparent",
+                              borderRadius: 4,
+                              transition: "width 0.4s ease",
+                            }}
+                          />
+                        </div>
+                        <div style={{ fontSize: "0.7rem", fontFamily: "sans-serif", fontWeight: 700, color: s > 0 ? d.color : "#cbd5e1", width: 16, textAlign: "right" }}>
+                          {s || "—"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Reset */}
+              {scoredCount > 0 && (
+                <button
+                  onClick={() => setScores({})}
+                  style={{
+                    background: "transparent",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: 8,
+                    padding: "0.6rem 1rem",
+                    fontSize: "0.75rem",
+                    fontFamily: "sans-serif",
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                    transition: "all 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => { e.target.style.borderColor = "#8B1A2B"; e.target.style.color = "#8B1A2B"; }}
+                  onMouseLeave={(e) => { e.target.style.borderColor = "#e5e7eb"; e.target.style.color = "#94a3b8"; }}
+                >
+                  Reset scores
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Level Legend */}
+          <div
+            style={{
+              background: "white",
+              borderRadius: 12,
+              padding: "1.25rem",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+              border: "1px solid #e5e7eb",
+            }}
+          >
+            <div style={{ fontSize: "0.65rem", color: "#94a3b8", fontFamily: "sans-serif", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "1rem" }}>
+              Scoring Scale
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "0.75rem" }}>
+              {LEVELS.map((lvl) => (
+                <div key={lvl.value} style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      width: 36, height: 36,
+                      borderRadius: "50%",
+                      background: `hsl(${200 + lvl.value * 20}, 60%, ${55 - lvl.value * 6}%)`,
+                      color: "white",
+                      fontWeight: 700,
+                      fontSize: "1rem",
+                      fontFamily: "sans-serif",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: "0 auto 0.4rem",
+                    }}
+                  >
+                    {lvl.value}
+                  </div>
+                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#374151", marginBottom: 2 }}>{lvl.label}</div>
+                  <div style={{ fontSize: "0.6rem", color: "#94a3b8", fontFamily: "sans-serif", lineHeight: 1.3 }}>{lvl.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
-</script>
-</body>
-</html>
