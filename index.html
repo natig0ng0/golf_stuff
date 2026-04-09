@@ -1,678 +1,668 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TVET Institutional Scorecard</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voting System</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <style>
-  :root {
-    --crimson: #8B1A2B;
-    --gold: #C17F24;
-    --teal: #2E6B5E;
-    --navy: #1E4060;
-    --ink: #1a1a2e;
-    --parchment: #f8f5f0;
-    --card: #ffffff;
-    --border: #e5e7eb;
-    --muted: #64748b;
-    --light: #f1f5f9;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Source Sans 3', sans-serif;
-    background: var(--parchment);
-    color: #1a1a1a;
-    min-height: 100vh;
-  }
-
-  /* ── HEADER ── */
-  .site-header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
-    padding: 2.5rem 2rem 2rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .site-header::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: repeating-linear-gradient(45deg,
-      rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px,
-      transparent 1px, transparent 14px);
-  }
-  .header-inner {
-    position: relative;
-    max-width: 980px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  .header-eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 0.4rem;
-  }
-  .header-bar { width: 3px; height: 22px; background: var(--gold); border-radius: 2px; }
-  .header-tag {
-    color: var(--gold);
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-  h1 {
-    font-family: 'Playfair Display', serif;
-    color: white;
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    font-weight: 600;
-    letter-spacing: -0.01em;
-  }
-  .header-sub { color: #94a3b8; font-size: 0.82rem; margin-top: 0.25rem; }
-
-  .meta-fields { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-  .meta-input {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 7px;
-    padding: 0.45rem 0.75rem;
-    color: white;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.8rem;
-    outline: none;
-    width: 180px;
-    transition: border-color 0.2s;
-  }
-  .meta-input::placeholder { color: rgba(255,255,255,0.35); }
-  .meta-input:focus { border-color: var(--gold); }
-
-  /* ── MAIN LAYOUT ── */
-  .main { max-width: 980px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
-  .grid-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-  }
-
-  /* ── DOMAIN CARDS ── */
-  .domain-card {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    transition: box-shadow 0.25s, border-color 0.25s, transform 0.25s;
-    opacity: 0;
-    transform: translateY(14px);
-    animation: fadeUp 0.4s forwards;
-  }
-  .domain-card:hover { transform: translateY(-2px); }
-  @keyframes fadeUp {
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .card-head {
-    padding: 0.8rem 1rem;
-    border-bottom: 2.5px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-  }
-  .card-category {
-    font-size: 0.58rem;
-    font-weight: 700;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    margin-bottom: 2px;
-  }
-  .card-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-  .score-badge {
-    width: 38px; height: 38px;
-    border-radius: 9px;
-    background: var(--light);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem;
-    font-weight: 700;
-    flex-shrink: 0;
-    transition: background 0.25s, color 0.25s;
-  }
-
-  .card-body { padding: 0.75rem 1rem 0.85rem; }
-  .level-buttons { display: flex; gap: 5px; margin-bottom: 0.5rem; }
-  .lvl-btn {
-    flex: 1; height: 30px;
-    border: none; border-radius: 6px;
-    cursor: pointer;
-    font-weight: 700; font-size: 0.82rem;
-    font-family: 'Source Sans 3', sans-serif;
-    background: var(--light);
-    transition: background 0.15s, transform 0.12s, color 0.15s;
-  }
-  .lvl-btn:hover { transform: scale(1.06); }
-  .lvl-btn.active { color: white; transform: scale(1.08); }
-
-  .level-desc {
-    min-height: 30px;
-    font-size: 0.68rem;
-    color: var(--muted);
-    line-height: 1.45;
-    transition: opacity 0.15s;
-  }
-  .level-desc strong { font-weight: 700; }
-
-  /* ── BOTTOM GRID ── */
-  .bottom-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-  @media (max-width: 640px) { .bottom-grid { grid-template-columns: 1fr; } }
-
-  .panel {
-    background: white;
-    border-radius: 12px;
-    padding: 1.25rem;
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-  .panel-label {
-    font-size: 0.6rem;
-    color: #94a3b8;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 0.9rem;
-  }
-
-  /* Radar panel */
-  .radar-wrap { display: flex; justify-content: center; }
-  .radar-legend {
-    display: flex; flex-wrap: wrap; gap: 0.35rem;
-    justify-content: center; margin-top: 0.75rem;
-  }
-  .legend-item {
-    display: flex; align-items: center; gap: 4px;
-    font-size: 0.58rem; color: var(--muted);
-  }
-  .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
-
-  /* Summary panel */
-  .summary-panel {
-    background: linear-gradient(135deg, #1a1a2e, #0f3460);
-    border-radius: 12px;
-    padding: 1.25rem;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .overall-score {
-    font-family: 'Playfair Display', serif;
-    font-size: 3.2rem;
-    font-weight: 400;
-    line-height: 1;
-  }
-  .overall-score span { font-size: 1rem; color: #94a3b8; font-family: 'Source Sans 3', sans-serif; margin-left: 4px; }
-  .overall-level { font-size: 0.9rem; font-weight: 600; }
-  .progress-bar-bg {
-    height: 7px; background: rgba(255,255,255,0.1);
-    border-radius: 4px; overflow: hidden;
-  }
-  .progress-bar-fill {
-    height: 100%; border-radius: 4px;
-    background: linear-gradient(90deg, var(--gold), #e8a84c);
-    transition: width 0.5s ease;
-  }
-  .progress-meta {
-    display: flex; justify-content: space-between;
-    font-size: 0.63rem; color: #94a3b8; margin-bottom: 3px;
-  }
-
-  /* Bar breakdown */
-  .bars-panel { display: flex; flex-direction: column; gap: 0.45rem; }
-  .bar-row { display: flex; align-items: center; gap: 8px; }
-  .bar-label { font-size: 0.65rem; color: #374151; width: 88px; flex-shrink: 0; line-height: 1.3; }
-  .bar-track { flex: 1; height: 8px; background: var(--light); border-radius: 4px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
-  .bar-score { font-size: 0.7rem; font-weight: 700; width: 14px; text-align: right; }
-
-  /* Legend strip */
-  .legend-strip {
-    background: white;
-    border-radius: 12px;
-    padding: 1.1rem 1.25rem;
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    margin-top: 1rem;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.75rem;
-  }
-  .legend-cell { text-align: center; }
-  .legend-num {
-    width: 34px; height: 34px;
-    border-radius: 50%;
-    color: white;
-    font-weight: 700;
-    font-size: 0.95rem;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 0.4rem;
-  }
-  .legend-name { font-size: 0.7rem; font-weight: 700; color: #374151; margin-bottom: 2px; }
-  .legend-desc-text { font-size: 0.58rem; color: var(--muted); line-height: 1.35; }
-
-  /* ── ACTIONS ── */
-  .actions {
-    display: flex; gap: 0.75rem; flex-wrap: wrap;
-    margin-top: 1.25rem; align-items: center;
-  }
-  .btn {
-    padding: 0.6rem 1.3rem;
-    border-radius: 8px;
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-    display: flex; align-items: center; gap: 0.4rem;
-  }
-  .btn-primary {
-    background: var(--crimson);
-    color: white;
-  }
-  .btn-primary:hover { background: #6e1421; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(139,26,43,0.3); }
-  .btn-secondary {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-  .btn-secondary:hover { border-color: var(--crimson); color: var(--crimson); }
-
-  /* ── PRINT STYLES ── */
-  @media print {
-    body { background: white !important; }
-    .no-print { display: none !important; }
-    .site-header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-    .domain-card { opacity: 1 !important; transform: none !important; page-break-inside: avoid; }
-    .summary-panel { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-    .panel { page-break-inside: avoid; }
-    @page { size: A4 portrait; margin: 12mm 10mm; }
-    .main { padding: 0.5rem; }
-    .btn { display: none; }
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0f1e;color:#e8eaf0;min-height:100vh}
+input,select,textarea{background:#1a2236;border:1px solid #233050;color:#e8eaf0;border-radius:8px;padding:10px 14px;font-size:14px;width:100%;outline:none;transition:border .2s;font-family:inherit}
+input:focus,select:focus,textarea:focus{border-color:#00b8a9}
+button{cursor:pointer;font-family:inherit;transition:all .15s}
+.btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;border:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:#00b8a9;color:#0a0f1e}.btn-primary:hover:not(:disabled){background:#00d4c4}
+.btn-outline{background:transparent;border:1px solid #233050;color:#e8eaf0}.btn-outline:hover:not(:disabled){border-color:#00b8a9;color:#00b8a9}
+.btn-danger{background:#ef4444;color:#fff}.btn-danger:hover:not(:disabled){background:#dc2626}
+.btn-gold{background:#f0a500;color:#0a0f1e}.btn-gold:hover:not(:disabled){background:#f5b830}
+.btn-sm{padding:6px 12px;font-size:13px}.btn-xs{padding:4px 10px;font-size:12px;border-radius:6px}
+.card{background:#111827;border:1px solid #233050;border-radius:12px;padding:24px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.badge-success{background:#052e16;color:#4ade80;border:1px solid #166534}
+.badge-warn{background:#2d1d0a;color:#fbbf24;border:1px solid #92400e}
+.badge-gray{background:#1e293b;color:#94a3b8;border:1px solid #334155}
+.badge-info{background:#0c1a2e;color:#60a5fa;border:1px solid #1e3a5f}
+.tab-bar{display:flex;gap:4px;background:#111827;padding:4px;border-radius:10px;margin-bottom:24px}
+.tab{padding:8px 16px;border-radius:8px;font-size:14px;font-weight:500;border:none;background:transparent;color:#94a3b8;cursor:pointer;transition:all .15s}
+.tab.active{background:#1a2236;color:#00b8a9}
+label{font-size:13px;color:#94a3b8;display:block;margin-bottom:6px}
+.form-row{margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
+.scroll{max-height:440px;overflow-y:auto;padding-right:4px}
+.scroll::-webkit-scrollbar{width:4px}
+.scroll::-webkit-scrollbar-track{background:#111827}
+.scroll::-webkit-scrollbar-thumb{background:#233050;border-radius:4px}
+.spinner{width:20px;height:20px;border:2px solid #233050;border-top-color:#00b8a9;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px}
+.alert-err{background:#2a0a0a;border:1px solid #7f1d1d;color:#fca5a5}
+.alert-ok{background:#0d3026;border:1px solid #166534;color:#4ade80}
+.alert-info{background:#0c1a2e;border:1px solid #1e3a5f;color:#93c5fd}
+.mono{font-family:'Courier New',monospace;letter-spacing:2px}
 </style>
 </head>
 <body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
 
-<!-- HEADER -->
-<header class="site-header">
-  <div class="header-inner">
+/* ═══ FIREBASE LAYER ═══ */
+let db = null;
+function initFirebase(cfg) {
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    db = firebase.firestore();
+    return true;
+  } catch(e) { console.error(e); return false; }
+}
+const FS = {
+  async getDoc(col,id){ const d=await db.collection(col).doc(id).get(); return d.exists?{id:d.id,...d.data()}:null; },
+  async setDoc(col,id,data){ return db.collection(col).doc(id).set(data,{merge:true}); },
+  onDoc(col,id,cb){ return db.collection(col).doc(id).onSnapshot(s=>cb(s.exists?{id:s.id,...s.data()}:null)); },
+  onCol(col,cb){ return db.collection(col).onSnapshot(s=>cb(s.docs.map(d=>({id:d.id,...d.data()})))); },
+  async addDoc(col,data){ return db.collection(col).add(data); },
+  async updateDoc(col,id,data){ return db.collection(col).doc(id).update(data); },
+  async deleteDoc(col,id){ return db.collection(col).doc(id).delete(); },
+  async batchVotes(voteDocs,voterId){
+    const batch=db.batch();
+    voteDocs.forEach(v=>batch.set(db.collection('votes').doc(),v));
+    batch.update(db.collection('voters').doc(voterId),{hasVoted:true});
+    return batch.commit();
+  },
+  async clearVotes(){
+    const snap=await db.collection('votes').get();
+    const batch=db.batch();
+    snap.docs.forEach(d=>batch.delete(d.ref));
+    return batch.commit();
+  },
+  async resetVoterStatus(){
+    const snap=await db.collection('voters').get();
+    const batch=db.batch();
+    snap.docs.forEach(d=>batch.update(d.ref,{hasVoted:false}));
+    return batch.commit();
+  }
+};
+
+/* ═══ DEFAULTS ═══ */
+const DEFAULT_POSITIONS = [
+  {id:'p1',name:'President',          candidates:[{id:'c1a',name:'Candidate A'},{id:'c1b',name:'Candidate B'},{id:'c1c',name:'Candidate C'}]},
+  {id:'p2',name:'Vice President',     candidates:[{id:'c2a',name:'Candidate A'},{id:'c2b',name:'Candidate B'},{id:'c2c',name:'Candidate C'}]},
+  {id:'p3',name:'Secretary',          candidates:[{id:'c3a',name:'Candidate A'},{id:'c3b',name:'Candidate B'},{id:'c3c',name:'Candidate C'}]},
+  {id:'p4',name:'Treasurer',          candidates:[{id:'c4a',name:'Candidate A'},{id:'c4b',name:'Candidate B'},{id:'c4c',name:'Candidate C'}]},
+  {id:'p5',name:'PRO / Communications',candidates:[{id:'c5a',name:'Candidate A'},{id:'c5b',name:'Candidate B'},{id:'c5c',name:'Candidate C'}]},
+  {id:'p6',name:'Social Media Officer',candidates:[{id:'c6a',name:'Candidate A'},{id:'c6b',name:'Candidate B'},{id:'c6c',name:'Candidate C'}]},
+];
+const DEFAULT_CONFIG = {electionTitle:'2026 Elections',adminPassword:'admin2026',isOpen:false};
+
+function genCode(){ return Math.random().toString(36).substring(2,8).toUpperCase(); }
+
+/* ═══ FIREBASE SETUP WIZARD ═══ */
+function FirebaseSetup({onConnected}) {
+  const [step,setStep]=useState(1);
+  const [raw,setRaw]=useState('');
+  const [err,setErr]=useState('');
+  const [busy,setBusy]=useState(false);
+
+  async function connect() {
+    setErr(''); setBusy(true);
+    try {
+      let text = raw.trim()
+        .replace(/^const\s+\w+\s*=\s*/,'').replace(/;$/,'')
+        .replace(/([{,]\s*)(\w+)\s*:/g,'$1"$2":')
+        .replace(/'/g,'"');
+      const cfg = JSON.parse(text);
+      if(!cfg.projectId) throw new Error('Missing projectId — did you paste the full config?');
+      if(!initFirebase(cfg)) throw new Error('Firebase init failed.');
+      await db.collection('_ping').doc('test').get().catch(e=>{ if(e.code!=='permission-denied') throw e; });
+      localStorage.setItem('va-firebase-cfg', JSON.stringify(cfg));
+      onConnected();
+    } catch(e) { setErr(e.message||'Connection failed. Check your config and Firestore rules.'); }
+    setBusy(false);
+  }
+
+  const steps = [
+    { label:'Create Project', content: <>
+      <h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Step 1 — Create a Firebase project</h3>
+      <ol style={{color:'#94a3b8',fontSize:14,lineHeight:2.2,paddingLeft:20}}>
+        <li>Go to <a href="https://console.firebase.google.com" target="_blank" style={{color:'#00b8a9'}}>console.firebase.google.com</a></li>
+        <li>Click <b style={{color:'#e8eaf0'}}>Add project</b> and give it a name</li>
+        <li>Disable Google Analytics (not needed) → Create project</li>
+      </ol>
+    </>},
+    { label:'Enable Firestore', content: <>
+      <h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Step 2 — Enable Firestore</h3>
+      <ol style={{color:'#94a3b8',fontSize:14,lineHeight:2.2,paddingLeft:20}}>
+        <li>In the left sidebar click <b style={{color:'#e8eaf0'}}>Firestore Database</b></li>
+        <li>Click <b style={{color:'#e8eaf0'}}>Create database</b></li>
+        <li>Choose <b style={{color:'#e8eaf0'}}>Start in test mode</b> → pick a region → Enable</li>
+      </ol>
+      <div className="alert alert-info" style={{marginBottom:0,marginTop:12}}>Test mode allows open access for 30 days — enough to run your election.</div>
+    </>},
+    { label:'Get Config', content: <>
+      <h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Step 3 — Copy your app config</h3>
+      <ol style={{color:'#94a3b8',fontSize:14,lineHeight:2.2,paddingLeft:20}}>
+        <li>Go to <b style={{color:'#e8eaf0'}}>Project Settings</b> (gear icon, top-left)</li>
+        <li>Scroll to <b style={{color:'#e8eaf0'}}>Your apps</b> → click the <code style={{color:'#f0a500',background:'#1a2236',padding:'1px 6px',borderRadius:4}}>&lt;/&gt;</code> web icon</li>
+        <li>Register the app (any nickname) → copy the <code style={{color:'#f0a500',background:'#1a2236',padding:'1px 6px',borderRadius:4}}>firebaseConfig</code> object</li>
+      </ol>
+    </>},
+    { label:'Connect', content: <>
+      <h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Step 4 — Paste config &amp; connect</h3>
+      <div className="form-row">
+        <label>Paste your firebaseConfig object</label>
+        <textarea value={raw} onChange={e=>{setRaw(e.target.value);setErr('');}} rows={8}
+          style={{fontFamily:'monospace',fontSize:12,resize:'none'}}
+          placeholder={'{\n  apiKey: "AIzaSy...",\n  authDomain: "my-app.firebaseapp.com",\n  projectId: "my-app",\n  storageBucket: "my-app.appspot.com",\n  messagingSenderId: "123456",\n  appId: "1:123456:web:abc123"\n}'} />
+      </div>
+      {err && <div className="alert alert-err">{err}</div>}
+      <button className="btn btn-primary" style={{width:'100%',padding:13}} onClick={connect} disabled={busy||!raw.trim()}>
+        {busy?<><span className="spinner"/>Connecting…</>:'Connect & Launch App'}
+      </button>
+    </>}
+  ];
+
+  return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{width:'100%',maxWidth:520}}>
+        <div style={{textAlign:'center',marginBottom:28}}>
+          <div style={{fontSize:12,letterSpacing:'2px',color:'#00b8a9',fontWeight:600,textTransform:'uppercase',marginBottom:8}}>First-Time Setup</div>
+          <h1 style={{fontSize:26,fontWeight:700,marginBottom:8}}>Connect to Firebase</h1>
+          <p style={{color:'#64748b',fontSize:14}}>Firebase stores all data in the cloud so admin and voters share real-time data across any device.</p>
+        </div>
+
+        <div style={{display:'flex',gap:0,marginBottom:20,borderRadius:10,overflow:'hidden',border:'1px solid #233050'}}>
+          {steps.map((s,i)=>(
+            <div key={i} onClick={()=>setStep(i+1)} style={{flex:1,padding:'10px 4px',textAlign:'center',fontSize:11,fontWeight:500,cursor:'pointer',background:step===i+1?'#1a2236':'#111827',color:step===i+1?'#00b8a9':'#64748b',borderRight:i<3?'1px solid #233050':'none',transition:'all .15s'}}>
+              <div style={{fontSize:15,marginBottom:2}}>{['①','②','③','④'][i]}</div>
+              {s.label}
+            </div>
+          ))}
+        </div>
+
+        <div className="card" style={{marginBottom:14}}>{steps[step-1].content}</div>
+
+        <div style={{display:'flex',justifyContent:'space-between'}}>
+          <button className="btn btn-outline btn-sm" onClick={()=>setStep(Math.max(1,step-1))} disabled={step===1}>← Back</button>
+          {step<4 && <button className="btn btn-sm" style={{background:'#1a2236',border:'1px solid #233050',color:'#94a3b8'}} onClick={()=>setStep(step+1)}>Next →</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ HOME SCREEN ═══ */
+function HomeScreen({onAdmin,onVoter,electionTitle,isOpen}) {
+  return (
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{textAlign:'center',maxWidth:480,width:'100%'}}>
+        <div style={{marginBottom:8,fontSize:12,letterSpacing:'2px',color:'#00b8a9',fontWeight:600,textTransform:'uppercase'}}>Secure Voting System</div>
+        <h1 style={{fontSize:'clamp(26px,5vw,42px)',fontWeight:700,color:'#fff',marginBottom:8,lineHeight:1.2}}>{electionTitle}</h1>
+        <p style={{color:'#64748b',marginBottom:12,fontSize:15}}>Anonymous. Fair. Transparent.</p>
+        <div style={{marginBottom:32}}><span className={`badge ${isOpen?'badge-success':'badge-warn'}`}>{isOpen?'Voting is Open':'Voting is Closed'}</span></div>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <button className="btn btn-gold" style={{padding:16,fontSize:17,borderRadius:12,fontWeight:600}} onClick={onVoter}>Cast Your Vote →</button>
+          <button className="btn btn-outline" style={{padding:14,fontSize:15,borderRadius:12}} onClick={onAdmin}>Admin Portal</button>
+        </div>
+      </div>
+      <div style={{position:'fixed',bottom:20,color:'#334155',fontSize:12}}>Your identity is never linked to your choices</div>
+    </div>
+  );
+}
+
+/* ═══ ADMIN LOGIN ═══ */
+function AdminLogin({config,onLogin,onBack}) {
+  const [pw,setPw]=useState('');
+  const [err,setErr]=useState('');
+  function attempt(){ pw===config.adminPassword ? onLogin() : setErr('Incorrect password.'); }
+  return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div className="card" style={{width:'100%',maxWidth:360}}>
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:12,color:'#00b8a9',letterSpacing:'2px',fontWeight:600,textTransform:'uppercase',marginBottom:6}}>Admin Access</div>
+          <h2 style={{fontSize:22,fontWeight:600}}>Administration Portal</h2>
+        </div>
+        <div className="form-row">
+          <label>Password</label>
+          <input type="password" value={pw} onChange={e=>{setPw(e.target.value);setErr('');}} onKeyDown={e=>e.key==='Enter'&&attempt()} placeholder="Enter admin password" autoFocus />
+        </div>
+        {err && <div className="alert alert-err">{err}</div>}
+        <div style={{display:'flex',gap:10}}>
+          <button className="btn btn-outline" style={{flex:1}} onClick={onBack}>← Back</button>
+          <button className="btn btn-primary" style={{flex:2,padding:12}} onClick={attempt}>Sign In</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ ADMIN DASHBOARD ═══ */
+function AdminDashboard({positions,setPositions,voters,votes,config,setConfig,onLogout}) {
+  const [tab,setTab]=useState('voters');
+  const voted=voters.filter(v=>v.hasVoted).length;
+  return (
+    <div style={{maxWidth:920,margin:'0 auto',padding:'24px 20px'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:28,flexWrap:'wrap',gap:12}}>
+        <div>
+          <div style={{fontSize:12,color:'#00b8a9',letterSpacing:'2px',fontWeight:600,textTransform:'uppercase',marginBottom:4}}>Administration</div>
+          <h1 style={{fontSize:24,fontWeight:700}}>{config.electionTitle}</h1>
+        </div>
+        <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+          <span className={`badge ${config.isOpen?'badge-success':'badge-warn'}`}>{config.isOpen?'Voting Open':'Voting Closed'}</span>
+          <span className="badge badge-info">{voted} / {voters.length} voted</span>
+          <button className="btn btn-outline btn-sm" onClick={onLogout}>Sign Out</button>
+        </div>
+      </div>
+      <div className="tab-bar">
+        {[['voters','Voters'],['results','Results'],['setup','Setup']].map(([k,l])=>(
+          <button key={k} className={`tab${tab===k?' active':''}`} onClick={()=>setTab(k)}>{l}</button>
+        ))}
+      </div>
+      {tab==='voters'  && <VoterManagement voters={voters} />}
+      {tab==='results' && <ResultsView positions={positions} votes={votes} voters={voters} config={config} setConfig={setConfig} />}
+      {tab==='setup'   && <SetupTab positions={positions} setPositions={setPositions} config={config} setConfig={setConfig} />}
+    </div>
+  );
+}
+
+/* ═══ VOTER MANAGEMENT ═══ */
+function VoterManagement({voters}) {
+  const [name,setName]=useState('');
+  const [bulk,setBulk]=useState('');
+  const [lastCode,setLastCode]=useState(null);
+  const [search,setSearch]=useState('');
+  const [busy,setBusy]=useState(false);
+
+  async function addOne() {
+    if(!name.trim()) return;
+    setBusy(true);
+    const code=genCode();
+    await FS.addDoc('voters',{name:name.trim(),code,approved:true,hasVoted:false});
+    setLastCode({name:name.trim(),code}); setName(''); setBusy(false);
+  }
+  async function bulkAdd() {
+    const names=bulk.split('\n').map(n=>n.trim()).filter(Boolean);
+    if(!names.length) return;
+    setBusy(true);
+    for(const n of names) await FS.addDoc('voters',{name:n,code:genCode(),approved:true,hasVoted:false});
+    setBulk(''); setBusy(false);
+  }
+  async function remove(id){ if(!confirm('Remove this voter?')) return; await FS.deleteDoc('voters',id); }
+  async function toggle(v){ await FS.updateDoc('voters',v.id,{approved:!v.approved}); }
+
+  const filtered=voters.filter(v=>v.name.toLowerCase().includes(search.toLowerCase())||v.code.includes(search.toUpperCase()));
+  const stats={total:voters.length,approved:voters.filter(v=>v.approved).length,voted:voters.filter(v=>v.hasVoted).length};
+
+  return (
     <div>
-      <div class="header-eyebrow">
-        <div class="header-bar"></div>
-        <span class="header-tag">Assessment Framework</span>
-      </div>
-      <h1>TVET Institutional Scorecard</h1>
-      <p class="header-sub">Rate each domain — 1 (Supply-Oriented) to 5 (Systems-Embedded)</p>
-    </div>
-    <div class="meta-fields no-print">
-      <input class="meta-input" id="assessorName" placeholder="Assessor name" />
-      <input class="meta-input" id="orgName" placeholder="Organisation" />
-    </div>
-  </div>
-</header>
-
-<!-- MAIN -->
-<main class="main">
-
-  <!-- DOMAIN CARDS -->
-  <div class="grid-cards" id="cardGrid"></div>
-
-  <!-- BOTTOM: Radar + Summary + Bars -->
-  <div class="bottom-grid">
-
-    <!-- Radar -->
-    <div class="panel">
-      <div class="panel-label">Domain Profile</div>
-      <div class="radar-wrap">
-        <svg id="radar" viewBox="0 0 300 300" width="260" height="260"></svg>
-      </div>
-      <div class="radar-legend" id="radarLegend"></div>
-    </div>
-
-    <!-- Right column -->
-    <div style="display:flex;flex-direction:column;gap:0.85rem;">
-
-      <!-- Overall score -->
-      <div class="summary-panel" id="summaryPanel">
-        <div class="panel-label" style="color:#94a3b8;">Overall Score</div>
-        <div class="overall-score" id="avgScore">—<span>/5</span></div>
-        <div class="overall-level" id="overallLevel" style="color:var(--gold);">Rate all domains to see your level</div>
-        <div>
-          <div class="progress-meta">
-            <span id="totalFraction">0 / 40</span>
-            <span id="pctLabel">0%</span>
+      <div className="grid3" style={{marginBottom:20}}>
+        {[['Total Voters',stats.total,'#00b8a9'],['Approved',stats.approved,'#22c55e'],['Votes Cast',stats.voted,'#f0a500']].map(([l,v,c])=>(
+          <div key={l} className="card" style={{padding:'14px 18px',textAlign:'center'}}>
+            <div style={{fontSize:28,fontWeight:700,color:c}}>{v}</div>
+            <div style={{fontSize:12,color:'#64748b',marginTop:2}}>{l}</div>
           </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        ))}
+      </div>
+      <div className="grid2" style={{marginBottom:20}}>
+        <div className="card">
+          <h3 style={{fontSize:15,fontWeight:600,marginBottom:14}}>Add Single Voter</h3>
+          <div className="form-row">
+            <label>Full Name</label>
+            <input value={name} onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addOne()} placeholder="Voter's full name" />
           </div>
+          <button className="btn btn-primary" style={{width:'100%'}} onClick={addOne} disabled={busy||!name.trim()}>
+            {busy?<span className="spinner"/>:'Add & Generate Code'}
+          </button>
+          {lastCode && (
+            <div className="alert alert-ok" style={{marginTop:14,marginBottom:0}}>
+              <div style={{fontSize:12,marginBottom:4}}>{lastCode.name} — share this code:</div>
+              <div className="mono" style={{fontSize:22,fontWeight:700}}>{lastCode.code}</div>
+            </div>
+          )}
         </div>
-        <div style="font-size:0.63rem;color:#475569;" id="ratedCount">0 / 8 domains rated</div>
+        <div className="card">
+          <h3 style={{fontSize:15,fontWeight:600,marginBottom:14}}>Bulk Add (one name per line)</h3>
+          <textarea value={bulk} onChange={e=>setBulk(e.target.value)} placeholder={"John Smith\nJane Doe\nAlex Johnson"} rows={4} style={{resize:'none'}} />
+          <button className="btn btn-outline" style={{width:'100%',marginTop:10}} onClick={bulkAdd} disabled={busy||!bulk.trim()}>
+            {busy?<span className="spinner"/>:'Add All Voters'}
+          </button>
+        </div>
       </div>
-
-      <!-- Bar breakdown -->
-      <div class="panel">
-        <div class="panel-label">Domain Breakdown</div>
-        <div class="bars-panel" id="barsPanel"></div>
+      <div className="card">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,gap:12,flexWrap:'wrap'}}>
+          <h3 style={{fontSize:15,fontWeight:600}}>Registry ({filtered.length})</h3>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or code…" style={{width:210}} />
+        </div>
+        <div className="scroll">
+          {filtered.length===0 && <div style={{color:'#64748b',textAlign:'center',padding:'30px 0'}}>{voters.length===0?'No voters yet.':'No results.'}</div>}
+          {filtered.map(v=>(
+            <div key={v.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid #1a2236'}}>
+              <div style={{width:34,height:34,borderRadius:'50%',background:'#1a2236',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:600,color:'#94a3b8',flexShrink:0}}>
+                {v.name.charAt(0).toUpperCase()}
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontWeight:500,fontSize:14,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{v.name}</div>
+                <div className="mono" style={{fontSize:12,color:'#64748b'}}>{v.code}</div>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0,flexWrap:'wrap',justifyContent:'flex-end'}}>
+                <span className={`badge ${v.hasVoted?'badge-success':'badge-gray'}`}>{v.hasVoted?'Voted':'Pending'}</span>
+                <span className={`badge ${v.approved?'badge-success':'badge-warn'}`}>{v.approved?'Approved':'Blocked'}</span>
+                <button className="btn btn-xs btn-outline" onClick={()=>toggle(v)}>{v.approved?'Block':'Approve'}</button>
+                <button className="btn btn-xs btn-danger" onClick={()=>remove(v.id)}>✕</button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-
     </div>
-  </div>
-
-  <!-- Scoring Scale -->
-  <div class="legend-strip">
-    <!-- filled by JS -->
-  </div>
-
-  <!-- Actions -->
-  <div class="actions no-print">
-    <button class="btn btn-primary" onclick="window.print()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      Export PDF
-    </button>
-    <button class="btn btn-secondary" onclick="resetScores()">Reset scores</button>
-  </div>
-
-</main>
-
-<script>
-const DOMAINS = [
-  { id:"market_assessment",       label:"Market Assessment",       short:"Market",      color:"#8B1A2B", bg:"#fdf0f2", category:"Strategic & Operational Planning" },
-  { id:"curriculum_design",       label:"Curriculum Design",       short:"Curr. Design",color:"#C17F24", bg:"#fdf6ec", category:"Curriculum & Training" },
-  { id:"curriculum_delivery",     label:"Curriculum Delivery",     short:"Delivery",    color:"#C17F24", bg:"#fdf6ec", category:"Curriculum & Training" },
-  { id:"work_based_learning",     label:"Work-Based Learning",     short:"WBL",         color:"#C17F24", bg:"#fdf6ec", category:"Curriculum & Training" },
-  { id:"management",              label:"Management",              short:"Management",  color:"#2E6B5E", bg:"#edf5f3", category:"Stakeholder Management" },
-  { id:"monitoring_evaluation",   label:"Monitoring & Evaluation", short:"M&E",         color:"#2E6B5E", bg:"#edf5f3", category:"Stakeholder Management" },
-  { id:"financial_sustainability",label:"Financial Sustainability",short:"Finance",     color:"#1E4060", bg:"#eef3f8", category:"Institutional Capacity" },
-  { id:"governance",              label:"Governance",              short:"Governance",  color:"#1E4060", bg:"#eef3f8", category:"Institutional Capacity" },
-];
-
-const LEVELS = [
-  { v:1, label:"Supply-Oriented",   desc:"Indifferent to market; basic provision only", bgColor:"#c0392b" },
-  { v:2, label:"Demand-Responsive", desc:"Actively uses market feedback to adapt",       bgColor:"#d35400" },
-  { v:3, label:"TVET-Led",          desc:"Public & private TVETs actively engaged",      bgColor:"#C17F24" },
-  { v:4, label:"Employer-Engaged",  desc:"Employers drive co-design of programmes",      bgColor:"#2E6B5E" },
-  { v:5, label:"Systems-Embedded",  desc:"Government & full ecosystem fully aligned",    bgColor:"#1E4060" },
-];
-
-const OVERALL_LABELS = [
-  { min:4.5, label:"Systems-Embedded",   color:"#1E4060" },
-  { min:3.5, label:"Employer-Engaged",   color:"#2E6B5E" },
-  { min:2.5, label:"TVET-Led",           color:"#C17F24" },
-  { min:1.5, label:"Demand-Responsive",  color:"#d35400" },
-  { min:0,   label:"Supply-Oriented",    color:"#8B1A2B" },
-];
-
-let scores = {};
-
-// ── Build cards ──────────────────────────────────────────────────────────────
-function buildCards() {
-  const grid = document.getElementById('cardGrid');
-  DOMAINS.forEach((d, di) => {
-    const card = document.createElement('div');
-    card.className = 'domain-card';
-    card.id = 'card-' + d.id;
-    card.style.animationDelay = (di * 0.07) + 's';
-    card.innerHTML = `
-      <div class="card-head" id="head-${d.id}" style="background:${d.bg}; border-bottom-color:${d.color}">
-        <div>
-          <div class="card-category" style="color:${d.color}">${d.category}</div>
-          <div class="card-title">${d.label}</div>
-        </div>
-        <div class="score-badge" id="badge-${d.id}">—</div>
-      </div>
-      <div class="card-body">
-        <div class="level-buttons" id="btns-${d.id}">
-          ${LEVELS.map(l => `
-            <button class="lvl-btn" id="btn-${d.id}-${l.v}"
-              style="color:${d.color}"
-              onmouseenter="showDesc('${d.id}',${l.v},'${d.color}')"
-              onmouseleave="restoreDesc('${d.id}')"
-              onclick="setScore('${d.id}',${l.v},'${d.color}','${d.bg}')"
-            >${l.v}</button>
-          `).join('')}
-        </div>
-        <div class="level-desc" id="desc-${d.id}">
-          <span style="color:${d.color};font-weight:600">Click a number to score</span>
-        </div>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
+  );
 }
 
-function showDesc(domainId, val, color) {
-  const lvl = LEVELS.find(l => l.v === val);
-  const el = document.getElementById('desc-' + domainId);
-  el.innerHTML = `<strong style="color:${color}">${lvl.label}:</strong> ${lvl.desc}`;
-}
-
-function restoreDesc(domainId) {
-  if (scores[domainId]) {
-    const d = DOMAINS.find(x => x.id === domainId);
-    showDesc(domainId, scores[domainId], d.color);
-  } else {
-    const d = DOMAINS.find(x => x.id === domainId);
-    document.getElementById('desc-' + domainId).innerHTML =
-      `<span style="color:${d.color};font-weight:600">Click a number to score</span>`;
+/* ═══ RESULTS ═══ */
+function ResultsView({positions,votes,voters,config,setConfig}) {
+  const [busy,setBusy]=useState(false);
+  async function toggleElection(){
+    setBusy(true);
+    const nc={...config,isOpen:!config.isOpen};
+    await FS.setDoc('config','settings',nc); setConfig(nc); setBusy(false);
   }
+  async function clearAll(){
+    if(!confirm('Clear ALL votes and reset voter statuses? Cannot be undone.')) return;
+    setBusy(true); await FS.clearVotes(); await FS.resetVoterStatus(); setBusy(false);
+  }
+  const votedCount=voters.filter(v=>v.hasVoted).length;
+  const turnout=voters.length?Math.round((votedCount/voters.length)*100):0;
+  return (
+    <div>
+      <div style={{display:'flex',gap:12,marginBottom:24,flexWrap:'wrap',alignItems:'center'}}>
+        {[['Turnout',`${turnout}%`,'#f0a500'],['Votes Cast',votedCount,'#00b8a9'],['Total Voters',voters.length,'#94a3b8']].map(([l,v,c])=>(
+          <div key={l} className="card" style={{flex:'1 1 110px',padding:'14px 18px',textAlign:'center'}}>
+            <div style={{fontSize:26,fontWeight:700,color:c}}>{v}</div>
+            <div style={{fontSize:12,color:'#64748b',marginTop:2}}>{l}</div>
+          </div>
+        ))}
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          <button className={`btn btn-sm ${config.isOpen?'btn-danger':'btn-primary'}`} onClick={toggleElection} disabled={busy}>
+            {config.isOpen?'Close Voting':'Open Voting'}
+          </button>
+          <button className="btn btn-outline btn-sm" onClick={clearAll} disabled={busy}>Clear All Votes</button>
+        </div>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:14}}>
+        {positions.map(pos=>{
+          const pv=votes.filter(v=>v.positionId===pos.id);
+          const total=pv.length;
+          const counts=pos.candidates.map(c=>({...c,count:pv.filter(v=>v.candidateId===c.id).length}));
+          const maxC=Math.max(...counts.map(c=>c.count),0);
+          return (
+            <div key={pos.id} className="card">
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+                <h3 style={{fontSize:15,fontWeight:600}}>{pos.name}</h3>
+                <span style={{fontSize:13,color:'#64748b'}}>{total} vote{total!==1?'s':''}</span>
+              </div>
+              {counts.map(c=>{
+                const pct=total?Math.round((c.count/total)*100):0;
+                const lead=c.count===maxC&&c.count>0;
+                return (
+                  <div key={c.id} style={{marginBottom:10}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                      <span style={{fontSize:14,color:lead?'#f0a500':'#e8eaf0',fontWeight:lead?600:400}}>{c.name}{lead?' ★':''}</span>
+                      <span style={{fontSize:13,color:'#94a3b8'}}>{c.count} ({pct}%)</span>
+                    </div>
+                    <div style={{height:8,background:'#1a2236',borderRadius:4,overflow:'hidden'}}>
+                      <div style={{height:'100%',width:`${pct}%`,background:lead?'#f0a500':'#00b8a9',borderRadius:4,transition:'width .5s ease'}} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
-function setScore(domainId, val, color, bg) {
-  scores[domainId] = val;
-  const d = DOMAINS.find(x => x.id === domainId);
+/* ═══ SETUP TAB ═══ */
+function SetupTab({positions,setPositions,config,setConfig}) {
+  const [local,setLocal]=useState(positions.map(p=>({...p,candidates:p.candidates.map(c=>({...c}))})));
+  const [title,setTitle]=useState(config.electionTitle);
+  const [pw,setPw]=useState('');
+  const [saved,setSaved]=useState(false);
+  const [busy,setBusy]=useState(false);
 
-  // Badge
-  const badge = document.getElementById('badge-' + domainId);
-  badge.textContent = val;
-  badge.style.background = color;
-  badge.style.color = 'white';
+  function updName(pi,v){setLocal(l=>l.map((p,i)=>i===pi?{...p,name:v}:p));}
+  function updCand(pi,ci,v){setLocal(l=>l.map((p,i)=>i===pi?{...p,candidates:p.candidates.map((c,j)=>j===ci?{...c,name:v}:c)}:p));}
 
-  // Card border highlight
-  const card = document.getElementById('card-' + domainId);
-  card.style.borderColor = color + '55';
-  card.style.boxShadow = `0 3px 14px ${color}22`;
+  async function saveAll(){
+    setBusy(true);
+    const nc={...config,electionTitle:title,...(pw?{adminPassword:pw}:{})};
+    await FS.setDoc('config','settings',nc);
+    await FS.setDoc('positions','data',{positions:local});
+    setConfig(nc); setPositions(local);
+    setPw(''); setSaved(true); setTimeout(()=>setSaved(false),2500); setBusy(false);
+  }
 
-  // Button states
-  LEVELS.forEach(l => {
-    const btn = document.getElementById(`btn-${domainId}-${l.v}`);
-    if (l.v === val) {
-      btn.classList.add('active');
-      btn.style.background = color;
-      btn.style.color = 'white';
-    } else if (l.v < val) {
-      btn.classList.remove('active');
-      btn.style.background = color + '25';
-      btn.style.color = color;
-    } else {
-      btn.classList.remove('active');
-      btn.style.background = '#f1f5f9';
-      btn.style.color = color;
+  return (
+    <div>
+      <div className="card" style={{marginBottom:18}}>
+        <h3 style={{fontSize:15,fontWeight:600,marginBottom:14}}>Election Settings</h3>
+        <div className="grid2">
+          <div className="form-row" style={{marginBottom:0}}>
+            <label>Election Title</label>
+            <input value={title} onChange={e=>setTitle(e.target.value)} />
+          </div>
+          <div className="form-row" style={{marginBottom:0}}>
+            <label>Change Admin Password</label>
+            <input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Leave blank to keep current" />
+          </div>
+        </div>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:18}}>
+        {local.map((pos,pi)=>(
+          <div key={pos.id} className="card">
+            <div className="form-row">
+              <label style={{fontSize:11,color:'#00b8a9',letterSpacing:'1px',textTransform:'uppercase'}}>Position {pi+1}</label>
+              <input value={pos.name} onChange={e=>updName(pi,e.target.value)} />
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+              {pos.candidates.map((c,ci)=>(
+                <div key={c.id}>
+                  <label>Candidate {ci+1}</label>
+                  <input value={c.name} onChange={e=>updCand(pi,ci,e.target.value)} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+        <button className="btn btn-primary" style={{padding:'12px 32px'}} onClick={saveAll} disabled={busy}>
+          {busy?<span className="spinner"/>:saved?'✓ Saved!':'Save All Changes'}
+        </button>
+        <button className="btn btn-outline btn-sm" onClick={()=>{if(confirm('Disconnect Firebase? (Data stays in Firestore)')){localStorage.removeItem('va-firebase-cfg');window.location.reload();}}}>
+          Disconnect Firebase
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ VOTER PORTAL ═══ */
+function VoterPortal({positions,config,onBack}) {
+  const [phase,setPhase]=useState('code');
+  const [codeInput,setCodeInput]=useState('');
+  const [err,setErr]=useState('');
+  const [voter,setVoter]=useState(null);
+  const [selections,setSelections]=useState({});
+  const [submitting,setSubmitting]=useState(false);
+
+  async function verifyCode(){
+    setErr('');
+    if(!config.isOpen){setErr('Voting is currently closed.');return;}
+    const snap=await db.collection('voters').where('code','==',codeInput.trim().toUpperCase()).limit(1).get();
+    if(snap.empty){setErr('Invalid voter code. Please check with the administrator.');return;}
+    const v={id:snap.docs[0].id,...snap.docs[0].data()};
+    if(!v.approved){setErr('Your access has been blocked. Contact the administrator.');return;}
+    if(v.hasVoted){setErr('This code has already been used to vote.');return;}
+    setVoter(v); setPhase('ballot');
+  }
+
+  async function submitVotes(){
+    const missing=positions.filter(p=>!selections[p.id]);
+    if(missing.length){alert(`Please select a candidate for: ${missing.map(p=>p.name).join(', ')}`);return;}
+    setSubmitting(true);
+    await FS.batchVotes(positions.map(p=>({positionId:p.id,candidateId:selections[p.id]})), voter.id);
+    setPhase('done'); setSubmitting(false);
+  }
+
+  if(phase==='code') return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{width:'100%',maxWidth:400}}>
+        <button onClick={onBack} style={{background:'none',border:'none',color:'#64748b',cursor:'pointer',fontSize:13,marginBottom:20,display:'flex',alignItems:'center',gap:6}}>← Back</button>
+        <div className="card">
+          <div style={{marginBottom:20}}>
+            <div style={{fontSize:12,color:'#f0a500',letterSpacing:'2px',fontWeight:600,textTransform:'uppercase',marginBottom:6}}>Voter Access</div>
+            <h2 style={{fontSize:22,fontWeight:700}}>{config.electionTitle}</h2>
+            <p style={{fontSize:13,color:'#64748b',marginTop:6}}>Enter your unique voter code to access the ballot.</p>
+          </div>
+          {!config.isOpen&&<div className="alert" style={{background:'#2d1d0a',border:'1px solid #92400e',color:'#fbbf24',marginBottom:14}}>Voting is currently closed.</div>}
+          <div className="form-row">
+            <label>Your Voter Code</label>
+            <input value={codeInput} onChange={e=>{setCodeInput(e.target.value.toUpperCase());setErr('');}} onKeyDown={e=>e.key==='Enter'&&verifyCode()} placeholder="e.g. AB12CD" className="mono" style={{fontSize:22,textAlign:'center',fontWeight:700}} maxLength={6} autoFocus />
+          </div>
+          {err&&<div className="alert alert-err">{err}</div>}
+          <button className="btn btn-gold" style={{width:'100%',padding:13,fontSize:15,fontWeight:600}} onClick={verifyCode} disabled={!config.isOpen||!codeInput.trim()}>
+            Access Ballot
+          </button>
+          <p style={{textAlign:'center',fontSize:12,color:'#334155',marginTop:16}}>Your vote is completely anonymous.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  if(phase==='ballot'){
+    const done=positions.filter(p=>selections[p.id]).length;
+    return (
+      <div style={{maxWidth:660,margin:'0 auto',padding:'24px 20px'}}>
+        <div style={{marginBottom:22}}>
+          <div style={{fontSize:12,color:'#f0a500',letterSpacing:'2px',fontWeight:600,textTransform:'uppercase',marginBottom:6}}>Official Ballot</div>
+          <h1 style={{fontSize:22,fontWeight:700}}>{config.electionTitle}</h1>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginTop:10}}>
+            <div style={{height:6,background:'#1a2236',borderRadius:3,flex:1}}>
+              <div style={{height:'100%',background:'#f0a500',borderRadius:3,width:`${(done/positions.length)*100}%`,transition:'width .3s'}} />
+            </div>
+            <span style={{fontSize:13,color:'#64748b',flexShrink:0}}>{done}/{positions.length} selected</span>
+          </div>
+        </div>
+        {positions.map((pos,i)=>(
+          <div key={pos.id} className="card" style={{marginBottom:12,borderColor:selections[pos.id]?'#00b8a9':'#233050',transition:'border-color .2s'}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12}}>
+              <div style={{width:24,height:24,borderRadius:'50%',background:selections[pos.id]?'#00b8a9':'#1a2236',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:selections[pos.id]?'#0a0f1e':'#64748b',flexShrink:0,transition:'all .2s'}}>{i+1}</div>
+              <h3 style={{fontSize:15,fontWeight:600}}>{pos.name}</h3>
+              {selections[pos.id]&&<span style={{fontSize:12,color:'#00b8a9',marginLeft:'auto'}}>✓ Selected</span>}
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {pos.candidates.map(c=>{
+                const chosen=selections[pos.id]===c.id;
+                return (
+                  <div key={c.id} onClick={()=>setSelections(s=>({...s,[pos.id]:c.id}))}
+                    style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',borderRadius:8,border:`1px solid ${chosen?'#00b8a9':'#233050'}`,background:chosen?'#0d2626':'#1a2236',cursor:'pointer',transition:'all .15s',userSelect:'none'}}
+                  >
+                    <div style={{width:18,height:18,borderRadius:'50%',border:`2px solid ${chosen?'#00b8a9':'#334155'}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                      {chosen&&<div style={{width:8,height:8,borderRadius:'50%',background:'#00b8a9'}} />}
+                    </div>
+                    <span style={{fontSize:14,color:chosen?'#00d4c4':'#e8eaf0',fontWeight:chosen?500:400}}>{c.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        <div className="card" style={{background:'#0d2015',borderColor:'#166534',textAlign:'center',padding:20,marginTop:4}}>
+          <p style={{fontSize:13,color:'#4ade80',marginBottom:14}}>Once submitted your vote cannot be changed. Your identity is never linked to your choices.</p>
+          <button className="btn btn-gold" style={{padding:'13px 40px',fontSize:15,fontWeight:600}} onClick={submitVotes} disabled={submitting||done<positions.length}>
+            {submitting?<><span className="spinner"/>Submitting…</>:done<positions.length?`${positions.length-done} position(s) remaining`:'Submit My Ballot'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{textAlign:'center',maxWidth:400}}>
+        <div style={{width:72,height:72,borderRadius:'50%',background:'#0d3026',border:'2px solid #166534',display:'flex',alignItems:'center',justifyContent:'center',fontSize:32,margin:'0 auto 20px'}}>✓</div>
+        <h2 style={{fontSize:26,fontWeight:700,color:'#4ade80',marginBottom:8}}>Vote Submitted!</h2>
+        <p style={{color:'#64748b',marginBottom:8}}>Your ballot has been recorded anonymously.</p>
+        <p style={{fontSize:13,color:'#334155',marginBottom:32}}>Your voter code is now deactivated. Thank you for participating.</p>
+        <button className="btn btn-outline" style={{padding:'12px 32px'}} onClick={onBack}>Return to Home</button>
+      </div>
+    </div>
+  );
+}
+
+/* ═══ ROOT ═══ */
+function App() {
+  const [fbReady,setFbReady]=useState(false);
+  const [screen,setScreen]=useState('home');
+  const [adminAuthed,setAdminAuthed]=useState(false);
+  const [loading,setLoading]=useState(true);
+  const [config,setConfig]=useState(DEFAULT_CONFIG);
+  const [positions,setPositions]=useState(DEFAULT_POSITIONS);
+  const [voters,setVoters]=useState([]);
+  const [votes,setVotes]=useState([]);
+  const unsubs=useRef([]);
+
+  useEffect(()=>{
+    const raw=localStorage.getItem('va-firebase-cfg');
+    if(raw){ try{ if(initFirebase(JSON.parse(raw))){ setFbReady(true); return; } }catch(e){} }
+    setLoading(false);
+  },[]);
+
+  useEffect(()=>{
+    if(!fbReady) return;
+    async function seed(){
+      const cfgDoc=await FS.getDoc('config','settings');
+      const posDoc=await FS.getDoc('positions','data');
+      if(!cfgDoc) await FS.setDoc('config','settings',DEFAULT_CONFIG);
+      if(!posDoc) await FS.setDoc('positions','data',{positions:DEFAULT_POSITIONS});
     }
-  });
-
-  showDesc(domainId, val, color);
-  updateSummary();
-  drawRadar();
-}
-
-// ── Summary ──────────────────────────────────────────────────────────────────
-function updateSummary() {
-  const vals = Object.values(scores);
-  const count = vals.length;
-  const total = vals.reduce((a,b) => a+b, 0);
-  const avg = count > 0 ? (total / count) : 0;
-  const maxPossible = DOMAINS.length * 5;
-  const pct = Math.round((total / maxPossible) * 100);
-
-  document.getElementById('avgScore').innerHTML =
-    count > 0 ? `${avg.toFixed(1)}<span>/5</span>` : `—<span>/5</span>`;
-  document.getElementById('ratedCount').textContent = `${count} / ${DOMAINS.length} domains rated`;
-  document.getElementById('totalFraction').textContent = `Total: ${total} / ${maxPossible}`;
-  document.getElementById('pctLabel').textContent = `${pct}%`;
-  document.getElementById('progressFill').style.width = pct + '%';
-
-  const levelEl = document.getElementById('overallLevel');
-  if (count === DOMAINS.length) {
-    const lbl = OVERALL_LABELS.find(l => avg >= l.min);
-    levelEl.textContent = lbl.label;
-    levelEl.style.color = lbl.color === '#1E4060' ? '#7cb4d9' : lbl.color;
-  } else {
-    levelEl.textContent = `Rate all domains to see overall level`;
-    levelEl.style.color = 'var(--gold)';
-  }
-
-  updateBars();
-}
-
-function updateBars() {
-  const panel = document.getElementById('barsPanel');
-  panel.innerHTML = '';
-  DOMAINS.forEach(d => {
-    const s = scores[d.id] || 0;
-    const row = document.createElement('div');
-    row.className = 'bar-row';
-    row.innerHTML = `
-      <div class="bar-label">${d.short}</div>
-      <div class="bar-track">
-        <div class="bar-fill" style="width:${(s/5)*100}%;background:${s>0?d.color:'#e5e7eb'}"></div>
-      </div>
-      <div class="bar-score" style="color:${s>0?d.color:'#cbd5e1'}">${s||'—'}</div>
-    `;
-    panel.appendChild(row);
-  });
-}
-
-// ── Radar ─────────────────────────────────────────────────────────────────────
-function drawRadar() {
-  const svg = document.getElementById('radar');
-  const cx=150, cy=150, r=95, n=DOMAINS.length;
-
-  const pt = (i, val) => {
-    const a = (Math.PI*2*i/n) - Math.PI/2;
-    return { x: cx + (val/5)*r*Math.cos(a), y: cy + (val/5)*r*Math.sin(a) };
-  };
-  const axPt = (i) => pt(i, 5);
-
-  let html = '';
-
-  // Grid
-  [1,2,3,4,5].forEach(lvl => {
-    const pts = DOMAINS.map((_,i) => axPt(i)).map((_,i) => pt(i,lvl));
-    html += `<path d="${pts.map((p,i)=>`${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')} Z"
-      fill="none" stroke="#e2e8f0" stroke-width="${lvl===5?1.5:0.7}" />`;
-  });
-
-  // Axes
-  DOMAINS.forEach((_,i) => {
-    const p = axPt(i);
-    html += `<line x1="${cx}" y1="${cy}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="#d1d5db" stroke-width="0.7" />`;
-  });
-
-  // Score polygon
-  const spts = DOMAINS.map((d,i) => pt(i, scores[d.id]||0));
-  html += `<path d="${spts.map((p,i)=>`${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')} Z"
-    fill="rgba(139,26,43,0.13)" stroke="#8B1A2B" stroke-width="2" />`;
-
-  // Dots
-  DOMAINS.forEach((d,i) => {
-    if (!scores[d.id]) return;
-    const p = pt(i, scores[d.id]);
-    html += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="${d.color}" stroke="white" stroke-width="1.5" />`;
-  });
-
-  // Labels
-  DOMAINS.forEach((d,i) => {
-    const a = (Math.PI*2*i/n) - Math.PI/2;
-    const lx = (cx + (r+26)*Math.cos(a)).toFixed(1);
-    const ly = (cy + (r+26)*Math.sin(a)).toFixed(1);
-    html += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle"
-      font-size="9.5" font-family="Georgia,serif" fill="#374151" font-weight="600">${d.short}</text>`;
-  });
-
-  svg.innerHTML = html;
-
-  // Legend
-  const leg = document.getElementById('radarLegend');
-  leg.innerHTML = DOMAINS.map(d =>
-    `<div class="legend-item">
-      <div class="legend-dot" style="background:${d.color}"></div>
-      ${d.short}
-    </div>`
-  ).join('');
-}
-
-// ── Legend strip ──────────────────────────────────────────────────────────────
-function buildLegend() {
-  const strip = document.querySelector('.legend-strip');
-  const topLabel = document.createElement('div');
-  topLabel.style.cssText = 'grid-column:1/-1;font-size:0.6rem;color:#94a3b8;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.25rem;';
-  topLabel.textContent = 'Scoring Scale';
-  strip.appendChild(topLabel);
-
-  LEVELS.forEach(l => {
-    const cell = document.createElement('div');
-    cell.className = 'legend-cell';
-    cell.innerHTML = `
-      <div class="legend-num" style="background:${l.bgColor}">${l.v}</div>
-      <div class="legend-name">${l.label}</div>
-      <div class="legend-desc-text">${l.desc}</div>
-    `;
-    strip.appendChild(cell);
-  });
-}
-
-// ── Reset ─────────────────────────────────────────────────────────────────────
-function resetScores() {
-  scores = {};
-  DOMAINS.forEach(d => {
-    const badge = document.getElementById('badge-' + d.id);
-    badge.textContent = '—';
-    badge.style.background = '#f1f5f9';
-    badge.style.color = '#1a1a1a';
-    document.getElementById('card-'+d.id).style.borderColor = '#e5e7eb';
-    document.getElementById('card-'+d.id).style.boxShadow = '';
-    LEVELS.forEach(l => {
-      const btn = document.getElementById(`btn-${d.id}-${l.v}`);
-      btn.classList.remove('active');
-      btn.style.background = '#f1f5f9';
-      btn.style.color = d.color;
+    seed().then(()=>{
+      const u1=FS.onDoc('config','settings',d=>{ if(d) setConfig(d); });
+      const u2=FS.onDoc('positions','data',d=>{ if(d&&d.positions) setPositions(d.positions); });
+      const u3=FS.onCol('voters',docs=>setVoters(docs));
+      const u4=FS.onCol('votes',docs=>setVotes(docs));
+      unsubs.current=[u1,u2,u3,u4];
+      setLoading(false);
     });
-    restoreDesc(d.id);
-  });
-  updateSummary();
-  drawRadar();
+    return ()=>unsubs.current.forEach(u=>u&&u());
+  },[fbReady]);
+
+  if(!fbReady) return <FirebaseSetup onConnected={()=>{setFbReady(true);setLoading(true);}} />;
+  if(loading) return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:16}}>
+      <span className="spinner" style={{width:36,height:36,borderWidth:3}} />
+      <div style={{color:'#64748b',fontSize:14}}>Connecting to Firebase…</div>
+    </div>
+  );
+  if(screen==='home') return <HomeScreen electionTitle={config.electionTitle} isOpen={config.isOpen} onAdmin={()=>setScreen('admin')} onVoter={()=>setScreen('voter')} />;
+  if(screen==='admin'){
+    if(!adminAuthed) return <AdminLogin config={config} onLogin={()=>setAdminAuthed(true)} onBack={()=>setScreen('home')} />;
+    return <AdminDashboard positions={positions} setPositions={setPositions} voters={voters} votes={votes} config={config} setConfig={setConfig} onLogout={()=>{setAdminAuthed(false);setScreen('home');}} />;
+  }
+  if(screen==='voter') return <VoterPortal positions={positions} config={config} onBack={()=>setScreen('home')} />;
+  return null;
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-buildCards();
-buildLegend();
-updateBars();
-drawRadar();
+ReactDOM.render(<App/>, document.getElementById('root'));
 </script>
 </body>
 </html>
