@@ -6,9 +6,11 @@
 <title>Voting System</title>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="./config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0f1e;color:#e8eaf0;min-height:100vh}
@@ -54,21 +56,6 @@ label{font-size:13px;color:#94a3b8;display:block;margin-bottom:6px}
 <script type="text/babel">
 const { useState, useEffect, useRef } = React;
 
-/* ══════════════════════════════════════════════════
-   PASTE YOUR FIREBASE CONFIG HERE
-   Get it from: Firebase Console → Project Settings
-   → Your apps → web (</>)  → firebaseConfig
-══════════════════════════════════════════════════ */
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBOipf2unIfQHlAIByjyMZxv3tzSyiqogA",
-  authDomain: "alumni-voting-system.firebaseapp.com",
-  projectId: "alumni-voting-system",
-  storageBucket: "alumni-voting-system.firebasestorage.app",
-  messagingSenderId: "367764400517",
-  appId: "1:367764400517:web:a29beca358d4b762dd3cec",
-  measurementId: "G-8QLZ7X5ZZW"
-};
-
 /* ═══ FIREBASE LAYER ═══ */
 let db = null;
 function initFirebase(cfg) {
@@ -105,6 +92,20 @@ const FS = {
     return batch.commit();
   }
 };
+
+/* ═══ EMAIL HELPER ═══ */
+async function sendVoterEmail(voter, config) {
+  const { emailjsServiceId, emailjsTemplateId, emailjsPublicKey, appUrl, electionTitle } = config;
+  if(!emailjsServiceId || !emailjsTemplateId || !emailjsPublicKey) throw new Error('EmailJS not configured. Go to Setup → Email Settings.');
+  if(!voter.email) throw new Error('This voter has no email address.');
+  await emailjs.send(emailjsServiceId, emailjsTemplateId, {
+    to_name:        voter.name,
+    to_email:       voter.email,
+    voter_code:     voter.code,
+    election_title: electionTitle || '2026 Elections',
+    app_url:        appUrl || window.location.href,
+  }, emailjsPublicKey);
+}
 
 /* ═══ DEFAULTS ═══ */
 const DEFAULT_POSITIONS = [
@@ -280,7 +281,7 @@ function AdminDashboard({positions,setPositions,voters,votes,config,setConfig,on
           <button key={k} className={`tab${tab===k?' active':''}`} onClick={()=>setTab(k)}>{l}</button>
         ))}
       </div>
-      {tab==='voters'  && <VoterManagement voters={voters} />}
+      {tab==='voters'  && <VoterManagement voters={voters} config={config} />}
       {tab==='results' && <ResultsView positions={positions} votes={votes} voters={voters} config={config} setConfig={setConfig} />}
       {tab==='setup'   && <SetupTab positions={positions} setPositions={setPositions} config={config} setConfig={setConfig} />}
     </div>
@@ -288,35 +289,80 @@ function AdminDashboard({positions,setPositions,voters,votes,config,setConfig,on
 }
 
 /* ═══ VOTER MANAGEMENT ═══ */
-function VoterManagement({voters}) {
+function VoterManagement({voters, config}) {
   const [name,setName]=useState('');
+  const [email,setEmail]=useState('');
   const [bulk,setBulk]=useState('');
-  const [lastCode,setLastCode]=useState(null);
+  const [lastAdded,setLastAdded]=useState(null);
   const [search,setSearch]=useState('');
   const [busy,setBusy]=useState(false);
+  const [sending,setSending]=useState({});
+  const [sendStatus,setSendStatus]=useState({});
+  const emailConfigured = !!(config.emailjsServiceId && config.emailjsTemplateId && config.emailjsPublicKey);
 
   async function addOne() {
     if(!name.trim()) return;
     setBusy(true);
     const code=genCode();
-    await FS.addDoc('voters',{name:name.trim(),code,approved:true,hasVoted:false});
-    setLastCode({name:name.trim(),code}); setName(''); setBusy(false);
+    const voterData={name:name.trim(),email:email.trim().toLowerCase(),code,approved:true,hasVoted:false};
+    const ref=await FS.addDoc('voters',voterData);
+    const added={id:ref.id,...voterData};
+    setLastAdded(added);
+    if(email.trim() && emailConfigured) {
+      try { await sendVoterEmail(added,config); setSendStatus(s=>({...s,[ref.id]:'sent'})); }
+      catch(e) { setSendStatus(s=>({...s,[ref.id]:'err:'+e.message})); }
+    }
+    setName(''); setEmail(''); setBusy(false);
   }
+
   async function bulkAdd() {
-    const names=bulk.split('\n').map(n=>n.trim()).filter(Boolean);
-    if(!names.length) return;
+    const lines=bulk.split('\n').map(l=>l.trim()).filter(Boolean);
+    if(!lines.length) return;
     setBusy(true);
-    for(const n of names) await FS.addDoc('voters',{name:n,code:genCode(),approved:true,hasVoted:false});
+    for(const line of lines){
+      const parts=line.split(',').map(p=>p.trim());
+      const n=parts[0], em=parts[1]||'';
+      const code=genCode();
+      const voterData={name:n,email:em.toLowerCase(),code,approved:true,hasVoted:false};
+      const ref=await FS.addDoc('voters',voterData);
+      if(em && emailConfigured){
+        try { await sendVoterEmail({id:ref.id,...voterData},config); }
+        catch(e) { console.warn('Email failed for',n,e.message); }
+      }
+    }
     setBulk(''); setBusy(false);
   }
+
+  async function resend(v){
+    if(!v.email){alert('This voter has no email address. Edit not yet supported — remove and re-add with email.');return;}
+    setSending(s=>({...s,[v.id]:true}));
+    try {
+      await sendVoterEmail(v,config);
+      setSendStatus(s=>({...s,[v.id]:'sent'}));
+    } catch(e) {
+      setSendStatus(s=>({...s,[v.id]:'err:'+e.message}));
+      alert('Send failed: '+e.message);
+    }
+    setSending(s=>({...s,[v.id]:false}));
+  }
+
   async function remove(id){ if(!confirm('Remove this voter?')) return; await FS.deleteDoc('voters',id); }
   async function toggle(v){ await FS.updateDoc('voters',v.id,{approved:!v.approved}); }
 
-  const filtered=voters.filter(v=>v.name.toLowerCase().includes(search.toLowerCase())||v.code.includes(search.toUpperCase()));
+  const filtered=voters.filter(v=>
+    v.name.toLowerCase().includes(search.toLowerCase()) ||
+    (v.email||'').toLowerCase().includes(search.toLowerCase()) ||
+    v.code.includes(search.toUpperCase())
+  );
   const stats={total:voters.length,approved:voters.filter(v=>v.approved).length,voted:voters.filter(v=>v.hasVoted).length};
 
   return (
     <div>
+      {!emailConfigured && (
+        <div className="alert alert-info" style={{marginBottom:16}}>
+          Email sending is not yet configured. Go to the <b>Setup</b> tab → <b>Email Settings</b> to enable automatic code delivery.
+        </div>
+      )}
       <div className="grid3" style={{marginBottom:20}}>
         {[['Total Voters',stats.total,'#00b8a9'],['Approved',stats.approved,'#22c55e'],['Votes Cast',stats.voted,'#f0a500']].map(([l,v,c])=>(
           <div key={l} className="card" style={{padding:'14px 18px',textAlign:'center'}}>
@@ -330,45 +376,59 @@ function VoterManagement({voters}) {
           <h3 style={{fontSize:15,fontWeight:600,marginBottom:14}}>Add Single Voter</h3>
           <div className="form-row">
             <label>Full Name</label>
-            <input value={name} onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addOne()} placeholder="Voter's full name" />
+            <input value={name} onChange={e=>setName(e.target.value)} placeholder="Voter's full name" />
+          </div>
+          <div className="form-row">
+            <label>Email Address {emailConfigured?<span style={{color:'#00b8a9',fontSize:11}}>(code will be emailed automatically)</span>:<span style={{color:'#64748b',fontSize:11}}>(optional)</span>}</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addOne()} placeholder="voter@example.com" />
           </div>
           <button className="btn btn-primary" style={{width:'100%'}} onClick={addOne} disabled={busy||!name.trim()}>
-            {busy?<span className="spinner"/>:'Add & Generate Code'}
+            {busy?<span className="spinner"/>:emailConfigured&&email?'Add & Send Code by Email':'Add & Generate Code'}
           </button>
-          {lastCode && (
+          {lastAdded && (
             <div className="alert alert-ok" style={{marginTop:14,marginBottom:0}}>
-              <div style={{fontSize:12,marginBottom:4}}>{lastCode.name} — share this code:</div>
-              <div className="mono" style={{fontSize:22,fontWeight:700}}>{lastCode.code}</div>
+              <div style={{fontSize:12,marginBottom:4}}>{lastAdded.name}{lastAdded.email?' — code emailed to '+lastAdded.email:' — share this code:'}</div>
+              <div className="mono" style={{fontSize:22,fontWeight:700}}>{lastAdded.code}</div>
+              {sendStatus[lastAdded.id]==='sent' && <div style={{fontSize:12,marginTop:6,color:'#4ade80'}}>✓ Email sent successfully</div>}
+              {(sendStatus[lastAdded.id]||'').startsWith('err:') && <div style={{fontSize:12,marginTop:6,color:'#fca5a5'}}>Email failed — {sendStatus[lastAdded.id].replace('err:','')}</div>}
             </div>
           )}
         </div>
         <div className="card">
-          <h3 style={{fontSize:15,fontWeight:600,marginBottom:14}}>Bulk Add (one name per line)</h3>
-          <textarea value={bulk} onChange={e=>setBulk(e.target.value)} placeholder={"John Smith\nJane Doe\nAlex Johnson"} rows={4} style={{resize:'none'}} />
+          <h3 style={{fontSize:15,fontWeight:600,marginBottom:14}}>Bulk Add</h3>
+          <p style={{fontSize:12,color:'#64748b',marginBottom:10}}>One voter per line. Format: <code style={{color:'#00b8a9'}}>Name, email@address.com</code><br/>Email is optional — omit the comma if no email.</p>
+          <textarea value={bulk} onChange={e=>setBulk(e.target.value)} placeholder={"John Smith, john@example.com\nJane Doe, jane@example.com\nAlex Johnson"} rows={5} style={{resize:'none'}} />
           <button className="btn btn-outline" style={{width:'100%',marginTop:10}} onClick={bulkAdd} disabled={busy||!bulk.trim()}>
-            {busy?<span className="spinner"/>:'Add All Voters'}
+            {busy?<><span className="spinner"/>Adding…</>:emailConfigured?'Add All & Email Codes':'Add All Voters'}
           </button>
         </div>
       </div>
       <div className="card">
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,gap:12,flexWrap:'wrap'}}>
           <h3 style={{fontSize:15,fontWeight:600}}>Registry ({filtered.length})</h3>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or code…" style={{width:210}} />
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name, email or code…" style={{width:230}} />
         </div>
         <div className="scroll">
           {filtered.length===0 && <div style={{color:'#64748b',textAlign:'center',padding:'30px 0'}}>{voters.length===0?'No voters yet.':'No results.'}</div>}
           {filtered.map(v=>(
-            <div key={v.id} style={{display:'flex',alignItems:'center',gap:10,padding:'10px 0',borderBottom:'1px solid #1a2236'}}>
+            <div key={v.id} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 0',borderBottom:'1px solid #1a2236'}}>
               <div style={{width:34,height:34,borderRadius:'50%',background:'#1a2236',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:600,color:'#94a3b8',flexShrink:0}}>
                 {v.name.charAt(0).toUpperCase()}
               </div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontWeight:500,fontSize:14,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{v.name}</div>
-                <div className="mono" style={{fontSize:12,color:'#64748b'}}>{v.code}</div>
+                <div style={{fontSize:12,color:'#64748b',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{v.email||<span style={{color:'#334155',fontStyle:'italic'}}>no email</span>}</div>
+                <div className="mono" style={{fontSize:11,color:'#4b5563',marginTop:1}}>{v.code}</div>
               </div>
               <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0,flexWrap:'wrap',justifyContent:'flex-end'}}>
+                {sendStatus[v.id]==='sent' && <span style={{fontSize:11,color:'#4ade80'}}>✓ sent</span>}
                 <span className={`badge ${v.hasVoted?'badge-success':'badge-gray'}`}>{v.hasVoted?'Voted':'Pending'}</span>
-                <span className={`badge ${v.approved?'badge-success':'badge-warn'}`}>{v.approved?'Approved':'Blocked'}</span>
+                <span className={`badge ${v.approved?'badge-success':'badge-warn'}`}>{v.approved?'OK':'Blocked'}</span>
+                {emailConfigured && (
+                  <button className="btn btn-xs btn-outline" onClick={()=>resend(v)} disabled={sending[v.id]} title="Resend code by email">
+                    {sending[v.id]?<span className="spinner" style={{width:12,height:12}}/>:'✉ Send'}
+                  </button>
+                )}
                 <button className="btn btn-xs btn-outline" onClick={()=>toggle(v)}>{v.approved?'Block':'Approve'}</button>
                 <button className="btn btn-xs btn-danger" onClick={()=>remove(v.id)}>✕</button>
               </div>
@@ -450,6 +510,10 @@ function SetupTab({positions,setPositions,config,setConfig}) {
   const [local,setLocal]=useState(positions.map(p=>({...p,candidates:p.candidates.map(c=>({...c}))})));
   const [title,setTitle]=useState(config.electionTitle);
   const [pw,setPw]=useState('');
+  const [appUrl,setAppUrl]=useState(config.appUrl||window.location.href);
+  const [ejsServiceId,setEjsServiceId]=useState(config.emailjsServiceId||'');
+  const [ejsTemplateId,setEjsTemplateId]=useState(config.emailjsTemplateId||'');
+  const [ejsPublicKey,setEjsPublicKey]=useState(config.emailjsPublicKey||'');
   const [saved,setSaved]=useState(false);
   const [busy,setBusy]=useState(false);
 
@@ -458,7 +522,13 @@ function SetupTab({positions,setPositions,config,setConfig}) {
 
   async function saveAll(){
     setBusy(true);
-    const nc={...config,electionTitle:title,...(pw?{adminPassword:pw}:{})};
+    const nc={
+      ...config, electionTitle:title, appUrl,
+      emailjsServiceId:ejsServiceId.trim(),
+      emailjsTemplateId:ejsTemplateId.trim(),
+      emailjsPublicKey:ejsPublicKey.trim(),
+      ...(pw?{adminPassword:pw}:{})
+    };
     await FS.setDoc('config','settings',nc);
     await FS.setDoc('positions','data',{positions:local});
     setConfig(nc); setPositions(local);
@@ -477,6 +547,47 @@ function SetupTab({positions,setPositions,config,setConfig}) {
           <div className="form-row" style={{marginBottom:0}}>
             <label>Change Admin Password</label>
             <input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Leave blank to keep current" />
+          </div>
+        </div>
+      </div>
+
+      <div className="card" style={{marginBottom:18}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,flexWrap:'wrap',gap:8}}>
+          <h3 style={{fontSize:15,fontWeight:600}}>Email Settings (EmailJS)</h3>
+          <a href="https://www.emailjs.com" target="_blank" style={{fontSize:12,color:'#00b8a9'}}>Get free account →</a>
+        </div>
+        <div className="alert alert-info" style={{marginBottom:14}}>
+          EmailJS lets you send emails from the browser without a backend. Free tier gives 200 emails/month.
+          After creating an account: <b>Email Services</b> → connect Gmail/Outlook → note the <b>Service ID</b>.
+          Then <b>Email Templates</b> → create a template using the variables below → note the <b>Template ID</b>.
+          Then <b>Account</b> → <b>Public Key</b>.
+        </div>
+        <div style={{background:'#0a0f1e',borderRadius:8,padding:'10px 14px',marginBottom:14,fontSize:12,color:'#64748b',fontFamily:'monospace',lineHeight:1.8}}>
+          Template variables to use in your EmailJS template:<br/>
+          <span style={{color:'#00b8a9'}}>{'{{to_name}}'}</span> — voter's name &nbsp;|&nbsp;
+          <span style={{color:'#00b8a9'}}>{'{{to_email}}'}</span> — voter's email<br/>
+          <span style={{color:'#00b8a9'}}>{'{{voter_code}}'}</span> — their 6-char code &nbsp;|&nbsp;
+          <span style={{color:'#00b8a9'}}>{'{{election_title}}'}</span> — election name &nbsp;|&nbsp;
+          <span style={{color:'#00b8a9'}}>{'{{app_url}}'}</span> — link to the voting page
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}}>
+          <div>
+            <label>Service ID</label>
+            <input value={ejsServiceId} onChange={e=>setEjsServiceId(e.target.value)} placeholder="service_xxxxxxx" />
+          </div>
+          <div>
+            <label>Template ID</label>
+            <input value={ejsTemplateId} onChange={e=>setEjsTemplateId(e.target.value)} placeholder="template_xxxxxxx" />
+          </div>
+        </div>
+        <div className="grid2">
+          <div>
+            <label>Public Key</label>
+            <input value={ejsPublicKey} onChange={e=>setEjsPublicKey(e.target.value)} placeholder="your_public_key" />
+          </div>
+          <div>
+            <label>App URL (included in email as voting link)</label>
+            <input value={appUrl} onChange={e=>setAppUrl(e.target.value)} placeholder="https://yourname.github.io/voting-app" />
           </div>
         </div>
       </div>
