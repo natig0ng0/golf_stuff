@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voting System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0f1e;color:#e8eaf0;min-height:100vh}
+  :root{
+    --navy:#0a0f1e;--navy2:#111827;--navy3:#1a2236;--navy4:#233050;
+    --teal:#00b8a9;--teal2:#00d4c4;--gold:#f0a500;
+    --text:#e8eaf0;--text2:#94a3b8;--text3:#64748b;
+    --border:#233050;--danger:#ef4444;--success:#22c55e;--warn:#f59e0b;
+    --radius:10px;
+  }
+  input,select,textarea{background:#1a2236;border:1px solid #233050;color:#e8eaf0;border-radius:8px;padding:10px 14px;font-size:14px;width:100%;outline:none;transition:border .2s}
+  input:focus,select:focus{border-color:#00b8a9}
+  button{cursor:pointer;font-family:inherit;transition:all .15s}
+  .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:500;border:none}
+  .btn-primary{background:#00b8a9;color:#0a0f1e}
+  .btn-primary:hover{background:#00d4c4}
+  .btn-outline{background:transparent;border:1px solid #233050;color:#e8eaf0}
+  .btn-outline:hover{border-color:#00b8a9;color:#00b8a9}
+  .btn-danger{background:#ef4444;color:#fff}
+  .btn-danger:hover{background:#dc2626}
+  .btn-gold{background:#f0a500;color:#0a0f1e}
+  .btn-gold:hover{background:#f0b830}
+  .btn-sm{padding:6px 12px;font-size:13px}
+  .btn-xs{padding:4px 10px;font-size:12px;border-radius:6px}
+  .card{background:#111827;border:1px solid #233050;border-radius:12px;padding:24px}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+  .badge-success{background:#052e16;color:#4ade80;border:1px solid #166534}
+  .badge-warn{background:#2d1d0a;color:#fbbf24;border:1px solid #92400e}
+  .badge-gray{background:#1e293b;color:#94a3b8;border:1px solid #334155}
+  .tab-bar{display:flex;gap:4px;background:#111827;padding:4px;border-radius:10px;margin-bottom:24px}
+  .tab{padding:8px 16px;border-radius:8px;font-size:14px;font-weight:500;border:none;background:transparent;color:#94a3b8;cursor:pointer;transition:all .15s}
+  .tab.active{background:#1a2236;color:#00b8a9}
+  label{font-size:13px;color:#94a3b8;display:block;margin-bottom:6px}
+  .form-row{margin-bottom:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.grid2{grid-template-columns:1fr}}
+  .divider{border:none;border-top:1px solid #233050;margin:20px 0}
+  .scroll{max-height:420px;overflow-y:auto;padding-right:4px}
+  .scroll::-webkit-scrollbar{width:4px}
+  .scroll::-webkit-scrollbar-track{background:#111827}
+  .scroll::-webkit-scrollbar-thumb{background:#233050;border-radius:4px}
+  .tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.5px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+const DEFAULT_POSITIONS = [
+  { id: 'p1', name: 'President', candidates: [{id:'c1a',name:'Candidate A'},{id:'c1b',name:'Candidate B'},{id:'c1c',name:'Candidate C'}] },
+  { id: 'p2', name: 'Vice President', candidates: [{id:'c2a',name:'Candidate A'},{id:'c2b',name:'Candidate B'},{id:'c2c',name:'Candidate C'}] },
+  { id: 'p3', name: 'Secretary', candidates: [{id:'c3a',name:'Candidate A'},{id:'c3b',name:'Candidate B'},{id:'c3c',name:'Candidate C'}] },
+  { id: 'p4', name: 'Treasurer', candidates: [{id:'c4a',name:'Candidate A'},{id:'c4b',name:'Candidate B'},{id:'c4c',name:'Candidate C'}] },
+  { id: 'p5', name: 'PRO / Communications', candidates: [{id:'c5a',name:'Candidate A'},{id:'c5b',name:'Candidate B'},{id:'c5c',name:'Candidate C'}] },
+  { id: 'p6', name: 'Social Media Officer', candidates: [{id:'c6a',name:'Candidate A'},{id:'c6b',name:'Candidate B'},{id:'c6c',name:'Candidate C'}] },
+];
+
+function genCode() {
+  return Math.random().toString(36).substring(2,8).toUpperCase();
+}
+
+async function save(key, val) {
+  try { await window.storage.set(key, JSON.stringify(val)); } catch(e) { console.error(e); }
+}
+async function load(key) {
+  try { const r = await window.storage.get(key); return r ? JSON.parse(r.value) : null; } catch(e) { return null; }
+}
+
+/* ─── HOME SCREEN ─── */
+function HomeScreen({ onAdmin, onVoter, electionTitle }) {
+  return (
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'24px'}}>
+      <div style={{textAlign:'center',maxWidth:480,width:'100%'}}>
+        <div style={{marginBottom:8,fontSize:13,letterSpacing:'2px',color:'#00b8a9',fontWeight:600,textTransform:'uppercase'}}>Secure Voting System</div>
+        <h1 style={{fontSize:'clamp(28px,5vw,42px)',fontWeight:700,color:'#fff',marginBottom:8,lineHeight:1.2}}>{electionTitle}</h1>
+        <p style={{color:'#64748b',marginBottom:40,fontSize:15}}>Anonymous. Fair. Transparent.</p>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          <button className="btn btn-gold" style={{padding:'16px',fontSize:17,borderRadius:12,fontWeight:600}} onClick={onVoter}>
+            Cast Your Vote →
+          </button>
+          <button className="btn btn-outline" style={{padding:'14px',fontSize:15,borderRadius:12}} onClick={onAdmin}>
+            Admin Portal
+          </button>
+        </div>
+      </div>
+      <div style={{position:'fixed',bottom:20,color:'#334155',fontSize:12}}>Votes are anonymous — your identity is never linked to your choices</div>
+    </div>
+  );
+}
+
+/* ─── ADMIN LOGIN ─── */
+function AdminLogin({ onLogin }) {
+  const [pw, setPw] = useState('');
+  const [err, setErr] = useState('');
+  return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div className="card" style={{width:'100%',maxWidth:380}}>
+        <div style={{marginBottom:20}}>
+          <div style={{fontSize:12,color:'#00b8a9',letterSpacing:'2px',fontWeight:600,textTransform:'uppercase',marginBottom:6}}>Admin Access</div>
+          <h2 style={{fontSize:22,fontWeight:600}}>Administration Portal</h2>
+        </div>
+        <div className="form-row">
+          <label>Password</label>
+          <input type="password" value={pw} onChange={e=>{setPw(e.target.value);setErr('')}} onKeyDown={e=>e.key==='Enter'&&onLogin(pw,setErr)} placeholder="Enter admin password" autoFocus />
+        </div>
+        {err && <div style={{color:'#ef4444',fontSize:13,marginBottom:12}}>{err}</div>}
+        <button className="btn btn-primary" style={{width:'100%',padding:12}} onClick={()=>onLogin(pw,setErr)}>Sign In</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ADMIN DASHBOARD ─── */
+function AdminDashboard({ positions, setPositions, voters, setVoters, votes, config, setConfig, onLogout }) {
+  const [tab, setTab] = useState('voters');
+
+  return (
+    <div style={{maxWidth:900,margin:'0 auto',padding:'24px 20px'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:28}}>
+        <div>
+          <div style={{fontSize:12,color:'#00b8a9',letterSpacing:'2px',fontWeight:600,textTransform:'uppercase',marginBottom:4}}>Administration</div>
+          <h1 style={{fontSize:24,fontWeight:700}}>{config.electionTitle}</h1>
+        </div>
+        <div style={{display:'flex',gap:10,alignItems:'center'}}>
+          <span className={`badge ${config.isOpen ? 'badge-success' : 'badge-warn'}`}>
+            {config.isOpen ? 'Voting Open' : 'Voting Closed'}
+          </span>
+          <button className="btn btn-outline btn-sm" onClick={onLogout}>Sign Out</button>
+        </div>
+      </div>
+
+      <div className="tab-bar">
+        {[['voters','Voters'],['results','Results'],['setup','Setup']].map(([k,l])=>(
+          <button key={k} className={`tab${tab===k?' active':''}`} onClick={()=>setTab(k)}>{l}</button>
+        ))}
+      </div>
+
+      {tab==='voters' && <VoterManagement voters={voters} setVoters={setVoters} />}
+      {tab==='results' && <ResultsView positions={positions} votes={votes} voters={voters} config={config} setConfig={setConfig} />}
+      {tab==='setup' && <SetupTab positions={positions} setPositions={setPositions} config={config} setConfig={setConfig} />}
+    </div>
+  );
+}
+
+/* ─── VOTER MANAGEMENT ─── */
+function VoterManagement({ voters, setVoters }) {
+  const [name, setName] = useState('');
+  const [bulk, setBulk] = useState('');
+  const [showCode, setShowCode] = useState(null);
+  const [search, setSearch] = useState('');
+
+  async function addVoter() {
+    if(!name.trim()) return;
+    const code = genCode();
+    const nv = [...voters, { id: Date.now().toString(), name: name.trim(), code, approved: true, hasVoted: false }];
+    setVoters(nv); await save('va-voters', nv);
+    setShowCode(code); setName('');
+  }
+
+  async function bulkAdd() {
+    const names = bulk.split('\n').map(n=>n.trim()).filter(Boolean);
+    if(!names.length) return;
+    const newVoters = names.map(n=>({ id: Date.now().toString()+Math.random(), name:n, code:genCode(), approved:true, hasVoted:false }));
+    const nv = [...voters, ...newVoters];
+    setVoters(nv); await save('va-voters', nv);
+    setBulk('');
+    alert(`Added ${names.length} voters.`);
+  }
+
+  async function removeVoter(id) {
+    if(!confirm('Remove this voter?')) return;
+    const nv = voters.filter(v=>v.id!==id);
+    setVoters(nv); await save('va-voters', nv);
+  }
+
+  async function toggleApproval(id) {
+    const nv = voters.map(v=>v.id===id?{...v,approved:!v.approved}:v);
+    setVoters(nv); await save('va-voters', nv);
+  }
+
+  const filtered = voters.filter(v=>v.name.toLowerCase().includes(search.toLowerCase()) || v.code.includes(search.toUpperCase()));
+  const stats = { total: voters.length, voted: voters.filter(v=>v.hasVoted).length, approved: voters.filter(v=>v.approved).length };
+
+  return (
+    <div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,marginBottom:24}}>
+        {[['Total Voters',stats.total,'#00b8a9'],['Approved',stats.approved,'#22c55e'],['Votes Cast',stats.voted,'#f0a500']].map(([l,v,c])=>(
+          <div key={l} className="card" style={{padding:'16px 20px',textAlign:'center'}}>
+            <div style={{fontSize:28,fontWeight:700,color:c}}>{v}</div>
+            <div style={{fontSize:12,color:'#64748b',marginTop:2}}>{l}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid2" style={{marginBottom:24,gap:20}}>
+        <div className="card">
+          <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Add Single Voter</h3>
+          <div className="form-row">
+            <label>Full Name</label>
+            <input value={name} onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addVoter()} placeholder="Voter's full name" />
+          </div>
+          <button className="btn btn-primary" style={{width:'100%'}} onClick={addVoter}>Add &amp; Generate Code</button>
+          {showCode && (
+            <div style={{marginTop:14,padding:'12px 16px',background:'#0d3026',border:'1px solid #166534',borderRadius:8}}>
+              <div style={{fontSize:12,color:'#4ade80',marginBottom:4}}>Voter code generated:</div>
+              <div style={{fontSize:24,fontWeight:700,letterSpacing:'4px',color:'#4ade80'}}>{showCode}</div>
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Bulk Add (one name per line)</h3>
+          <textarea value={bulk} onChange={e=>setBulk(e.target.value)} placeholder="John Smith&#10;Jane Doe&#10;Alex Johnson" style={{background:'#1a2236',border:'1px solid #233050',color:'#e8eaf0',borderRadius:8,padding:'10px 14px',fontSize:13,width:'100%',height:88,resize:'none',outline:'none',fontFamily:'inherit'}} />
+          <button className="btn btn-outline" style={{width:'100%',marginTop:10}} onClick={bulkAdd}>Add All Voters</button>
+        </div>
+      </div>
+
+      <div className="card">
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+          <h3 style={{fontSize:15,fontWeight:600}}>Voter Registry ({filtered.length})</h3>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search name or code..." style={{width:220,padding:'7px 12px',fontSize:13}} />
+        </div>
+        <div className="scroll">
+          {filtered.length===0 && <div style={{color:'#64748b',textAlign:'center',padding:'30px 0'}}>No voters yet. Add some above.</div>}
+          {filtered.map(v=>(
+            <div key={v.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid #1a2236'}}>
+              <div style={{display:'flex',alignItems:'center',gap:12,flex:1,minWidth:0}}>
+                <div style={{width:36,height:36,borderRadius:'50%',background:'#1a2236',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:600,color:'#94a3b8',flexShrink:0}}>
+                  {v.name.charAt(0).toUpperCase()}
+                </div>
+                <div style={{minWidth:0}}>
+                  <div style={{fontWeight:500,fontSize:14,color:'#e8eaf0',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{v.name}</div>
+                  <div style={{fontSize:12,color:'#64748b',fontFamily:'monospace',letterSpacing:'2px'}}>{v.code}</div>
+                </div>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
+                {v.hasVoted ? <span className="badge badge-success">Voted</span> : <span className="badge badge-gray">Pending</span>}
+                <span className={`badge ${v.approved?'badge-success':'badge-warn'}`}>{v.approved?'Approved':'Blocked'}</span>
+                <button className="btn btn-xs btn-outline" onClick={()=>toggleApproval(v.id)}>{v.approved?'Block':'Approve'}</button>
+                <button className="btn btn-xs btn-danger" onClick={()=>removeVoter(v.id)}>✕</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── RESULTS ─── */
+function ResultsView({ positions, votes, voters, config, setConfig }) {
+  async function toggleElection() {
+    const nc = {...config, isOpen: !config.isOpen};
+    setConfig(nc); await save('va-config', nc);
+  }
+
+  async function clearVotes() {
+    if(!confirm('Clear ALL votes? This cannot be undone.')) return;
+    await save('va-votes', []);
+    window.location.reload();
+  }
+
+  const totalVoters = voters.length;
+  const votedCount = voters.filter(v=>v.hasVoted).length;
+  const turnout = totalVoters ? Math.round((votedCount/totalVoters)*100) : 0;
+
+  return (
+    <div>
+      <div style={{display:'flex',gap:12,marginBottom:24,flexWrap:'wrap'}}>
+        <div className="card" style={{flex:1,minWidth:140,padding:'16px 20px',textAlign:'center'}}>
+          <div style={{fontSize:28,fontWeight:700,color:'#f0a500'}}>{turnout}%</div>
+          <div style={{fontSize:12,color:'#64748b'}}>Turnout</div>
+        </div>
+        <div className="card" style={{flex:1,minWidth:140,padding:'16px 20px',textAlign:'center'}}>
+          <div style={{fontSize:28,fontWeight:700,color:'#00b8a9'}}>{votedCount}</div>
+          <div style={{fontSize:12,color:'#64748b'}}>Votes Cast</div>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          <button className={`btn ${config.isOpen?'btn-danger':'btn-primary'} btn-sm`} style={{whiteSpace:'nowrap'}} onClick={toggleElection}>
+            {config.isOpen ? 'Close Voting' : 'Open Voting'}
+          </button>
+          <button className="btn btn-outline btn-sm" onClick={clearVotes}>Clear All Votes</button>
+        </div>
+      </div>
+
+      <div style={{display:'flex',flexDirection:'column',gap:16}}>
+        {positions.map(pos=>{
+          const posVotes = votes.filter(v=>v.positionId===pos.id);
+          const total = posVotes.length;
+          const maxVotes = Math.max(...pos.candidates.map(c=>posVotes.filter(v=>v.candidateId===c.id).length), 1);
+          return (
+            <div key={pos.id} className="card">
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+                <h3 style={{fontSize:15,fontWeight:600}}>{pos.name}</h3>
+                <span style={{fontSize:13,color:'#64748b'}}>{total} vote{total!==1?'s':''}</span>
+              </div>
+              {pos.candidates.map(c=>{
+                const count = posVotes.filter(v=>v.candidateId===c.id).length;
+                const pct = total ? Math.round((count/total)*100) : 0;
+                const isLeading = count===maxVotes && count>0;
+                return (
+                  <div key={c.id} style={{marginBottom:12}}>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
+                      <span style={{fontSize:14,color: isLeading?'#f0a500':'#e8eaf0',fontWeight:isLeading?600:400}}>{c.name}{isLeading&&' ★'}</span>
+                      <span style={{fontSize:14,fontWeight:500,color:'#94a3b8'}}>{count} ({pct}%)</span>
+                    </div>
+                    <div style={{height:8,background:'#1a2236',borderRadius:4,overflow:'hidden'}}>
+                      <div style={{height:'100%',width:`${pct}%`,background: isLeading?'#f0a500':'#00b8a9',borderRadius:4,transition:'width .5s ease'}} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── SETUP TAB ─── */
+function SetupTab({ positions, setPositions, config, setConfig }) {
+  const [localPositions, setLocalPositions] = useState(positions.map(p=>({...p,candidates:[...p.candidates]})));
+  const [title, setTitle] = useState(config.electionTitle);
+  const [pw, setPw] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  function updateName(pi, val) {
+    const n = localPositions.map((p,i)=>i===pi?{...p,name:val}:p);
+    setLocalPositions(n);
+  }
+  function updateCandidate(pi, ci, val) {
+    const n = localPositions.map((p,i)=>i===pi?{...p,candidates:p.candidates.map((c,j)=>j===ci?{...c,name:val}:c)}:p);
+    setLocalPositions(n);
+  }
+
+  async function saveAll() {
+    const nc = {...config, electionTitle: title, ...(pw?{adminPassword:pw}:{})};
+    setConfig(nc); await save('va-config', nc);
+    setPositions(localPositions); await save('va-positions', localPositions);
+    setSaved(true); setTimeout(()=>setSaved(false),2500);
+  }
+
+  return (
+    <div>
+      <div className="card" style={{marginBottom:20}}>
+        <h3 style={{fontSize:15,fontWeight:600,marginBottom:16}}>Election Settings</h3>
+        <div className="grid2">
+          <div className="form-row" style={{marginBottom:0}}>
+            <label>Election Title</label>
+            <input value={title} onChange={e=>setTitle(e.target.value)} />
+          </div>
+          <div className="form-row" style={{marginBottom:0}}>
+            <label>Change Admin Password</label>
+            <input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Leave blank to keep current" />
+          </div>
+        </div>
+      </div>
+
+      <div style={{display:'flex',flexDirection:'column',gap:16,marginBottom:20}}>
+        {localPositions.map((pos,pi)=>(
+          <div key={pos.id} className="card">
+            <div className="form-row">
+              <label style={{fontSize:12,color:'#00b8a9',letterSpacing:'1px',textTransform:'uppercase'}}>Position {pi+1}</label>
+              <input value={pos.name} onChange={e=>updateName(pi,e.target.value)} placeholder={`Position ${pi+1} name`} />
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+              {pos.candidates.map((c,ci)=>(
+                <div key={c.id}>
+                  <label>Candidate {ci+1}</label>
+                  <input value={c.name} onChange={e=>updateCandidate(pi,ci,e.target.value)} placeholder={`Candidate ${ci+1}`} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button className="btn btn-primary" style={{padding:'12px 32px',fontSize:15}} onClick={saveAll}>
+        {saved ? '✓ Saved!' : 'Save All Changes'}
+      </button>
+    </div>
+  );
+}
+
+/* ─── VOTER PORTAL ─── */
+function VoterPortal({ voters, setVoters, positions, votes, setVotes, config, onBack }) {
+  const [phase, setPhase] = useState('code');
+  const [code, setCode] = useState('');
+  const [err, setErr] = useState('');
+  const [voter, setVoter] = useState(null);
+  const [selections, setSelections] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+
+  function verifyCode() {
+    const v = voters.find(x=>x.code===code.trim().toUpperCase());
+    if(!v) { setErr('Invalid voter code. Please check with the administrator.'); return; }
+    if(!v.approved) { setErr('Your voter account has not been approved yet.'); return; }
+    if(v.hasVoted) { setErr('This code has already been used to vote.'); return; }
+    if(!config.isOpen) { setErr('Voting is currently closed.'); return; }
+    setVoter(v); setPhase('ballot'); setErr('');
+  }
+
+  function select(positionId, candidateId) {
+    setSelections(s=>({...s,[positionId]:candidateId}));
+  }
+
+  async function submitVotes() {
+    const unanswered = positions.filter(p=>!selections[p.id]);
+    if(unanswered.length>0) {
+      alert(`Please vote for all positions. Missing: ${unanswered.map(p=>p.name).join(', ')}`);
+      return;
+    }
+    setSubmitting(true);
+    const newVotes = positions.map(p=>({ positionId: p.id, candidateId: selections[p.id] }));
+    const updatedVotes = [...votes, ...newVotes];
+    await save('va-votes', updatedVotes);
+    setVotes(updatedVotes);
+
+    const updatedVoters = voters.map(v=>v.id===voter.id?{...v,hasVoted:true}:v);
+    await save('va-voters', updatedVoters);
+    setVoters(updatedVoters);
+
+    setPhase('done'); setSubmitting(false);
+  }
+
+  if(phase==='code') return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{width:'100%',maxWidth:400}}>
+        <button onClick={onBack} style={{background:'none',border:'none',color:'#64748b',cursor:'pointer',fontSize:13,marginBottom:20,display:'flex',alignItems:'center',gap:6}}>← Back</button>
+        <div className="card">
+          <div style={{marginBottom:20}}>
+            <div style={{fontSize:12,color:'#f0a500',letterSpacing:'2px',fontWeight:600,textTransform:'uppercase',marginBottom:6}}>Voter Access</div>
+            <h2 style={{fontSize:22,fontWeight:700}}>{config.electionTitle}</h2>
+            <p style={{color:'#64748b',fontSize:13,marginTop:6}}>Enter your unique voter code to access the ballot.</p>
+          </div>
+          {!config.isOpen && <div style={{background:'#2d1d0a',border:'1px solid #92400e',borderRadius:8,padding:'10px 14px',marginBottom:16,fontSize:13,color:'#fbbf24'}}>Voting is currently closed.</div>}
+          <div className="form-row">
+            <label>Your Voter Code</label>
+            <input
+              value={code}
+              onChange={e=>{setCode(e.target.value.toUpperCase());setErr('')}}
+              onKeyDown={e=>e.key==='Enter'&&verifyCode()}
+              placeholder="e.g. AB12CD"
+              style={{fontSize:20,letterSpacing:'4px',textAlign:'center',fontWeight:600}}
+              maxLength={6}
+              autoFocus
+            />
+          </div>
+          {err && <div style={{color:'#ef4444',fontSize:13,marginBottom:12,padding:'8px 12px',background:'#2a0a0a',borderRadius:6,border:'1px solid #7f1d1d'}}>{err}</div>}
+          <button className="btn btn-gold" style={{width:'100%',padding:13,fontSize:15,fontWeight:600}} onClick={verifyCode} disabled={!config.isOpen}>
+            Access Ballot
+          </button>
+          <p style={{textAlign:'center',fontSize:12,color:'#334155',marginTop:16}}>Your vote is completely anonymous. No one can see who you voted for.</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  if(phase==='ballot') {
+    const done = positions.filter(p=>selections[p.id]).length;
+    return (
+      <div style={{maxWidth:680,margin:'0 auto',padding:'24px 20px'}}>
+        <div style={{marginBottom:24}}>
+          <div style={{fontSize:12,color:'#f0a500',letterSpacing:'2px',fontWeight:600,textTransform:'uppercase',marginBottom:6}}>Official Ballot</div>
+          <h1 style={{fontSize:24,fontWeight:700}}>{config.electionTitle}</h1>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginTop:10}}>
+            <div style={{height:6,background:'#1a2236',borderRadius:3,flex:1}}>
+              <div style={{height:'100%',background:'#f0a500',borderRadius:3,width:`${(done/positions.length)*100}%`,transition:'width .3s'}} />
+            </div>
+            <span style={{fontSize:13,color:'#64748b',flexShrink:0}}>{done}/{positions.length} selected</span>
+          </div>
+        </div>
+
+        {positions.map((pos,i)=>(
+          <div key={pos.id} className="card" style={{marginBottom:16,borderColor: selections[pos.id]?'#00b8a9':'#233050'}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:16}}>
+              <div style={{width:24,height:24,borderRadius:'50%',background:selections[pos.id]?'#00b8a9':'#1a2236',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:selections[pos.id]?'#0a0f1e':'#64748b',flexShrink:0}}>{i+1}</div>
+              <h3 style={{fontSize:15,fontWeight:600}}>{pos.name}</h3>
+              {selections[pos.id] && <span style={{fontSize:12,color:'#00b8a9',marginLeft:'auto'}}>✓ Selected</span>}
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {pos.candidates.map(c=>{
+                const chosen = selections[pos.id]===c.id;
+                return (
+                  <div
+                    key={c.id}
+                    onClick={()=>select(pos.id,c.id)}
+                    style={{
+                      display:'flex',alignItems:'center',gap:12,padding:'12px 16px',
+                      borderRadius:8,border:`1px solid ${chosen?'#00b8a9':'#233050'}`,
+                      background:chosen?'#0d2626':'#1a2236',cursor:'pointer',transition:'all .15s',userSelect:'none'
+                    }}
+                  >
+                    <div style={{width:18,height:18,borderRadius:'50%',border:`2px solid ${chosen?'#00b8a9':'#334155'}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                      {chosen && <div style={{width:8,height:8,borderRadius:'50%',background:'#00b8a9'}} />}
+                    </div>
+                    <span style={{fontSize:14,color:chosen?'#00d4c4':'#e8eaf0',fontWeight:chosen?500:400}}>{c.name}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        <div className="card" style={{background:'#0d2015',borderColor:'#166534',textAlign:'center',padding:'20px'}}>
+          <p style={{fontSize:13,color:'#4ade80',marginBottom:16}}>Once submitted, your vote cannot be changed. Your identity will never be linked to your choices.</p>
+          <button
+            className="btn btn-gold"
+            style={{padding:'13px 40px',fontSize:15,fontWeight:600,opacity:done<positions.length?.5:1}}
+            onClick={submitVotes}
+            disabled={submitting || done<positions.length}
+          >
+            {submitting ? 'Submitting...' : done<positions.length ? `Select ${positions.length-done} more position(s)` : 'Submit My Ballot'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if(phase==='done') return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{textAlign:'center',maxWidth:420}}>
+        <div style={{width:72,height:72,borderRadius:'50%',background:'#0d3026',border:'2px solid #166534',display:'flex',alignItems:'center',justifyContent:'center',fontSize:32,margin:'0 auto 20px'}}>✓</div>
+        <h2 style={{fontSize:26,fontWeight:700,color:'#4ade80',marginBottom:8}}>Vote Submitted!</h2>
+        <p style={{color:'#64748b',marginBottom:8}}>Your ballot has been recorded anonymously.</p>
+        <p style={{fontSize:13,color:'#334155',marginBottom:32}}>Your voter code is now deactivated. Thank you for participating.</p>
+        <button className="btn btn-outline" style={{padding:'12px 32px'}} onClick={onBack}>Return to Home</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── ROOT APP ─── */
+function App() {
+  const [screen, setScreen] = useState('home');
+  const [adminAuthed, setAdminAuthed] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const [config, setConfig] = useState({ electionTitle: '2026 Elections', adminPassword: 'admin2026', isOpen: false });
+  const [positions, setPositions] = useState(DEFAULT_POSITIONS);
+  const [voters, setVoters] = useState([]);
+  const [votes, setVotes] = useState([]);
+
+  useEffect(()=>{
+    (async()=>{
+      const [cfg, pos, vtr, vts] = await Promise.all([
+        load('va-config'), load('va-positions'), load('va-voters'), load('va-votes')
+      ]);
+      if(cfg) setConfig(cfg);
+      if(pos) setPositions(pos);
+      if(vtr) setVoters(vtr);
+      if(vts) setVotes(vts);
+      setLoading(false);
+    })();
+  },[]);
+
+  function handleAdminLogin(pw, setErr) {
+    if(pw===config.adminPassword) { setAdminAuthed(true); setScreen('admin'); setErr(''); }
+    else setErr('Incorrect password.');
+  }
+
+  if(loading) return (
+    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <div style={{color:'#64748b',fontSize:14}}>Loading…</div>
+    </div>
+  );
+
+  if(screen==='home') return <HomeScreen electionTitle={config.electionTitle} onAdmin={()=>setScreen('admin')} onVoter={()=>setScreen('voter')} />;
+
+  if(screen==='admin') {
+    if(!adminAuthed) return <AdminLogin onLogin={handleAdminLogin} />;
+    return <AdminDashboard
+      positions={positions} setPositions={setPositions}
+      voters={voters} setVoters={setVoters}
+      votes={votes} config={config} setConfig={setConfig}
+      onLogout={()=>{setAdminAuthed(false);setScreen('home')}}
+    />;
+  }
+
+  if(screen==='voter') return <VoterPortal
+    voters={voters} setVoters={setVoters}
+    positions={positions} votes={votes} setVotes={setVotes}
+    config={config} onBack={()=>setScreen('home')}
+  />;
+
+  return null;
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
