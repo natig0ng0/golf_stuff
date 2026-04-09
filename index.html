@@ -225,6 +225,12 @@ function HomeScreen({onAdmin,onVoter,electionTitle,isOpen}) {
         <div style={{marginBottom:32}}><span className={`badge ${isOpen?'badge-success':'badge-warn'}`}>{isOpen?'Voting is Open':'Voting is Closed'}</span></div>
         <div style={{display:'flex',flexDirection:'column',gap:14}}>
           <button className="btn btn-gold" style={{padding:16,fontSize:17,borderRadius:12,fontWeight:600}} onClick={onVoter}>Cast Your Vote →</button>
+          <a href="https://docs.google.com/spreadsheets/d/1bzztGTEHaC9p_H2uqfEU3bhF8syXnOHegIpUUAElRZc/edit?gid=1593112808#gid=1593112808" target="_blank" rel="noopener noreferrer"
+            style={{display:'block',padding:'14px',fontSize:15,borderRadius:12,border:'1px solid #233050',color:'#e8eaf0',textAlign:'center',textDecoration:'none',transition:'all .15s',background:'transparent'}}
+            onMouseOver={e=>{e.currentTarget.style.borderColor='#f0a500';e.currentTarget.style.color='#f0a500';}}
+            onMouseOut={e=>{e.currentTarget.style.borderColor='#233050';e.currentTarget.style.color='#e8eaf0';}}>
+            Submit a Nomination ↗
+          </a>
           <button className="btn btn-outline" style={{padding:14,fontSize:15,borderRadius:12}} onClick={onAdmin}>Admin Portal</button>
         </div>
       </div>
