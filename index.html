@@ -109,10 +109,10 @@ async function sendVoterEmail(voter, config) {
 
 /* ═══ DEFAULTS ═══ */
 const DEFAULT_POSITIONS = [
-  {id:'p1',name:'President',          candidates:[{id:'c1a',name:'Candidate A'},{id:'c1b',name:'Candidate B'},{id:'c1c',name:'Candidate C'}]},
-  {id:'p2',name:'Vice President',     candidates:[{id:'c2a',name:'Candidate A'},{id:'c2b',name:'Candidate B'},{id:'c2c',name:'Candidate C'}]},
-  {id:'p3',name:'Secretary',          candidates:[{id:'c3a',name:'Candidate A'},{id:'c3b',name:'Candidate B'},{id:'c3c',name:'Candidate C'}]},
-  {id:'p4',name:'Treasurer',          candidates:[{id:'c4a',name:'Candidate A'},{id:'c4b',name:'Candidate B'},{id:'c4c',name:'Candidate C'}]},
+  {id:'p1',name:'President',           candidates:[{id:'c1a',name:'Candidate A'},{id:'c1b',name:'Candidate B'},{id:'c1c',name:'Candidate C'}]},
+  {id:'p2',name:'Vice President',      candidates:[{id:'c2a',name:'Candidate A'},{id:'c2b',name:'Candidate B'},{id:'c2c',name:'Candidate C'}]},
+  {id:'p3',name:'Secretary',           candidates:[{id:'c3a',name:'Candidate A'},{id:'c3b',name:'Candidate B'},{id:'c3c',name:'Candidate C'}]},
+  {id:'p4',name:'Treasurer',           candidates:[{id:'c4a',name:'Candidate A'},{id:'c4b',name:'Candidate B'},{id:'c4c',name:'Candidate C'}]},
   {id:'p5',name:'PRO / Communications',candidates:[{id:'c5a',name:'Candidate A'},{id:'c5b',name:'Candidate B'},{id:'c5c',name:'Candidate C'}]},
   {id:'p6',name:'Social Media Officer',candidates:[{id:'c6a',name:'Candidate A'},{id:'c6b',name:'Candidate B'},{id:'c6c',name:'Candidate C'}]},
 ];
@@ -120,127 +120,59 @@ const DEFAULT_CONFIG = {electionTitle:'2026 Elections',adminPassword:'admin2026'
 
 function genCode(){ return Math.random().toString(36).substring(2,8).toUpperCase(); }
 
-/* ═══ FIREBASE SETUP WIZARD ═══ */
-function FirebaseSetup({onConnected}) {
-  const [step,setStep]=useState(1);
-  const [raw,setRaw]=useState('');
-  const [err,setErr]=useState('');
-  const [busy,setBusy]=useState(false);
+/* ═══ HOME SCREEN ═══
+   Admin access: click the copyright line at the bottom 5 times quickly,
+   or navigate to ?admin in the URL.
+════════════════════ */
+function HomeScreen({onAdmin,onVoter,electionTitle,isOpen}) {
+  const [tapCount,setTapCount]=useState(0);
+  const tapTimer=useRef(null);
 
-  async function connect() {
-    setErr(''); setBusy(true);
-    try {
-      let text = raw.trim()
-        .replace(/^const\s+\w+\s*=\s*/,'').replace(/;$/,'')
-        .replace(/([{,]\s*)(\w+)\s*:/g,'$1"$2":')
-        .replace(/'/g,'"');
-      const cfg = JSON.parse(text);
-      if(!cfg.projectId) throw new Error('Missing projectId — did you paste the full config?');
-      if(!initFirebase(cfg)) throw new Error('Firebase init failed.');
-      await db.collection('_ping').doc('test').get().catch(e=>{ if(e.code!=='permission-denied') throw e; });
-      localStorage.setItem('va-firebase-cfg', JSON.stringify(cfg));
-      onConnected();
-    } catch(e) { setErr(e.message||'Connection failed. Check your config and Firestore rules.'); }
-    setBusy(false);
+  function handleSecretTap(){
+    const next=tapCount+1;
+    setTapCount(next);
+    clearTimeout(tapTimer.current);
+    if(next>=5){ setTapCount(0); onAdmin(); return; }
+    tapTimer.current=setTimeout(()=>setTapCount(0),2000);
   }
 
-  const steps = [
-    { label:'Create Project', content: <>
-      <h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Step 1 — Create a Firebase project</h3>
-      <ol style={{color:'#94a3b8',fontSize:14,lineHeight:2.2,paddingLeft:20}}>
-        <li>Go to <a href="https://console.firebase.google.com" target="_blank" style={{color:'#00b8a9'}}>console.firebase.google.com</a></li>
-        <li>Click <b style={{color:'#e8eaf0'}}>Add project</b> and give it a name</li>
-        <li>Disable Google Analytics (not needed) → Create project</li>
-      </ol>
-    </>},
-    { label:'Enable Firestore', content: <>
-      <h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Step 2 — Enable Firestore</h3>
-      <ol style={{color:'#94a3b8',fontSize:14,lineHeight:2.2,paddingLeft:20}}>
-        <li>In the left sidebar click <b style={{color:'#e8eaf0'}}>Firestore Database</b></li>
-        <li>Click <b style={{color:'#e8eaf0'}}>Create database</b></li>
-        <li>Choose <b style={{color:'#e8eaf0'}}>Start in test mode</b> → pick a region → Enable</li>
-      </ol>
-      <div className="alert alert-info" style={{marginBottom:0,marginTop:12}}>Test mode allows open access for 30 days — enough to run your election.</div>
-    </>},
-    { label:'Get Config', content: <>
-      <h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Step 3 — Copy your app config</h3>
-      <ol style={{color:'#94a3b8',fontSize:14,lineHeight:2.2,paddingLeft:20}}>
-        <li>Go to <b style={{color:'#e8eaf0'}}>Project Settings</b> (gear icon, top-left)</li>
-        <li>Scroll to <b style={{color:'#e8eaf0'}}>Your apps</b> → click the <code style={{color:'#f0a500',background:'#1a2236',padding:'1px 6px',borderRadius:4}}>&lt;/&gt;</code> web icon</li>
-        <li>Register the app (any nickname) → copy the <code style={{color:'#f0a500',background:'#1a2236',padding:'1px 6px',borderRadius:4}}>firebaseConfig</code> object</li>
-      </ol>
-    </>},
-    { label:'Connect', content: <>
-      <h3 style={{fontSize:15,fontWeight:600,marginBottom:12}}>Step 4 — Paste config &amp; connect</h3>
-      <div className="form-row">
-        <label>Paste your firebaseConfig object</label>
-        <textarea value={raw} onChange={e=>{setRaw(e.target.value);setErr('');}} rows={8}
-          style={{fontFamily:'monospace',fontSize:12,resize:'none'}}
-          placeholder={'{\n  apiKey: "AIzaSy...",\n  authDomain: "my-app.firebaseapp.com",\n  projectId: "my-app",\n  storageBucket: "my-app.appspot.com",\n  messagingSenderId: "123456",\n  appId: "1:123456:web:abc123"\n}'} />
-      </div>
-      {err && <div className="alert alert-err">{err}</div>}
-      <button className="btn btn-primary" style={{width:'100%',padding:13}} onClick={connect} disabled={busy||!raw.trim()}>
-        {busy?<><span className="spinner"/>Connecting…</>:'Connect & Launch App'}
-      </button>
-    </>}
-  ];
-
-  return (
-    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
-      <div style={{width:'100%',maxWidth:520}}>
-        <div style={{textAlign:'center',marginBottom:28}}>
-          <div style={{fontSize:12,letterSpacing:'2px',color:'#00b8a9',fontWeight:600,textTransform:'uppercase',marginBottom:8}}>First-Time Setup</div>
-          <h1 style={{fontSize:26,fontWeight:700,marginBottom:8}}>Connect to Firebase</h1>
-          <p style={{color:'#64748b',fontSize:14}}>Firebase stores all data in the cloud so admin and voters share real-time data across any device.</p>
-        </div>
-
-        <div style={{display:'flex',gap:0,marginBottom:20,borderRadius:10,overflow:'hidden',border:'1px solid #233050'}}>
-          {steps.map((s,i)=>(
-            <div key={i} onClick={()=>setStep(i+1)} style={{flex:1,padding:'10px 4px',textAlign:'center',fontSize:11,fontWeight:500,cursor:'pointer',background:step===i+1?'#1a2236':'#111827',color:step===i+1?'#00b8a9':'#64748b',borderRight:i<3?'1px solid #233050':'none',transition:'all .15s'}}>
-              <div style={{fontSize:15,marginBottom:2}}>{['①','②','③','④'][i]}</div>
-              {s.label}
-            </div>
-          ))}
-        </div>
-
-        <div className="card" style={{marginBottom:14}}>{steps[step-1].content}</div>
-
-        <div style={{display:'flex',justifyContent:'space-between'}}>
-          <button className="btn btn-outline btn-sm" onClick={()=>setStep(Math.max(1,step-1))} disabled={step===1}>← Back</button>
-          {step<4 && <button className="btn btn-sm" style={{background:'#1a2236',border:'1px solid #233050',color:'#94a3b8'}} onClick={()=>setStep(step+1)}>Next →</button>}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══ HOME SCREEN ═══ */
-function HomeScreen({onAdmin,onVoter,electionTitle,isOpen}) {
   return (
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24}}>
       <div style={{textAlign:'center',maxWidth:480,width:'100%'}}>
         <div style={{marginBottom:8,fontSize:12,letterSpacing:'2px',color:'#00b8a9',fontWeight:600,textTransform:'uppercase'}}>Secure Voting System</div>
         <h1 style={{fontSize:'clamp(26px,5vw,42px)',fontWeight:700,color:'#fff',marginBottom:8,lineHeight:1.2}}>{electionTitle}</h1>
         <p style={{color:'#64748b',marginBottom:12,fontSize:15}}>Anonymous. Fair. Transparent.</p>
-        <div style={{marginBottom:32}}><span className={`badge ${isOpen?'badge-success':'badge-warn'}`}>{isOpen?'Voting is Open':'Voting is Closed'}</span></div>
+        <div style={{marginBottom:32}}>
+          <span className={`badge ${isOpen?'badge-success':'badge-warn'}`}>{isOpen?'Voting is Open':'Voting is Closed'}</span>
+        </div>
         <div style={{display:'flex',flexDirection:'column',gap:14}}>
-          <button className="btn btn-gold" style={{padding:16,fontSize:17,borderRadius:12,fontWeight:600}} onClick={onVoter}>Cast Your Vote →</button>
-          <a href="https://forms.office.com/pages/responsepage.aspx?id=vz381wBpeUCYuG8kVfNTO1Hn8ci62hNHs5k-QHfJPj9UQjNLWEpWU1JTT0NLTlNLTVNHQUlJQ0I2SS4u&route=shorturl" target="_blank" rel="noopener noreferrer"
+          <button className="btn btn-gold" style={{padding:16,fontSize:17,borderRadius:12,fontWeight:600}} onClick={onVoter}>
+            Cast Your Vote →
+          </button>
+          <a href="https://forms.office.com/pages/responsepage.aspx?id=vz381wBpeUCYuG8kVfNTO1Hn8ci62hNHs5k-QHfJPj9UQjNLWEpWU1JTT0NLTlNLTVNHQUlJQ0I2SS4u&route=shorturl"
+            target="_blank" rel="noopener noreferrer"
             style={{display:'block',padding:'14px',fontSize:15,borderRadius:12,border:'1px solid #233050',color:'#e8eaf0',textAlign:'center',textDecoration:'none',transition:'all .15s',background:'transparent'}}
             onMouseOver={e=>{e.currentTarget.style.borderColor='#f0a500';e.currentTarget.style.color='#f0a500';}}
             onMouseOut={e=>{e.currentTarget.style.borderColor='#233050';e.currentTarget.style.color='#e8eaf0';}}>
-             Submit a Nomination ↗
+            Submit a Nomination ↗
           </a>
-          <a href="https://forms.cloud.microsoft/r/16enJp7RvG" target="_blank" rel="noopener noreferrer"
+          <a href="https://forms.cloud.microsoft/r/16enJp7RvG"
+            target="_blank" rel="noopener noreferrer"
             style={{display:'block',padding:'14px',fontSize:15,borderRadius:12,border:'1px solid #233050',color:'#e8eaf0',textAlign:'center',textDecoration:'none',transition:'all .15s',background:'transparent'}}
             onMouseOver={e=>{e.currentTarget.style.borderColor='#f0a500';e.currentTarget.style.color='#f0a500';}}
             onMouseOut={e=>{e.currentTarget.style.borderColor='#233050';e.currentTarget.style.color='#e8eaf0';}}>
             Register To Vote ↗
           </a>
-          <button className="btn btn-outline" style={{padding:14,fontSize:15,borderRadius:12}} onClick={onAdmin}>Admin Portal</button>
         </div>
       </div>
-      <div style={{position:'fixed',bottom:20,color:'#334155',fontSize:12}}>Your identity is never linked to your choices</div>
+
+      {/* Secret admin trigger — click 5× within 2s */}
+      <div
+        onClick={handleSecretTap}
+        style={{position:'fixed',bottom:20,color:'#1e293b',fontSize:12,cursor:'default',userSelect:'none',padding:'6px 12px'}}
+        title="">
+        {tapCount>0 ? '·'.repeat(tapCount) : 'Your identity is never linked to your choices'}
+      </div>
     </div>
   );
 }
@@ -309,52 +241,81 @@ function VoterManagement({voters, config}) {
   const [search,setSearch]=useState('');
   const [busy,setBusy]=useState(false);
   const [sending,setSending]=useState({});
-  const [sendStatus,setSendStatus]=useState({});
-  const emailConfigured = !!(config.emailjsServiceId && config.emailjsTemplateId && config.emailjsPublicKey);
+  const [bulkSending,setBulkSending]=useState(false);
+  const [bulkProgress,setBulkProgress]=useState(null);
 
+  const emailConfigured = !!(config.emailjsServiceId && config.emailjsTemplateId && config.emailjsPublicKey);
+  const votersWithEmail = voters.filter(v=>v.email);
+  const unsentVoters    = votersWithEmail.filter(v=>!v.emailSent && !v.hasVoted);
+
+  /* add single */
   async function addOne() {
     if(!name.trim()) return;
     setBusy(true);
     const code=genCode();
-    const voterData={name:name.trim(),email:email.trim().toLowerCase(),code,approved:true,hasVoted:false};
+    const voterData={name:name.trim(),email:email.trim().toLowerCase(),code,approved:true,hasVoted:false,emailSent:false};
     const ref=await FS.addDoc('voters',voterData);
     const added={id:ref.id,...voterData};
-    setLastAdded(added);
-    if(email.trim() && emailConfigured) {
-      try { await sendVoterEmail(added,config); setSendStatus(s=>({...s,[ref.id]:'sent'})); }
-      catch(e) { setSendStatus(s=>({...s,[ref.id]:'err:'+e.message})); }
+    setLastAdded({...added,emailResult:null});
+    if(email.trim() && emailConfigured){
+      try{
+        await sendVoterEmail(added,config);
+        await FS.updateDoc('voters',ref.id,{emailSent:true});
+        setLastAdded(a=>({...a,emailResult:'ok'}));
+      } catch(e){ setLastAdded(a=>({...a,emailResult:e.message})); }
     }
     setName(''); setEmail(''); setBusy(false);
   }
 
+  /* bulk add */
   async function bulkAdd() {
     const lines=bulk.split('\n').map(l=>l.trim()).filter(Boolean);
     if(!lines.length) return;
     setBusy(true);
+    let sent=0, failed=0;
     for(const line of lines){
       const parts=line.split(',').map(p=>p.trim());
-      const n=parts[0], em=parts[1]||'';
+      const n=parts[0], em=(parts[1]||'').toLowerCase();
       const code=genCode();
-      const voterData={name:n,email:em.toLowerCase(),code,approved:true,hasVoted:false};
+      const voterData={name:n,email:em,code,approved:true,hasVoted:false,emailSent:false};
       const ref=await FS.addDoc('voters',voterData);
       if(em && emailConfigured){
-        try { await sendVoterEmail({id:ref.id,...voterData},config); }
-        catch(e) { console.warn('Email failed for',n,e.message); }
+        try{ await sendVoterEmail({id:ref.id,...voterData},config); await FS.updateDoc('voters',ref.id,{emailSent:true}); sent++; }
+        catch(e){ failed++; console.warn('Email failed for',n,e.message); }
       }
     }
-    setBulk(''); setBusy(false);
+    setBulk('');
+    if(emailConfigured && (sent||failed)) alert('Bulk add complete.\n'+sent+' email(s) sent.'+(failed?' '+failed+' failed — check console.':''));
+    setBusy(false);
   }
 
-  async function resend(v){
-    if(!v.email){alert('This voter has no email address. Edit not yet supported — remove and re-add with email.');return;}
-    setSending(s=>({...s,[v.id]:true}));
-    try {
-      await sendVoterEmail(v,config);
-      setSendStatus(s=>({...s,[v.id]:'sent'}));
-    } catch(e) {
-      setSendStatus(s=>({...s,[v.id]:'err:'+e.message}));
-      alert('Send failed: '+e.message);
+  /* send all unsent */
+  async function bulkSendAll(){
+    if(!emailConfigured){alert('Configure EmailJS in Setup → Email Settings first.');return;}
+    if(!unsentVoters.length){alert('No unsent voters with email addresses.');return;}
+    if(!confirm('Send codes to '+unsentVoters.length+' voter(s) who have not yet been emailed?')) return;
+    setBulkSending(true);
+    let done=0, errors=0;
+    setBulkProgress({done:0,total:unsentVoters.length,errors:0});
+    for(const v of unsentVoters){
+      try{ await sendVoterEmail(v,config); await FS.updateDoc('voters',v.id,{emailSent:true}); }
+      catch(e){ errors++; console.warn('Email failed for',v.name,e.message); }
+      done++;
+      setBulkProgress({done,total:unsentVoters.length,errors});
+      await new Promise(r=>setTimeout(r,350));
     }
+    setBulkSending(false);
+    setBulkProgress(null);
+    alert('Done! '+(done-errors)+' sent, '+errors+' failed.');
+  }
+
+  /* resend single */
+  async function resend(v){
+    if(!v.email){alert('No email on this voter. Remove and re-add with an email address.');return;}
+    if(!emailConfigured){alert('Configure EmailJS in Setup → Email Settings first.');return;}
+    setSending(s=>({...s,[v.id]:true}));
+    try{ await sendVoterEmail(v,config); await FS.updateDoc('voters',v.id,{emailSent:true}); }
+    catch(e){ alert('Send failed: '+e.message); }
     setSending(s=>({...s,[v.id]:false}));
   }
 
@@ -366,23 +327,58 @@ function VoterManagement({voters, config}) {
     (v.email||'').toLowerCase().includes(search.toLowerCase()) ||
     v.code.includes(search.toUpperCase())
   );
-  const stats={total:voters.length,approved:voters.filter(v=>v.approved).length,voted:voters.filter(v=>v.hasVoted).length};
+  const stats={
+    total:voters.length,
+    approved:voters.filter(v=>v.approved).length,
+    voted:voters.filter(v=>v.hasVoted).length,
+    emailed:voters.filter(v=>v.emailSent).length,
+  };
 
   return (
     <div>
-      {!emailConfigured && (
+      {/* email status bar */}
+      {emailConfigured ? (
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',background:'#0d2015',border:'1px solid #166534',borderRadius:10,padding:'12px 16px',marginBottom:16,flexWrap:'wrap',gap:10}}>
+          <div style={{fontSize:13,color:'#4ade80'}}>
+            ✓ Email configured &nbsp;·&nbsp;
+            <span style={{color:'#94a3b8'}}>{stats.emailed} of {votersWithEmail.length} emailed</span>
+            {unsentVoters.length>0 && <span style={{color:'#fbbf24'}}> &nbsp;·&nbsp; {unsentVoters.length} unsent</span>}
+          </div>
+          <button className="btn btn-sm btn-primary" onClick={bulkSendAll} disabled={bulkSending||!unsentVoters.length}>
+            {bulkSending?<><span className="spinner"/>Sending…</>:'✉ Send All Unsent ('+unsentVoters.length+')'}
+          </button>
+        </div>
+      ) : (
         <div className="alert alert-info" style={{marginBottom:16}}>
-          Email sending is not yet configured. Go to the <b>Setup</b> tab → <b>Email Settings</b> to enable automatic code delivery.
+          Email not configured. Go to <b>Setup → Email Settings</b> to enable automatic code delivery.
         </div>
       )}
-      <div className="grid3" style={{marginBottom:20}}>
-        {[['Total Voters',stats.total,'#00b8a9'],['Approved',stats.approved,'#22c55e'],['Votes Cast',stats.voted,'#f0a500']].map(([l,v,c])=>(
-          <div key={l} className="card" style={{padding:'14px 18px',textAlign:'center'}}>
-            <div style={{fontSize:28,fontWeight:700,color:c}}>{v}</div>
-            <div style={{fontSize:12,color:'#64748b',marginTop:2}}>{l}</div>
+
+      {/* bulk send progress bar */}
+      {bulkProgress && (
+        <div className="card" style={{marginBottom:16,padding:'14px 18px'}}>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:8,fontSize:13}}>
+            <span style={{color:'#94a3b8'}}>Sending codes…</span>
+            <span style={{fontWeight:500}}>{bulkProgress.done} / {bulkProgress.total}</span>
+          </div>
+          <div style={{height:8,background:'#1a2236',borderRadius:4,overflow:'hidden'}}>
+            <div style={{height:'100%',background:'#00b8a9',borderRadius:4,width:Math.round((bulkProgress.done/bulkProgress.total)*100)+'%',transition:'width .3s'}}/>
+          </div>
+          {bulkProgress.errors>0 && <div style={{fontSize:12,color:'#fca5a5',marginTop:6}}>{bulkProgress.errors} error(s) — check browser console.</div>}
+        </div>
+      )}
+
+      {/* stats */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:20}}>
+        {[['Total',stats.total,'#00b8a9'],['Approved',stats.approved,'#22c55e'],['Emailed',stats.emailed,'#60a5fa'],['Voted',stats.voted,'#f0a500']].map(([l,v,c])=>(
+          <div key={l} className="card" style={{padding:'12px 14px',textAlign:'center'}}>
+            <div style={{fontSize:24,fontWeight:700,color:c}}>{v}</div>
+            <div style={{fontSize:11,color:'#64748b',marginTop:2}}>{l}</div>
           </div>
         ))}
       </div>
+
+      {/* add forms */}
       <div className="grid2" style={{marginBottom:20}}>
         <div className="card">
           <h3 style={{fontSize:15,fontWeight:600,marginBottom:14}}>Add Single Voter</h3>
@@ -391,30 +387,44 @@ function VoterManagement({voters, config}) {
             <input value={name} onChange={e=>setName(e.target.value)} placeholder="Voter's full name" />
           </div>
           <div className="form-row">
-            <label>Email Address {emailConfigured?<span style={{color:'#00b8a9',fontSize:11}}>(code will be emailed automatically)</span>:<span style={{color:'#64748b',fontSize:11}}>(optional)</span>}</label>
+            <label>Email Address &nbsp;
+              {emailConfigured
+                ? <span style={{color:'#00b8a9',fontSize:11}}>code will be emailed automatically</span>
+                : <span style={{color:'#64748b',fontSize:11}}>optional</span>}
+            </label>
             <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addOne()} placeholder="voter@example.com" />
           </div>
           <button className="btn btn-primary" style={{width:'100%'}} onClick={addOne} disabled={busy||!name.trim()}>
-            {busy?<span className="spinner"/>:emailConfigured&&email?'Add & Send Code by Email':'Add & Generate Code'}
+            {busy?<span className="spinner"/>:emailConfigured&&email.trim()?'Add & Send Code by Email':'Add & Generate Code'}
           </button>
           {lastAdded && (
             <div className="alert alert-ok" style={{marginTop:14,marginBottom:0}}>
-              <div style={{fontSize:12,marginBottom:4}}>{lastAdded.name}{lastAdded.email?' — code emailed to '+lastAdded.email:' — share this code:'}</div>
-              <div className="mono" style={{fontSize:22,fontWeight:700}}>{lastAdded.code}</div>
-              {sendStatus[lastAdded.id]==='sent' && <div style={{fontSize:12,marginTop:6,color:'#4ade80'}}>✓ Email sent successfully</div>}
-              {(sendStatus[lastAdded.id]||'').startsWith('err:') && <div style={{fontSize:12,marginTop:6,color:'#fca5a5'}}>Email failed — {sendStatus[lastAdded.id].replace('err:','')}</div>}
+              <div style={{fontSize:12,marginBottom:6,color:'#94a3b8'}}>{lastAdded.name}{lastAdded.email?' · '+lastAdded.email:''}</div>
+              <div className="mono" style={{fontSize:22,fontWeight:700,letterSpacing:'4px'}}>{lastAdded.code}</div>
+              {lastAdded.emailResult==='ok'                           && <div style={{fontSize:12,marginTop:6,color:'#4ade80'}}>✓ Email sent successfully</div>}
+              {lastAdded.emailResult&&lastAdded.emailResult!=='ok'    && <div style={{fontSize:12,marginTop:6,color:'#fca5a5'}}>Email failed — {lastAdded.emailResult}</div>}
+              {!lastAdded.email                                       && <div style={{fontSize:12,marginTop:6,color:'#64748b'}}>No email — share this code manually</div>}
             </div>
           )}
         </div>
+
         <div className="card">
-          <h3 style={{fontSize:15,fontWeight:600,marginBottom:14}}>Bulk Add</h3>
-          <p style={{fontSize:12,color:'#64748b',marginBottom:10}}>One voter per line. Format: <code style={{color:'#00b8a9'}}>Name, email@address.com</code><br/>Email is optional — omit the comma if no email.</p>
-          <textarea value={bulk} onChange={e=>setBulk(e.target.value)} placeholder={"John Smith, john@example.com\nJane Doe, jane@example.com\nAlex Johnson"} rows={5} style={{resize:'none'}} />
+          <h3 style={{fontSize:15,fontWeight:600,marginBottom:8}}>Bulk Add</h3>
+          <p style={{fontSize:12,color:'#64748b',marginBottom:10,lineHeight:1.7}}>
+            One voter per line.<br/>
+            With email: <code style={{color:'#00b8a9',fontSize:11}}>Full Name, email@example.com</code><br/>
+            Without: <code style={{color:'#64748b',fontSize:11}}>Full Name</code>
+          </p>
+          <textarea value={bulk} onChange={e=>setBulk(e.target.value)}
+            placeholder={"John Smith, john@example.com\nJane Doe, jane@example.com\nAlex Johnson"}
+            rows={6} style={{resize:'none'}} />
           <button className="btn btn-outline" style={{width:'100%',marginTop:10}} onClick={bulkAdd} disabled={busy||!bulk.trim()}>
-            {busy?<><span className="spinner"/>Adding…</>:emailConfigured?'Add All & Email Codes':'Add All Voters'}
+            {busy?<><span className="spinner"/>Adding…</>:emailConfigured?'Add All & Email Where Possible':'Add All Voters'}
           </button>
         </div>
       </div>
+
+      {/* registry */}
       <div className="card">
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,gap:12,flexWrap:'wrap'}}>
           <h3 style={{fontSize:15,fontWeight:600}}>Registry ({filtered.length})</h3>
@@ -429,16 +439,20 @@ function VoterManagement({voters, config}) {
               </div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{fontWeight:500,fontSize:14,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{v.name}</div>
-                <div style={{fontSize:12,color:'#64748b',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{v.email||<span style={{color:'#334155',fontStyle:'italic'}}>no email</span>}</div>
-                <div className="mono" style={{fontSize:11,color:'#4b5563',marginTop:1}}>{v.code}</div>
+                <div style={{fontSize:12,color:v.email?'#64748b':'#334155',fontStyle:v.email?'normal':'italic',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                  {v.email||'no email'}
+                </div>
+                <div style={{display:'flex',gap:8,alignItems:'center',marginTop:2}}>
+                  <span className="mono" style={{fontSize:11,color:'#4b5563'}}>{v.code}</span>
+                  {v.emailSent && <span style={{fontSize:10,color:'#60a5fa'}}>✉ sent</span>}
+                </div>
               </div>
               <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0,flexWrap:'wrap',justifyContent:'flex-end'}}>
-                {sendStatus[v.id]==='sent' && <span style={{fontSize:11,color:'#4ade80'}}>✓ sent</span>}
                 <span className={`badge ${v.hasVoted?'badge-success':'badge-gray'}`}>{v.hasVoted?'Voted':'Pending'}</span>
                 <span className={`badge ${v.approved?'badge-success':'badge-warn'}`}>{v.approved?'OK':'Blocked'}</span>
-                {emailConfigured && (
-                  <button className="btn btn-xs btn-outline" onClick={()=>resend(v)} disabled={sending[v.id]} title="Resend code by email">
-                    {sending[v.id]?<span className="spinner" style={{width:12,height:12}}/>:'✉ Send'}
+                {emailConfigured && v.email && (
+                  <button className="btn btn-xs btn-outline" onClick={()=>resend(v)} disabled={!!sending[v.id]} title={v.emailSent?'Resend code':'Send code'}>
+                    {sending[v.id]?<span className="spinner" style={{width:12,height:12,borderWidth:1.5}}/>:v.emailSent?'↺ Resend':'✉ Send'}
                   </button>
                 )}
                 <button className="btn btn-xs btn-outline" onClick={()=>toggle(v)}>{v.approved?'Block':'Approve'}</button>
@@ -504,7 +518,7 @@ function ResultsView({positions,votes,voters,config,setConfig}) {
                       <span style={{fontSize:13,color:'#94a3b8'}}>{c.count} ({pct}%)</span>
                     </div>
                     <div style={{height:8,background:'#1a2236',borderRadius:4,overflow:'hidden'}}>
-                      <div style={{height:'100%',width:`${pct}%`,background:lead?'#f0a500':'#00b8a9',borderRadius:4,transition:'width .5s ease'}} />
+                      <div style={{height:'100%',width:`${pct}%`,background:lead?'#f0a500':'#00b8a9',borderRadius:4,transition:'width .5s ease'}}/>
                     </div>
                   </div>
                 );
@@ -569,18 +583,18 @@ function SetupTab({positions,setPositions,config,setConfig}) {
           <a href="https://www.emailjs.com" target="_blank" style={{fontSize:12,color:'#00b8a9'}}>Get free account →</a>
         </div>
         <div className="alert alert-info" style={{marginBottom:14}}>
-          EmailJS lets you send emails from the browser without a backend. Free tier gives 200 emails/month.
-          After creating an account: <b>Email Services</b> → connect Gmail/Outlook → note the <b>Service ID</b>.
-          Then <b>Email Templates</b> → create a template using the variables below → note the <b>Template ID</b>.
-          Then <b>Account</b> → <b>Public Key</b>.
+          EmailJS sends emails from the browser — no backend needed. Free tier: 200 emails/month.<br/>
+          Setup: <b>Email Services</b> → connect Gmail/Outlook → copy <b>Service ID</b>.
+          Then <b>Email Templates</b> → create template → copy <b>Template ID</b>.
+          Then <b>Account</b> → copy <b>Public Key</b>.
         </div>
-        <div style={{background:'#0a0f1e',borderRadius:8,padding:'10px 14px',marginBottom:14,fontSize:12,color:'#64748b',fontFamily:'monospace',lineHeight:1.8}}>
-          Template variables to use in your EmailJS template:<br/>
-          <span style={{color:'#00b8a9'}}>{'{{to_name}}'}</span> — voter's name &nbsp;|&nbsp;
-          <span style={{color:'#00b8a9'}}>{'{{to_email}}'}</span> — voter's email<br/>
-          <span style={{color:'#00b8a9'}}>{'{{voter_code}}'}</span> — their 6-char code &nbsp;|&nbsp;
-          <span style={{color:'#00b8a9'}}>{'{{election_title}}'}</span> — election name &nbsp;|&nbsp;
-          <span style={{color:'#00b8a9'}}>{'{{app_url}}'}</span> — link to the voting page
+        <div style={{background:'#0a0f1e',borderRadius:8,padding:'10px 14px',marginBottom:14,fontSize:12,color:'#64748b',fontFamily:'monospace',lineHeight:2}}>
+          Use these variables in your EmailJS template:<br/>
+          <span style={{color:'#00b8a9'}}>{'{{to_name}}'}</span> &nbsp;
+          <span style={{color:'#00b8a9'}}>{'{{to_email}}'}</span> &nbsp;
+          <span style={{color:'#00b8a9'}}>{'{{voter_code}}'}</span> &nbsp;
+          <span style={{color:'#00b8a9'}}>{'{{election_title}}'}</span> &nbsp;
+          <span style={{color:'#00b8a9'}}>{'{{app_url}}'}</span>
         </div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}}>
           <div>
@@ -598,11 +612,12 @@ function SetupTab({positions,setPositions,config,setConfig}) {
             <input value={ejsPublicKey} onChange={e=>setEjsPublicKey(e.target.value)} placeholder="your_public_key" />
           </div>
           <div>
-            <label>App URL (included in email as voting link)</label>
-            <input value={appUrl} onChange={e=>setAppUrl(e.target.value)} placeholder="https://yourname.github.io/voting-app" />
+            <label>App URL (sent in email as voting link)</label>
+            <input value={appUrl} onChange={e=>setAppUrl(e.target.value)} placeholder="https://yourname.github.io/repo" />
           </div>
         </div>
       </div>
+
       <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:18}}>
         {local.map((pos,pi)=>(
           <div key={pos.id} className="card">
@@ -692,7 +707,7 @@ function VoterPortal({positions,config,onBack}) {
           <h1 style={{fontSize:22,fontWeight:700}}>{config.electionTitle}</h1>
           <div style={{display:'flex',alignItems:'center',gap:12,marginTop:10}}>
             <div style={{height:6,background:'#1a2236',borderRadius:3,flex:1}}>
-              <div style={{height:'100%',background:'#f0a500',borderRadius:3,width:`${(done/positions.length)*100}%`,transition:'width .3s'}} />
+              <div style={{height:'100%',background:'#f0a500',borderRadius:3,width:`${(done/positions.length)*100}%`,transition:'width .3s'}}/>
             </div>
             <span style={{fontSize:13,color:'#64748b',flexShrink:0}}>{done}/{positions.length} selected</span>
           </div>
@@ -712,7 +727,7 @@ function VoterPortal({positions,config,onBack}) {
                     style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',borderRadius:8,border:`1px solid ${chosen?'#00b8a9':'#233050'}`,background:chosen?'#0d2626':'#1a2236',cursor:'pointer',transition:'all .15s',userSelect:'none'}}
                   >
                     <div style={{width:18,height:18,borderRadius:'50%',border:`2px solid ${chosen?'#00b8a9':'#334155'}`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                      {chosen&&<div style={{width:8,height:8,borderRadius:'50%',background:'#00b8a9'}} />}
+                      {chosen&&<div style={{width:8,height:8,borderRadius:'50%',background:'#00b8a9'}}/>}
                     </div>
                     <span style={{fontSize:14,color:chosen?'#00d4c4':'#e8eaf0',fontWeight:chosen?500:400}}>{c.name}</span>
                   </div>
@@ -756,6 +771,11 @@ function App() {
   const [votes,setVotes]=useState([]);
   const unsubs=useRef([]);
 
+  /* Check URL for ?admin shortcut */
+  useEffect(()=>{
+    if(window.location.search.includes('admin')) setScreen('admin');
+  },[]);
+
   useEffect(()=>{
     if(initFirebase(FIREBASE_CONFIG)) setFbReady(true);
     else setLoading(false);
@@ -785,13 +805,13 @@ function App() {
       <div style={{textAlign:'center',maxWidth:440}}>
         <div style={{fontSize:32,marginBottom:16}}>⚠️</div>
         <h2 style={{fontSize:20,fontWeight:700,marginBottom:8,color:'#fbbf24'}}>Firebase not configured</h2>
-        <p style={{color:'#64748b',fontSize:14,lineHeight:1.7}}>Open <code style={{color:'#00b8a9',background:'#1a2236',padding:'2px 6px',borderRadius:4}}>index.html</code> in a text editor, find the <code style={{color:'#00b8a9',background:'#1a2236',padding:'2px 6px',borderRadius:4}}>FIREBASE_CONFIG</code> block near the top, and replace each placeholder with the values from your Firebase project settings.</p>
+        <p style={{color:'#64748b',fontSize:14,lineHeight:1.7}}>Open <code style={{color:'#00b8a9',background:'#1a2236',padding:'2px 6px',borderRadius:4}}>config.js</code> and replace each placeholder with your Firebase project values.</p>
       </div>
     </div>
   );
   if(loading) return (
     <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:16}}>
-      <span className="spinner" style={{width:36,height:36,borderWidth:3}} />
+      <span className="spinner" style={{width:36,height:36,borderWidth:3}}/>
       <div style={{color:'#64748b',fontSize:14}}>Connecting to Firebase…</div>
     </div>
   );
