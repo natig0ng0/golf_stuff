@@ -103,7 +103,7 @@ async function sendVoterEmail(voter, config) {
     to_email:       voter.email,
     voter_code:     voter.code,
     election_title: electionTitle || '2026 Elections',
-    app_url:        appUrl || window.location.href,
+    app_url:        appUrl || (window.location.origin + window.location.pathname),
   }, emailjsPublicKey);
 }
 
@@ -116,7 +116,7 @@ const DEFAULT_POSITIONS = [
   {id:'p5',name:'PRO / Communications',candidates:[{id:'c5a',name:'Candidate A'},{id:'c5b',name:'Candidate B'},{id:'c5c',name:'Candidate C'}]},
   {id:'p6',name:'Social Media Officer',candidates:[{id:'c6a',name:'Candidate A'},{id:'c6b',name:'Candidate B'},{id:'c6c',name:'Candidate C'}]},
 ];
-const DEFAULT_CONFIG = {electionTitle:'2026 Elections',adminPassword:'admin2026',isOpen:false};
+const DEFAULT_CONFIG = {electionTitle:'2026 Elections',isOpen:false};
 
 function genCode(){ return Math.random().toString(36).substring(2,8).toUpperCase(); }
 
@@ -181,7 +181,7 @@ function HomeScreen({onAdmin,onVoter,electionTitle,isOpen}) {
 function AdminLogin({config,onLogin,onBack}) {
   const [pw,setPw]=useState('');
   const [err,setErr]=useState('');
-  function attempt(){ pw===config.adminPassword ? onLogin() : setErr('Incorrect password.'); }
+  function attempt(){ pw===(typeof ADMIN_PASSWORD!=='undefined'?ADMIN_PASSWORD:'admin2026') ? onLogin() : setErr('Incorrect password.'); }
   return (
     <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
       <div className="card" style={{width:'100%',maxWidth:360}}>
@@ -536,7 +536,8 @@ function SetupTab({positions,setPositions,config,setConfig}) {
   const [local,setLocal]=useState(positions.map(p=>({...p,candidates:p.candidates.map(c=>({...c}))})));
   const [title,setTitle]=useState(config.electionTitle);
   const [pw,setPw]=useState('');
-  const [appUrl,setAppUrl]=useState(config.appUrl||window.location.href);
+  const cleanUrl = window.location.origin + window.location.pathname;
+  const [appUrl,setAppUrl]=useState(config.appUrl||cleanUrl);
   const [ejsServiceId,setEjsServiceId]=useState(config.emailjsServiceId||'');
   const [ejsTemplateId,setEjsTemplateId]=useState(config.emailjsTemplateId||'');
   const [ejsPublicKey,setEjsPublicKey]=useState(config.emailjsPublicKey||'');
@@ -553,8 +554,7 @@ function SetupTab({positions,setPositions,config,setConfig}) {
       emailjsServiceId:ejsServiceId.trim(),
       emailjsTemplateId:ejsTemplateId.trim(),
       emailjsPublicKey:ejsPublicKey.trim(),
-      ...(pw?{adminPassword:pw}:{})
-    };
+    }; // admin password never stored in Firestore — set it in config.js
     await FS.setDoc('config','settings',nc);
     await FS.setDoc('positions','data',{positions:local});
     setConfig(nc); setPositions(local);
@@ -572,7 +572,8 @@ function SetupTab({positions,setPositions,config,setConfig}) {
           </div>
           <div className="form-row" style={{marginBottom:0}}>
             <label>Change Admin Password</label>
-            <input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Leave blank to keep current" />
+            <input disabled value="Set in config.js — never stored here" style={{color:'#64748b',fontStyle:'italic',cursor:'not-allowed'}} />
+            <div style={{fontSize:11,color:'#64748b',marginTop:4}}>Edit <code style={{color:'#00b8a9'}}>ADMIN_PASSWORD</code> in config.js and redeploy.</div>
           </div>
         </div>
       </div>

@@ -31,6 +31,7 @@ jobs:
             messagingSenderId: "${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}",
             appId:             "${{ secrets.FIREBASE_APP_ID }}"
           };
+          const ADMIN_PASSWORD = "${{ secrets.ADMIN_PASSWORD }}";
           EOF
 
       - name: Setup Pages
