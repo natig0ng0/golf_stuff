@@ -103,7 +103,7 @@ async function sendVoterEmail(voter, config) {
     to_email:       voter.email,
     voter_code:     voter.code,
     election_title: electionTitle || '2026 Elections',
-    app_url:        appUrl || (window.location.origin + window.location.pathname),
+    app_url:        appUrl ? (()=>{ try{const u=new URL(appUrl);return u.origin+u.pathname;}catch(e){return appUrl;} })() : (window.location.origin + window.location.pathname),
   }, emailjsPublicKey);
 }
 
@@ -537,7 +537,8 @@ function SetupTab({positions,setPositions,config,setConfig}) {
   const [title,setTitle]=useState(config.electionTitle);
   const [pw,setPw]=useState('');
   const cleanUrl = window.location.origin + window.location.pathname;
-  const [appUrl,setAppUrl]=useState(config.appUrl||cleanUrl);
+  function stripQuery(url){ try { const u=new URL(url); return u.origin+u.pathname; } catch(e){ return url; } }
+  const [appUrl,setAppUrl]=useState(stripQuery(config.appUrl||cleanUrl));
   const [ejsServiceId,setEjsServiceId]=useState(config.emailjsServiceId||'');
   const [ejsTemplateId,setEjsTemplateId]=useState(config.emailjsTemplateId||'');
   const [ejsPublicKey,setEjsPublicKey]=useState(config.emailjsPublicKey||'');
@@ -550,7 +551,7 @@ function SetupTab({positions,setPositions,config,setConfig}) {
   async function saveAll(){
     setBusy(true);
     const nc={
-      ...config, electionTitle:title, appUrl,
+      ...config, electionTitle:title, appUrl:stripQuery(appUrl),
       emailjsServiceId:ejsServiceId.trim(),
       emailjsTemplateId:ejsTemplateId.trim(),
       emailjsPublicKey:ejsPublicKey.trim(),
