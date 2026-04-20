@@ -27,15 +27,10 @@
     --radius-md:   10px;
     --radius-lg:   14px;
     --red:         #d9534f;
-    --red-pale:    #fdf0f0;
   }
   body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--ink); min-height: 100vh; }
 
-  header {
-    background: var(--green-deep); padding: 28px 48px 24px;
-    display: flex; align-items: flex-end; justify-content: space-between;
-    border-bottom: 3px solid var(--gold);
-  }
+  header { background: var(--green-deep); padding: 28px 48px 24px; display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 3px solid var(--gold); }
   .header-left h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: var(--white); }
   .header-left p  { font-size: 13px; color: var(--green-light); margin-top: 4px; font-weight: 300; letter-spacing: 0.04em; }
   .header-right   { display: flex; align-items: center; gap: 12px; }
@@ -105,7 +100,7 @@
   .anc-total-row { margin-top: 6px; font-size: 11px; color: var(--ink-faint); padding-top: 14px; border-top: 1px solid var(--border); }
   .anc-total-row span { color: var(--ink-muted); font-weight: 500; }
 
-  /* ── Skins allocation ─────────────────────────────── */
+  /* Skins allocation */
   .alloc-wrap { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 22px; margin-bottom: 14px; }
   .alloc-status-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
   .alloc-pill { display: flex; flex-direction: column; align-items: center; background: var(--surface); border-radius: var(--radius-md); padding: 10px 20px; min-width: 90px; }
@@ -122,7 +117,6 @@
   .alloc-done-banner { display: none; align-items: center; gap: 8px; background: var(--green-pale); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--green-dark); margin-bottom: 16px; }
   .alloc-done-banner.show { display: flex; }
   .alloc-done-banner::before { content: '✓'; width: 18px; height: 18px; background: var(--green-mid); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
-
   .alloc-table { width: 100%; border-collapse: collapse; }
   .alloc-table thead th { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); text-align: left; padding: 0 0 10px; border-bottom: 1px solid var(--border-mid); }
   .alloc-table thead th:last-child { text-align: right; }
@@ -143,7 +137,6 @@
   td.alloc-name-td { padding-right: 10px; }
   td.alloc-skins-td { padding-right: 10px; width: 100px; }
   td.alloc-del-td { width: 30px; }
-
   .alloc-add-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
   .btn-add-player { display: flex; align-items: center; gap: 6px; background: none; border: 1px dashed var(--border-mid); border-radius: var(--radius-sm); padding: 7px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; color: var(--ink-muted); cursor: pointer; transition: border-color 0.2s, color 0.2s; }
   .btn-add-player:hover { border-color: var(--green-mid); color: var(--green-mid); }
@@ -180,21 +173,96 @@
 
   footer { text-align: center; font-size: 11px; color: var(--ink-faint); padding: 20px 0 32px; border-top: 1px solid var(--border); letter-spacing: 0.04em; }
 
+  /* ══════════════════════════════════════════
+     PRINT STYLES — one-page summary report
+  ══════════════════════════════════════════ */
+  .print-report { display: none; }
+
   @media print {
-    @page { size: A4; margin: 18mm 16mm; }
-    body { background: #fff; }
-    header, .pot-bar, .total-strip, .pot-seg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .anc-icon, .place-badge, .alloc-row-num, .alloc-progress-fill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .btn-print, .print-bar, .btn-add-player, .alloc-delete, .alloc-add-row { display: none !important; }
-    main { padding: 20px 0; }
-    .anc-grid { break-inside: avoid; }
-    .ladder-wrap, .alloc-wrap { break-inside: avoid; }
-    .bar-track, .bar-fill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { size: A4; margin: 14mm 16mm; }
+
+    /* hide everything on screen */
+    body > header,
+    body > footer,
+    main,
+    .print-bar { display: none !important; }
+
+    /* show only the print report */
+    .print-report { display: block !important; }
+
+    /* report base */
+    .print-report { font-family: 'DM Sans', sans-serif; color: #0d0d0d; font-size: 11pt; line-height: 1.5; }
+
+    .rpt-header { background: #0a2e1e; color: #fff; padding: 16pt 20pt 14pt; border-bottom: 3pt solid #c9a84c; display: flex; justify-content: space-between; align-items: flex-end; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rpt-header h1 { font-family: 'Playfair Display', serif; font-size: 18pt; font-weight: 600; }
+    .rpt-header .rpt-sub { font-size: 9pt; color: #5DCAA5; margin-top: 3pt; }
+    .rpt-header .rpt-date { font-size: 9pt; color: #9FE1CB; text-align: right; }
+
+    .rpt-body { padding: 16pt 20pt; }
+
+    /* key stats row */
+    .rpt-stats { display: flex; gap: 0; margin-bottom: 18pt; border: 1pt solid #bbb; border-radius: 6pt; overflow: hidden; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rpt-stat { flex: 1; padding: 10pt 14pt; border-right: 1pt solid #bbb; }
+    .rpt-stat:last-child { border-right: none; }
+    .rpt-stat .st-lbl { font-size: 7.5pt; letter-spacing: 0.08em; text-transform: uppercase; color: #3a3a3a; margin-bottom: 4pt; }
+    .rpt-stat .st-val { font-family: 'Playfair Display', serif; font-size: 16pt; font-weight: 600; color: #0d0d0d; }
+    .rpt-stat .st-sub { font-size: 8pt; color: #2a2a2a; margin-top: 2pt; }
+    .rpt-stat.highlight { background: #0a2e1e; }
+    .rpt-stat.highlight .st-lbl { color: #5DCAA5; }
+    .rpt-stat.highlight .st-val { color: #f0d080; }
+    .rpt-stat.highlight .st-sub { color: #9FE1CB; }
+
+    /* pot split bar */
+    .rpt-split-bar { display: flex; height: 20pt; border-radius: 4pt; overflow: hidden; margin-bottom: 18pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rpt-split-seg { display: flex; align-items: center; justify-content: center; font-size: 8pt; font-weight: 500; }
+    .rpt-split-seg.s1 { background: #1D9E75; color: #E1F5EE; flex: 6; }
+    .rpt-split-seg.s2 { background: #0F6E56; color: #9FE1CB; flex: 3; }
+    .rpt-split-seg.s3 { background: #085041; color: #5DCAA5; flex: 1; }
+
+    /* section heading */
+    .rpt-section-heading { font-size: 8pt; font-weight: 500; letter-spacing: 0.10em; text-transform: uppercase; color: #1a1a1a; margin-bottom: 8pt; padding-bottom: 5pt; border-bottom: 0.5pt solid #999; }
+
+    /* two column layout */
+    .rpt-two-col { display: flex; gap: 16pt; margin-bottom: 16pt; }
+    .rpt-col { flex: 1; }
+
+    /* winners tables */
+    .rpt-table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-bottom: 4pt; }
+    .rpt-table thead th { font-size: 7.5pt; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #1a1a1a; text-align: left; padding: 0 0 5pt; border-bottom: 0.5pt solid #888; }
+    .rpt-table thead th:last-child { text-align: right; }
+    .rpt-table tbody tr { border-bottom: 0.5pt solid #ccc; }
+    .rpt-table tbody tr:last-child { border-bottom: none; }
+    .rpt-table tbody td { padding: 5pt 0; color: #0d0d0d; }
+    .rpt-table tbody td:last-child { text-align: right; font-weight: 500; }
+    .rpt-pos { display: inline-flex; align-items: center; justify-content: center; width: 18pt; height: 18pt; border-radius: 50%; font-size: 8pt; font-weight: 500; margin-right: 5pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rpt-pos.p1 { background: #f0d080; color: #6b4e00; }
+    .rpt-pos.p2 { background: #e0e0e0; color: #444; }
+    .rpt-pos.p3 { background: #e8c9a0; color: #6b3d00; }
+    .rpt-name-cell { display: flex; align-items: center; }
+
+    /* skins winners */
+    .rpt-skins-grid { display: flex; flex-wrap: wrap; gap: 6pt; margin-bottom: 16pt; }
+    .rpt-skin-chip { background: #E1F5EE; border-radius: 4pt; padding: 5pt 10pt; font-size: 9pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rpt-skin-chip .chip-name { font-weight: 500; color: #0a2e1e; }
+    .rpt-skin-chip .chip-detail { color: #0a3d26; font-size: 8pt; font-weight: 500; }
+    .rpt-skin-chip.no-data { background: #f0f0f0; color: #444; font-style: italic; }
+
+    /* ancillaries grid */
+    .rpt-anc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; margin-bottom: 12pt; }
+    .rpt-anc-item { border: 0.5pt solid #aaa; border-radius: 4pt; padding: 6pt 8pt; font-size: 9pt; }
+    .rpt-anc-item .anc-item-lbl { font-size: 7pt; letter-spacing: 0.07em; text-transform: uppercase; color: #2a2a2a; margin-bottom: 3pt; font-weight: 500; }
+    .rpt-anc-item .anc-item-hole { color: #0a3d26; font-size: 8pt; font-weight: 500; }
+    .rpt-anc-item .anc-item-winner { font-weight: 600; color: #0d0d0d; }
+    .rpt-anc-item .anc-item-prize { color: #7a5800; font-weight: 600; float: right; font-size: 9pt; }
+    .rpt-anc-item.empty .anc-item-winner { color: #666; font-style: italic; font-weight: 400; }
+
+    .rpt-footer { margin-top: 14pt; padding-top: 8pt; border-top: 0.5pt solid #999; display: flex; justify-content: space-between; font-size: 7.5pt; color: #333; font-weight: 500; }
   }
 </style>
 </head>
 <body>
 
+<!-- ── SCREEN: header ── -->
 <header>
   <div class="header-left">
     <h1>Golf Skins Payout Calculator</h1>
@@ -206,9 +274,83 @@
   </div>
 </header>
 
+<!-- ── PRINT REPORT (hidden on screen) ── -->
+<div class="print-report" id="print-report">
+  <div class="rpt-header">
+    <div>
+      <div class="h1" style="font-family:'Playfair Display',serif;font-size:18pt;font-weight:600;">Golf Skins Payout</div>
+      <div class="rpt-sub">Official Results Sheet</div>
+    </div>
+    <div class="rpt-date" id="rpt-date"></div>
+  </div>
+  <div class="rpt-body">
+
+    <!-- Key stats -->
+    <div class="rpt-stats">
+      <div class="rpt-stat highlight">
+        <div class="st-lbl">Total pot</div>
+        <div class="st-val" id="rpt-total">GHS 0.00</div>
+        <div class="st-sub" id="rpt-buyin-detail"></div>
+      </div>
+      <div class="rpt-stat">
+        <div class="st-lbl">Players</div>
+        <div class="st-val" id="rpt-players">0</div>
+        <div class="st-sub" id="rpt-buyin-sub"></div>
+      </div>
+      <div class="rpt-stat">
+        <div class="st-lbl">Skins in play</div>
+        <div class="st-val" id="rpt-skins">0</div>
+        <div class="st-sub" id="rpt-skin-val-sub"></div>
+      </div>
+      <div class="rpt-stat">
+        <div class="st-lbl">Skins pot</div>
+        <div class="st-val" id="rpt-skins-pot">GHS 0.00</div>
+        <div class="st-sub">60% of total</div>
+      </div>
+    </div>
+
+    <!-- Pot split bar -->
+    <div class="rpt-split-bar">
+      <div class="rpt-split-seg s1">Skins 60%</div>
+      <div class="rpt-split-seg s2">Stroke play 30%</div>
+      <div class="rpt-split-seg s3">Anc 10%</div>
+    </div>
+
+    <!-- Two col: stroke play + skins winners -->
+    <div class="rpt-two-col">
+      <div class="rpt-col">
+        <div class="rpt-section-heading">Stroke play — <span id="rpt-sp-pot-lbl"></span></div>
+        <table class="rpt-table">
+          <thead><tr><th>Place</th><th>Player</th><th>Payout</th></tr></thead>
+          <tbody id="rpt-sp-tbody"></tbody>
+        </table>
+      </div>
+      <div class="rpt-col">
+        <div class="rpt-section-heading">Skins winners</div>
+        <div class="rpt-skins-grid" id="rpt-skins-grid"></div>
+      </div>
+    </div>
+
+    <!-- Ancillaries -->
+    <div class="rpt-section-heading">Ancillaries — <span id="rpt-anc-pot-lbl"></span> &middot; <span id="rpt-anc-per-lbl"></span> per prize</div>
+
+    <div style="font-size:8pt;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#5a5a5a;margin-bottom:5pt;">Longest drives</div>
+    <div class="rpt-anc-grid" id="rpt-ld-grid"></div>
+
+    <div style="font-size:8pt;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#5a5a5a;margin-bottom:5pt;">Closest to pin</div>
+    <div class="rpt-anc-grid" id="rpt-cp-grid"></div>
+
+    <div class="rpt-footer">
+      <span>Secopp Advisory Services</span>
+      <span id="rpt-footer-detail"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCREEN: main ── -->
 <main>
   <div class="print-bar">
-    <button class="btn-print" onclick="window.print()">
+    <button class="btn-print" onclick="buildReport(); window.print();">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="6 9 6 2 18 2 18 9"/>
         <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
@@ -262,7 +404,7 @@
     <div class="card-head">
       <span class="dot dot-sp"></span>
       <span class="card-head-label">Stroke play</span>
-      <span style="margin-left:auto; font-size:11px; color:var(--ink-faint);">Pot: <span id="sp-pot">GHS 720.00</span></span>
+      <span style="margin-left:auto;font-size:11px;color:var(--ink-faint);">Pot: <span id="sp-pot">GHS 720.00</span></span>
     </div>
     <div class="winner-row">
       <span class="place-badge place-1">1</span>
@@ -284,94 +426,37 @@
   <p class="section-label">Ancillaries</p>
   <p class="anc-subsection-label">Longest drives</p>
   <div class="anc-grid">
-    <div class="anc-card">
-      <div class="anc-card-head"><span class="anc-type-label">Longest drive 1</span><span id="ld-prize-1" class="anc-prize-amt">GHS 30.00</span></div>
-      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld1-hole" placeholder="Hole number" /></div>
-      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld1-winner" placeholder="Winner name" /></div>
-    </div>
-    <div class="anc-card">
-      <div class="anc-card-head"><span class="anc-type-label">Longest drive 2</span><span id="ld-prize-2" class="anc-prize-amt">GHS 30.00</span></div>
-      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld2-hole" placeholder="Hole number" /></div>
-      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld2-winner" placeholder="Winner name" /></div>
-    </div>
-    <div class="anc-card">
-      <div class="anc-card-head"><span class="anc-type-label">Longest drive 3</span><span id="ld-prize-3" class="anc-prize-amt">GHS 30.00</span></div>
-      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld3-hole" placeholder="Hole number" /></div>
-      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld3-winner" placeholder="Winner name" /></div>
-    </div>
-    <div class="anc-card">
-      <div class="anc-card-head"><span class="anc-type-label">Longest drive 4</span><span id="ld-prize-4" class="anc-prize-amt">GHS 30.00</span></div>
-      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld4-hole" placeholder="Hole number" /></div>
-      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld4-winner" placeholder="Winner name" /></div>
-    </div>
+    <div class="anc-card"><div class="anc-card-head"><span class="anc-type-label">Longest drive 1</span><span id="ld-prize-1" class="anc-prize-amt">GHS 30.00</span></div><div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld1-hole" placeholder="Hole number" /></div><div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld1-winner" placeholder="Winner name" /></div></div>
+    <div class="anc-card"><div class="anc-card-head"><span class="anc-type-label">Longest drive 2</span><span id="ld-prize-2" class="anc-prize-amt">GHS 30.00</span></div><div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld2-hole" placeholder="Hole number" /></div><div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld2-winner" placeholder="Winner name" /></div></div>
+    <div class="anc-card"><div class="anc-card-head"><span class="anc-type-label">Longest drive 3</span><span id="ld-prize-3" class="anc-prize-amt">GHS 30.00</span></div><div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld3-hole" placeholder="Hole number" /></div><div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld3-winner" placeholder="Winner name" /></div></div>
+    <div class="anc-card"><div class="anc-card-head"><span class="anc-type-label">Longest drive 4</span><span id="ld-prize-4" class="anc-prize-amt">GHS 30.00</span></div><div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld4-hole" placeholder="Hole number" /></div><div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld4-winner" placeholder="Winner name" /></div></div>
   </div>
-
   <p class="anc-subsection-label">Closest to pin</p>
   <div class="anc-grid">
-    <div class="anc-card">
-      <div class="anc-card-head"><span class="anc-type-label">Closest to pin 1</span><span id="cp-prize-1" class="anc-prize-amt">GHS 30.00</span></div>
-      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp1-hole" placeholder="Hole number" /></div>
-      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp1-winner" placeholder="Winner name" /></div>
-    </div>
-    <div class="anc-card">
-      <div class="anc-card-head"><span class="anc-type-label">Closest to pin 2</span><span id="cp-prize-2" class="anc-prize-amt">GHS 30.00</span></div>
-      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp2-hole" placeholder="Hole number" /></div>
-      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp2-winner" placeholder="Winner name" /></div>
-    </div>
-    <div class="anc-card">
-      <div class="anc-card-head"><span class="anc-type-label">Closest to pin 3</span><span id="cp-prize-3" class="anc-prize-amt">GHS 30.00</span></div>
-      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp3-hole" placeholder="Hole number" /></div>
-      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp3-winner" placeholder="Winner name" /></div>
-    </div>
-    <div class="anc-card">
-      <div class="anc-card-head"><span class="anc-type-label">Closest to pin 4</span><span id="cp-prize-4" class="anc-prize-amt">GHS 30.00</span></div>
-      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp4-hole" placeholder="Hole number" /></div>
-      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp4-winner" placeholder="Winner name" /></div>
-    </div>
+    <div class="anc-card"><div class="anc-card-head"><span class="anc-type-label">Closest to pin 1</span><span id="cp-prize-1" class="anc-prize-amt">GHS 30.00</span></div><div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp1-hole" placeholder="Hole number" /></div><div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp1-winner" placeholder="Winner name" /></div></div>
+    <div class="anc-card"><div class="anc-card-head"><span class="anc-type-label">Closest to pin 2</span><span id="cp-prize-2" class="anc-prize-amt">GHS 30.00</span></div><div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp2-hole" placeholder="Hole number" /></div><div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp2-winner" placeholder="Winner name" /></div></div>
+    <div class="anc-card"><div class="anc-card-head"><span class="anc-type-label">Closest to pin 3</span><span id="cp-prize-3" class="anc-prize-amt">GHS 30.00</span></div><div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp3-hole" placeholder="Hole number" /></div><div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp3-winner" placeholder="Winner name" /></div></div>
+    <div class="anc-card"><div class="anc-card-head"><span class="anc-type-label">Closest to pin 4</span><span id="cp-prize-4" class="anc-prize-amt">GHS 30.00</span></div><div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp4-hole" placeholder="Hole number" /></div><div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp4-winner" placeholder="Winner name" /></div></div>
   </div>
-  <div class="anc-total-row" style="margin-bottom:32px;">
-    Ancillary pot: <span id="anc-pot">GHS 240.00</span> &mdash; <span id="anc-per">GHS 30.00</span> per prize (8 prizes)
-  </div>
+  <div class="anc-total-row" style="margin-bottom:32px;">Ancillary pot: <span id="anc-pot">GHS 240.00</span> &mdash; <span id="anc-per">GHS 30.00</span> per prize (8 prizes)</div>
 
   <!-- Skins allocation -->
   <p class="section-label">Skins allocation</p>
   <div class="alloc-wrap">
     <div class="alloc-status-bar">
-      <div class="alloc-pill total">
-        <span id="alloc-total" class="pill-num">6</span>
-        <span class="pill-lbl">Total skins</span>
-      </div>
-      <div class="alloc-pill used">
-        <span id="alloc-used" class="pill-num">0</span>
-        <span class="pill-lbl">Assigned</span>
-      </div>
-      <div class="alloc-pill remain" id="alloc-remain-pill">
-        <span id="alloc-remain" class="pill-num">6</span>
-        <span class="pill-lbl">Remaining</span>
-      </div>
+      <div class="alloc-pill total"><span id="alloc-total" class="pill-num">6</span><span class="pill-lbl">Total skins</span></div>
+      <div class="alloc-pill used"><span id="alloc-used" class="pill-num">0</span><span class="pill-lbl">Assigned</span></div>
+      <div class="alloc-pill remain" id="alloc-remain-pill"><span id="alloc-remain" class="pill-num">6</span><span class="pill-lbl">Remaining</span></div>
       <div class="alloc-progress">
-        <div class="alloc-progress-track">
-          <div class="alloc-progress-fill" id="alloc-bar" style="width:0%"></div>
-        </div>
+        <div class="alloc-progress-track"><div class="alloc-progress-fill" id="alloc-bar" style="width:0%"></div></div>
         <div class="alloc-progress-lbl" id="alloc-progress-lbl">0 of 6 skins assigned</div>
       </div>
     </div>
-
     <div class="alloc-done-banner" id="alloc-done-banner">All skins have been assigned</div>
-
     <table class="alloc-table">
-      <thead>
-        <tr>
-          <th style="width:32px;"></th>
-          <th>Player name</th>
-          <th style="width:110px;">Skins won</th>
-          <th style="text-align:right;">Payout</th>
-          <th style="width:30px;"></th>
-        </tr>
-      </thead>
+      <thead><tr><th style="width:32px;"></th><th>Player name</th><th style="width:110px;">Skins won</th><th style="text-align:right;">Payout</th><th style="width:30px;"></th></tr></thead>
       <tbody id="alloc-tbody"></tbody>
     </table>
-
     <div class="alloc-add-row">
       <button class="btn-add-player" id="btn-add-player" onclick="addAllocRow()">+ Add player</button>
       <span class="alloc-over-warn" id="alloc-over-warn">Skins assigned exceed total — please correct</span>
@@ -379,13 +464,10 @@
     </div>
   </div>
 
-  <!-- Skins payout ladder -->
+  <!-- Skins ladder -->
   <p class="section-label">Skins payout ladder</p>
   <div class="ladder-wrap">
-    <div class="ladder-header">
-      <span class="dot dot-s"></span>
-      <span id="ladder-title">Player payout by skins won</span>
-    </div>
+    <div class="ladder-header"><span class="dot dot-s"></span><span id="ladder-title">Player payout by skins won</span></div>
     <div id="ladder-body"></div>
   </div>
 </main>
@@ -393,27 +475,20 @@
 <footer>Secopp Advisory Services &mdash; Golf Skins Payout Calculator</footer>
 
 <script>
-  var skinVal = 0;
-  var skinsPot = 0;
-  var totalSkins = 0;
-  var rowCount = 0;
-
-  var fmt = function(v) {
-    return 'GHS ' + v.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
+  var skinVal = 0, skinsPot = 0, totalSkins = 0, rowCount = 0;
+  var fmt = function(v) { return 'GHS ' + v.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
 
   function calc() {
     var players  = Math.max(2, parseInt(document.getElementById('inp-players').value) || 2);
     var buyin    = Math.max(1, parseFloat(document.getElementById('inp-buyin').value) || 200);
     var skinsWon = Math.max(0, parseInt(document.getElementById('inp-skins').value) || 0);
-
-    totalSkins = skinsWon;
-    var total  = players * buyin;
-    skinsPot   = total * 0.60;
-    var spPot  = total * 0.30;
-    var ancPot = total * 0.10;
+    totalSkins   = skinsWon;
+    var total    = players * buyin;
+    skinsPot     = total * 0.60;
+    var spPot    = total * 0.30;
+    var ancPot   = total * 0.10;
     var ancPrize = ancPot / 8;
-    skinVal    = skinsWon > 0 ? skinsPot / skinsWon : 0;
+    skinVal      = skinsWon > 0 ? skinsPot / skinsWon : 0;
 
     document.getElementById('tv-total').textContent  = fmt(total);
     document.getElementById('skins-pot').textContent = fmt(skinsPot);
@@ -427,24 +502,18 @@
     document.getElementById('sp1').textContent = fmt(spPot * 0.50);
     document.getElementById('sp2').textContent = fmt(spPot * 0.30);
     document.getElementById('sp3').textContent = fmt(spPot * 0.20);
-
     for (var i = 1; i <= 4; i++) {
       document.getElementById('ld-prize-' + i).textContent = fmt(ancPrize);
       document.getElementById('cp-prize-' + i).textContent = fmt(ancPrize);
     }
-
     updateAlloc();
     updateLadder(skinsWon);
   }
 
   function getUsedSkins() {
-    var total = 0;
-    var rows = document.querySelectorAll('.alloc-skins-input');
-    for (var i = 0; i < rows.length; i++) {
-      var v = parseInt(rows[i].value) || 0;
-      total += v;
-    }
-    return total;
+    var t = 0;
+    document.querySelectorAll('.alloc-skins-input').forEach(function(inp) { t += parseInt(inp.value) || 0; });
+    return t;
   }
 
   function updateAlloc() {
@@ -452,55 +521,36 @@
     var remain = totalSkins - used;
     var pct    = totalSkins > 0 ? Math.min(100, (used / totalSkins) * 100) : 0;
     var over   = used > totalSkins;
-
-    document.getElementById('alloc-total').textContent  = totalSkins;
-    document.getElementById('alloc-used').textContent   = used;
-    document.getElementById('alloc-remain').textContent = Math.max(0, remain);
-    document.getElementById('alloc-bar').style.width    = pct + '%';
+    document.getElementById('alloc-total').textContent       = totalSkins;
+    document.getElementById('alloc-used').textContent        = used;
+    document.getElementById('alloc-remain').textContent      = Math.max(0, remain);
+    document.getElementById('alloc-bar').style.width         = pct + '%';
     document.getElementById('alloc-progress-lbl').textContent = used + ' of ' + totalSkins + ' skins assigned';
-    document.getElementById('alloc-hint-num').textContent = Math.max(0, remain);
-
+    document.getElementById('alloc-hint-num').textContent    = Math.max(0, remain);
     var remainPill = document.getElementById('alloc-remain-pill');
-    if (remain === 0 && !over) {
-      remainPill.classList.add('done');
-    } else {
-      remainPill.classList.remove('done');
-    }
-
-    var done = (remain === 0 && !over && totalSkins > 0);
+    remain === 0 && !over ? remainPill.classList.add('done') : remainPill.classList.remove('done');
+    var done = remain === 0 && !over && totalSkins > 0;
     document.getElementById('alloc-done-banner').classList.toggle('show', done);
     document.getElementById('alloc-over-warn').classList.toggle('show', over);
     document.getElementById('alloc-hint').style.display = over ? 'none' : '';
-
     var addBtn = document.getElementById('btn-add-player');
-    if (remain <= 0 || over) {
-      addBtn.classList.add('disabled');
-    } else {
-      addBtn.classList.remove('disabled');
-    }
-
-    // update each row's payout live
-    var rows = document.querySelectorAll('#alloc-tbody tr');
-    for (var i = 0; i < rows.length; i++) {
-      var inp  = rows[i].querySelector('.alloc-skins-input');
-      var cell = rows[i].querySelector('.alloc-payout-cell');
+    remain <= 0 || over ? addBtn.classList.add('disabled') : addBtn.classList.remove('disabled');
+    document.querySelectorAll('#alloc-tbody tr').forEach(function(row) {
+      var inp  = row.querySelector('.alloc-skins-input');
+      var cell = row.querySelector('.alloc-payout-cell');
       if (inp && cell) {
         var s = parseInt(inp.value) || 0;
-        var payout = s * skinVal;
-        cell.textContent = s > 0 ? fmt(payout) : '—';
+        cell.textContent = s > 0 ? fmt(s * skinVal) : '—';
         cell.classList.toggle('zero', s === 0);
       }
-    }
+    });
   }
 
   function addAllocRow() {
-    var used   = getUsedSkins();
-    var remain = totalSkins - used;
+    var remain = totalSkins - getUsedSkins();
     if (remain <= 0) return;
-
     rowCount++;
     var idx = rowCount;
-    var tbody = document.getElementById('alloc-tbody');
     var tr = document.createElement('tr');
     tr.id = 'alloc-row-' + idx;
     tr.innerHTML =
@@ -509,56 +559,105 @@
       '<td class="alloc-skins-td"><input class="alloc-input alloc-skins-input" type="number" min="0" placeholder="Skins" /></td>' +
       '<td class="alloc-payout-cell zero">—</td>' +
       '<td class="alloc-del-td"><button class="alloc-delete" onclick="deleteAllocRow(' + idx + ')" title="Remove">&#x2715;</button></td>';
-    tbody.appendChild(tr);
-
-    var skinInp = tr.querySelector('.alloc-skins-input');
-    skinInp.addEventListener('input', updateAlloc);
-
+    document.getElementById('alloc-tbody').appendChild(tr);
+    tr.querySelector('.alloc-skins-input').addEventListener('input', updateAlloc);
     tr.querySelector('input[type="text"]').focus();
     updateAlloc();
   }
 
   function deleteAllocRow(idx) {
     var row = document.getElementById('alloc-row-' + idx);
-    if (row) { row.parentNode.removeChild(row); }
+    if (row) row.parentNode.removeChild(row);
     updateAlloc();
   }
 
   function updateLadder(skinsWon) {
-    var ladderBody = document.getElementById('ladder-body');
-    if (skinsWon === 0) {
-      ladderBody.innerHTML = '<p class="empty-msg">Set skins won above to see the payout ladder.</p>';
-      document.getElementById('ladder-title').textContent = 'Player payout by skins won';
-      return;
-    }
-    document.getElementById('ladder-title').textContent =
-      'If ' + skinsWon + ' skin' + (skinsWon !== 1 ? 's' : '') + ' are won — each skin = ' + fmt(skinVal);
-
+    var lb = document.getElementById('ladder-body');
+    if (skinsWon === 0) { lb.innerHTML = '<p class="empty-msg">Set skins won above to see the payout ladder.</p>'; document.getElementById('ladder-title').textContent = 'Player payout by skins won'; return; }
+    document.getElementById('ladder-title').textContent = 'If ' + skinsWon + ' skin' + (skinsWon !== 1 ? 's' : '') + ' are won — each skin = ' + fmt(skinVal);
     var rows = '';
     for (var j = 1; j <= skinsWon; j++) {
-      var payout = j * skinVal;
-      var pct    = (payout / skinsPot) * 100;
-      var isLast = j === skinsWon;
-      rows +=
-        '<tr' + (isLast ? ' class="full-pot"' : '') + '>' +
-        '<td><span class="badge">' + j + (j === 1 ? ' skin' : ' skins') + '</span></td>' +
-        '<td class="muted">' + fmt(skinVal) + ' &times; ' + j + '</td>' +
-        '<td>' + fmt(payout) + '</td>' +
-        '<td><span class="bar-track"><span class="bar-fill" style="width:' + pct + '%"></span></span>' +
-        '<span class="pct-lbl">' + pct.toFixed(2) + '%</span></td>' +
-        '</tr>';
+      var payout = j * skinVal, pct = (payout / skinsPot) * 100, isLast = j === skinsWon;
+      rows += '<tr' + (isLast ? ' class="full-pot"' : '') + '><td><span class="badge">' + j + (j === 1 ? ' skin' : ' skins') + '</span></td><td class="muted">' + fmt(skinVal) + ' &times; ' + j + '</td><td>' + fmt(payout) + '</td><td><span class="bar-track"><span class="bar-fill" style="width:' + pct + '%"></span></span><span class="pct-lbl">' + pct.toFixed(2) + '%</span></td></tr>';
     }
-    ladderBody.innerHTML =
-      '<table class="ltable">' +
-        '<thead><tr><th>Skins won</th><th>Calculation</th><th>Payout</th><th>Share of skins pot</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody>' +
-      '</table>';
+    lb.innerHTML = '<table class="ltable"><thead><tr><th>Skins won</th><th>Calculation</th><th>Payout</th><th>Share of skins pot</th></tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  function gv(id) { return (document.getElementById(id) ? document.getElementById(id).value.trim() : '') || '—'; }
+  function gt(id) { return document.getElementById(id) ? document.getElementById(id).textContent.trim() : ''; }
+
+  function buildReport() {
+    var players  = Math.max(2, parseInt(document.getElementById('inp-players').value) || 2);
+    var buyin    = Math.max(1, parseFloat(document.getElementById('inp-buyin').value) || 200);
+    var skinsWon = Math.max(0, parseInt(document.getElementById('inp-skins').value) || 0);
+    var total    = players * buyin;
+    var spPot    = total * 0.30;
+    var ancPot   = total * 0.10;
+    var ancPrize = ancPot / 8;
+
+    var now = new Date();
+    document.getElementById('rpt-date').textContent = now.toLocaleDateString('en-GH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('rpt-total').textContent        = fmt(total);
+    document.getElementById('rpt-buyin-detail').textContent = players + ' players x ' + fmt(buyin);
+    document.getElementById('rpt-players').textContent      = players;
+    document.getElementById('rpt-buyin-sub').textContent    = fmt(buyin) + ' buy-in';
+    document.getElementById('rpt-skins').textContent        = skinsWon;
+    document.getElementById('rpt-skin-val-sub').textContent = skinsWon > 0 ? fmt(skinVal) + ' per skin' : '';
+    document.getElementById('rpt-skins-pot').textContent    = fmt(skinsPot);
+    document.getElementById('rpt-sp-pot-lbl').textContent   = fmt(spPot);
+    document.getElementById('rpt-anc-pot-lbl').textContent  = fmt(ancPot);
+    document.getElementById('rpt-anc-per-lbl').textContent  = fmt(ancPrize);
+    document.getElementById('rpt-footer-detail').textContent = players + ' players · ' + skinsWon + ' skins · ' + fmt(total) + ' pot';
+
+    // stroke play
+    var spData = [
+      { pos: 1, cls: 'p1', name: gv('sp1-name'), payout: fmt(spPot * 0.50) },
+      { pos: 2, cls: 'p2', name: gv('sp2-name'), payout: fmt(spPot * 0.30) },
+      { pos: 3, cls: 'p3', name: gv('sp3-name'), payout: fmt(spPot * 0.20) }
+    ];
+    var spRows = spData.map(function(d) {
+      return '<tr><td><div class="rpt-name-cell"><span class="rpt-pos ' + d.cls + '">' + d.pos + '</span>' + d.name + '</div></td><td></td><td>' + d.payout + '</td></tr>';
+    }).join('');
+    document.getElementById('rpt-sp-tbody').innerHTML = spRows;
+
+    // skins winners from allocation
+    var allocRows = document.querySelectorAll('#alloc-tbody tr');
+    var skinChips = '';
+    allocRows.forEach(function(row) {
+      var nameInp  = row.querySelector('input[type="text"]');
+      var skinsInp = row.querySelector('.alloc-skins-input');
+      var name  = nameInp ? nameInp.value.trim() : '';
+      var skins = parseInt(skinsInp ? skinsInp.value : '') || 0;
+      if (name || skins > 0) {
+        var payout = skins * skinVal;
+        skinChips += '<div class="rpt-skin-chip"><div class="chip-name">' + (name || 'Unnamed') + '</div><div class="chip-detail">' + skins + (skins === 1 ? ' skin' : ' skins') + ' &mdash; ' + fmt(payout) + '</div></div>';
+      }
+    });
+    if (!skinChips) skinChips = '<div class="rpt-skin-chip no-data">No skins allocated yet</div>';
+    document.getElementById('rpt-skins-grid').innerHTML = skinChips;
+
+    // ancillaries
+    function buildAncGrid(gridId, prefix, label) {
+      var html = '';
+      for (var i = 1; i <= 4; i++) {
+        var hole   = document.getElementById(prefix + i + '-hole') ? document.getElementById(prefix + i + '-hole').value.trim() : '';
+        var winner = document.getElementById(prefix + i + '-winner') ? document.getElementById(prefix + i + '-winner').value.trim() : '';
+        var isEmpty = !hole && !winner;
+        html += '<div class="rpt-anc-item' + (isEmpty ? ' empty' : '') + '">';
+        html += '<div class="anc-item-lbl">' + label + ' ' + i + '<span class="anc-item-prize">' + fmt(ancPrize) + '</span></div>';
+        if (hole) html += '<div class="anc-item-hole">Hole ' + hole + '</div>';
+        html += '<div class="anc-item-winner">' + (winner || 'TBC') + '</div>';
+        html += '</div>';
+      }
+      document.getElementById(gridId).innerHTML = html;
+    }
+    buildAncGrid('rpt-ld-grid', 'ld', 'Longest drive');
+    buildAncGrid('rpt-cp-grid', 'cp', 'Closest to pin');
   }
 
   ['inp-players','inp-buyin','inp-skins'].forEach(function(id) {
     document.getElementById(id).addEventListener('input', calc);
   });
-
   calc();
   addAllocRow();
 </script>
