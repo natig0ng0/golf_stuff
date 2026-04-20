@@ -7,366 +7,188 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --green-deep:   #0a2e1e;
-    --green-dark:   #0f4a2e;
-    --green-mid:    #1D9E75;
-    --green-light:  #5DCAA5;
-    --green-pale:   #E1F5EE;
-    --gold:         #c9a84c;
-    --gold-light:   #f0d080;
-    --gold-pale:    #fdf6e3;
-    --white:        #ffffff;
-    --ink:          #1a1a1a;
-    --ink-muted:    #5a5a5a;
-    --ink-faint:    #9a9a9a;
-    --border:       rgba(0,0,0,0.10);
-    --border-mid:   rgba(0,0,0,0.16);
-    --surface:      #f7f9f7;
-    --surface-card: #ffffff;
-    --radius-sm:    6px;
-    --radius-md:    10px;
-    --radius-lg:    14px;
+    --green-deep:  #0a2e1e;
+    --green-dark:  #0f4a2e;
+    --green-mid:   #1D9E75;
+    --green-light: #5DCAA5;
+    --green-pale:  #E1F5EE;
+    --gold:        #c9a84c;
+    --gold-light:  #f0d080;
+    --white:       #ffffff;
+    --ink:         #1a1a1a;
+    --ink-muted:   #5a5a5a;
+    --ink-faint:   #9a9a9a;
+    --border:      rgba(0,0,0,0.10);
+    --border-mid:  rgba(0,0,0,0.16);
+    --surface:     #f7f9f7;
+    --surface-card:#ffffff;
+    --radius-sm:   6px;
+    --radius-md:   10px;
+    --radius-lg:   14px;
+    --red:         #d9534f;
+    --red-pale:    #fdf0f0;
   }
+  body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--ink); min-height: 100vh; }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--surface);
-    color: var(--ink);
-    min-height: 100vh;
-    padding: 0;
-  }
-
-  /* ── Header ─────────────────────────────────────────── */
   header {
-    background: var(--green-deep);
-    padding: 28px 48px 24px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
+    background: var(--green-deep); padding: 28px 48px 24px;
+    display: flex; align-items: flex-end; justify-content: space-between;
     border-bottom: 3px solid var(--gold);
   }
-  .header-left h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 28px;
-    font-weight: 600;
-    color: var(--white);
-    letter-spacing: 0.01em;
-    line-height: 1.2;
-  }
-  .header-left p {
-    font-size: 13px;
-    color: var(--green-light);
-    margin-top: 4px;
-    font-weight: 300;
-    letter-spacing: 0.04em;
-  }
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .flag {
-    font-size: 22px;
-    line-height: 1;
-  }
-  .currency-badge {
-    background: var(--gold);
-    color: var(--green-deep);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    padding: 4px 10px;
-    border-radius: 20px;
-    text-transform: uppercase;
-  }
+  .header-left h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: var(--white); }
+  .header-left p  { font-size: 13px; color: var(--green-light); margin-top: 4px; font-weight: 300; letter-spacing: 0.04em; }
+  .header-right   { display: flex; align-items: center; gap: 12px; }
+  .flag           { font-size: 22px; }
+  .currency-badge { background: var(--gold); color: var(--green-deep); font-size: 11px; font-weight: 500; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
 
-  /* ── Main layout ─────────────────────────────────────── */
-  main {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 36px 24px 60px;
-  }
+  main { max-width: 960px; margin: 0 auto; padding: 36px 24px 60px; }
+  .section-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 14px; }
 
-  /* ── Section label ───────────────────────────────────── */
-  .section-label {
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-bottom: 14px;
-  }
+  .inputs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+  .input-card { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 18px; transition: border-color 0.2s; }
+  .input-card:focus-within { border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(29,158,117,0.10); }
+  .input-card label { display: block; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }
+  .input-card input[type="number"] { width: 100%; font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 500; color: var(--ink); background: transparent; border: none; outline: none; -moz-appearance: textfield; }
+  .input-card input[type="number"]::-webkit-inner-spin-button,
+  .input-card input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .input-card .unit { font-size: 11px; color: var(--ink-faint); margin-top: 4px; }
 
-  /* ── Inputs ──────────────────────────────────────────── */
-  .inputs-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 28px;
-  }
-  .input-card {
-    background: var(--surface-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 16px 18px;
-    transition: border-color 0.2s;
-  }
-  .input-card:focus-within {
-    border-color: var(--green-mid);
-    box-shadow: 0 0 0 3px rgba(29,158,117,0.10);
-  }
-  .input-card label {
-    display: block;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-bottom: 8px;
-  }
-  .input-card input {
-    width: 100%;
-    font-family: 'Playfair Display', serif;
-    font-size: 26px;
-    font-weight: 500;
-    color: var(--ink);
-    background: transparent;
-    border: none;
-    outline: none;
-    appearance: textfield;
-    -moz-appearance: textfield;
-  }
-  .input-card input::-webkit-inner-spin-button,
-  .input-card input::-webkit-outer-spin-button { -webkit-appearance: none; }
-  .input-card .unit {
-    font-size: 11px;
-    color: var(--ink-faint);
-    margin-top: 4px;
-  }
+  .total-strip { background: var(--green-deep); border-radius: var(--radius-md); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+  .total-strip .tl { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-light); }
+  .total-strip .tv { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; color: var(--gold-light); }
 
-  /* ── Total strip ─────────────────────────────────────── */
-  .total-strip {
-    background: var(--green-deep);
-    border-radius: var(--radius-md);
-    padding: 16px 22px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 28px;
-  }
-  .total-strip .tl {
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--green-light);
-  }
-  .total-strip .tv {
-    font-family: 'Playfair Display', serif;
-    font-size: 26px;
-    font-weight: 600;
-    color: var(--gold-light);
-  }
-
-  /* ── Pot bar ─────────────────────────────────────────── */
-  .pot-bar {
-    display: grid;
-    grid-template-columns: 6fr 3fr 1fr;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    margin-bottom: 28px;
-    height: 44px;
-    border: 1px solid var(--border);
-  }
-  .pot-seg {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-  }
+  .pot-bar { display: grid; grid-template-columns: 6fr 3fr 1fr; border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 28px; height: 44px; border: 1px solid var(--border); }
+  .pot-seg { display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; }
   .pot-seg.s1 { background: #1D9E75; color: #E1F5EE; }
   .pot-seg.s2 { background: #0F6E56; color: #9FE1CB; }
   .pot-seg.s3 { background: #085041; color: #5DCAA5; }
 
-  /* ── Cards row ───────────────────────────────────────── */
-  .cards-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 32px;
-  }
-  .payout-card {
-    background: var(--surface-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 18px 20px;
-  }
-  .payout-card .card-head {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .dot { width: 9px; height: 9px; border-radius: 50%; }
-  .dot-s { background: #1D9E75; }
+  .payout-card { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+  .card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dot-s  { background: #1D9E75; }
   .dot-sp { background: #0F6E56; }
-  .dot-a { background: #c9a84c; }
-  .card-head-label {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-  }
-  .big-val {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--ink);
-    margin-bottom: 2px;
-  }
+  .dot-a  { background: #c9a84c; }
+  .card-head-label { font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-muted); }
+  .big-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
   .sub-lbl { font-size: 11px; color: var(--ink-faint); }
-  .card-divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 12px 0;
-  }
-  .prow {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 12px;
-  }
-  .prow:last-child { border-bottom: none; }
-  .prow .pl { color: var(--ink-muted); }
-  .prow .pv { font-weight: 500; color: var(--ink); font-size: 13px; }
-  .pot-footer {
-    font-size: 11px;
-    color: var(--ink-faint);
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-  }
+  .pot-footer { font-size: 11px; color: var(--ink-faint); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
   .pot-footer span { color: var(--ink-muted); font-weight: 500; }
 
-  /* ── Skins ladder ────────────────────────────────────── */
-  .ladder-wrap {
-    background: var(--surface-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px 22px;
-    margin-bottom: 36px;
-  }
-  .ladder-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  #ladder-title {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ink-muted);
-    letter-spacing: 0.02em;
-  }
-  table.ltable {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  table.ltable thead th {
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    text-align: left;
-    padding: 0 0 10px;
-    border-bottom: 1px solid var(--border-mid);
-  }
+  .winner-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .winner-row:last-of-type { border-bottom: none; }
+  .place-badge { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .place-1 { background: #f0d080; color: #6b4e00; }
+  .place-2 { background: #e0e0e0; color: #444; }
+  .place-3 { background: #e8c9a0; color: #6b3d00; }
+  .winner-name-input { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; outline: none; transition: border-color 0.2s; min-width: 0; }
+  .winner-name-input:focus { border-color: var(--green-mid); }
+  .winner-name-input::placeholder { color: var(--ink-faint); }
+  .winner-payout { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; min-width: 88px; text-align: right; }
+
+  .anc-subsection-label { font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .anc-subsection-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .anc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
+  .anc-card { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
+  .anc-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .anc-type-label { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+  .anc-prize-amt { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500; color: var(--green-mid); }
+  .anc-entry { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .anc-entry:last-child { margin-bottom: 0; }
+  .anc-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
+  .anc-icon.hole-icon { background: var(--green-pale); color: var(--green-dark); }
+  .anc-icon.win-icon  { background: #fdf6e3; color: #8a6800; }
+  .anc-entry input { flex: 1; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 9px; outline: none; transition: border-color 0.2s; min-width: 0; }
+  .anc-entry input:focus { border-color: var(--gold); }
+  .anc-entry input::placeholder { color: var(--ink-faint); }
+  .anc-total-row { margin-top: 6px; font-size: 11px; color: var(--ink-faint); padding-top: 14px; border-top: 1px solid var(--border); }
+  .anc-total-row span { color: var(--ink-muted); font-weight: 500; }
+
+  /* ── Skins allocation ─────────────────────────────── */
+  .alloc-wrap { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 22px; margin-bottom: 14px; }
+  .alloc-status-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .alloc-pill { display: flex; flex-direction: column; align-items: center; background: var(--surface); border-radius: var(--radius-md); padding: 10px 20px; min-width: 90px; }
+  .alloc-pill .pill-num { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600; line-height: 1; }
+  .alloc-pill .pill-lbl { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-faint); margin-top: 4px; }
+  .alloc-pill.total  .pill-num { color: var(--ink); }
+  .alloc-pill.used   .pill-num { color: var(--green-mid); }
+  .alloc-pill.remain .pill-num { color: var(--gold); }
+  .alloc-pill.remain.done .pill-num { color: var(--green-mid); }
+  .alloc-progress { flex: 1; }
+  .alloc-progress-track { height: 8px; background: var(--surface); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .alloc-progress-fill { height: 8px; background: var(--green-mid); border-radius: 4px; transition: width 0.3s ease; }
+  .alloc-progress-lbl { font-size: 11px; color: var(--ink-faint); margin-top: 6px; }
+  .alloc-done-banner { display: none; align-items: center; gap: 8px; background: var(--green-pale); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--green-dark); margin-bottom: 16px; }
+  .alloc-done-banner.show { display: flex; }
+  .alloc-done-banner::before { content: '✓'; width: 18px; height: 18px; background: var(--green-mid); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+
+  .alloc-table { width: 100%; border-collapse: collapse; }
+  .alloc-table thead th { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); text-align: left; padding: 0 0 10px; border-bottom: 1px solid var(--border-mid); }
+  .alloc-table thead th:last-child { text-align: right; }
+  .alloc-table tbody tr { border-bottom: 1px solid var(--border); }
+  .alloc-table tbody tr:last-child { border-bottom: none; }
+  .alloc-table tbody td { padding: 8px 0; vertical-align: middle; }
+  .alloc-row-num { width: 28px; height: 28px; border-radius: 50%; background: var(--green-pale); color: var(--green-dark); font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; }
+  .alloc-input { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; outline: none; transition: border-color 0.2s; width: 100%; }
+  .alloc-input:focus { border-color: var(--green-mid); }
+  .alloc-input::placeholder { color: var(--ink-faint); }
+  .alloc-input.skins-input { width: 80px; -moz-appearance: textfield; }
+  .alloc-input.skins-input::-webkit-inner-spin-button,
+  .alloc-input.skins-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .alloc-payout-cell { text-align: right; font-weight: 500; font-size: 13px; color: var(--green-mid); white-space: nowrap; }
+  .alloc-payout-cell.zero { color: var(--ink-faint); }
+  .alloc-delete { background: none; border: none; cursor: pointer; color: var(--ink-faint); font-size: 16px; padding: 0 4px; line-height: 1; transition: color 0.15s; }
+  .alloc-delete:hover { color: var(--red); }
+  td.alloc-name-td { padding-right: 10px; }
+  td.alloc-skins-td { padding-right: 10px; width: 100px; }
+  td.alloc-del-td { width: 30px; }
+
+  .alloc-add-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .btn-add-player { display: flex; align-items: center; gap: 6px; background: none; border: 1px dashed var(--border-mid); border-radius: var(--radius-sm); padding: 7px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; color: var(--ink-muted); cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+  .btn-add-player:hover { border-color: var(--green-mid); color: var(--green-mid); }
+  .btn-add-player.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .alloc-remaining-hint { font-size: 11px; color: var(--ink-faint); margin-left: auto; }
+  .alloc-remaining-hint strong { color: var(--green-mid); }
+  .alloc-over-warn { font-size: 11px; color: var(--red); margin-left: auto; display: none; }
+  .alloc-over-warn.show { display: block; }
+
+  /* Ladder */
+  .ladder-wrap { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 22px; margin-bottom: 36px; }
+  .ladder-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  #ladder-title { font-size: 12px; font-weight: 500; color: var(--ink-muted); }
+  table.ltable { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.ltable thead th { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); text-align: left; padding: 0 0 10px; border-bottom: 1px solid var(--border-mid); }
   table.ltable thead th:not(:first-child) { text-align: right; }
   table.ltable tbody tr { border-bottom: 1px solid var(--border); }
   table.ltable tbody tr:last-child { border-bottom: none; }
   table.ltable tbody td { padding: 9px 0; }
   table.ltable tbody td:not(:first-child) { text-align: right; }
   table.ltable tbody tr.full-pot td { font-weight: 500; }
-  table.ltable tbody tr.full-pot td .badge { background: var(--green-mid); color: var(--green-pale); }
-  .badge {
-    display: inline-block;
-    background: #f0f0ee;
-    color: var(--ink-muted);
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 11px;
-  }
+  table.ltable tbody tr.full-pot .badge { background: var(--green-mid); color: var(--green-pale); }
+  .badge { display: inline-block; background: #f0f0ee; color: var(--ink-muted); border-radius: 4px; padding: 2px 8px; font-size: 11px; }
   .muted { color: var(--ink-faint); }
-  .bar-track {
-    display: inline-block;
-    vertical-align: middle;
-    width: 90px;
-    height: 5px;
-    background: #eee;
-    border-radius: 3px;
-    overflow: hidden;
-    margin-right: 6px;
-  }
-  .bar-fill {
-    height: 5px;
-    background: var(--green-mid);
-    border-radius: 3px;
-  }
-  .pct-lbl { font-size: 11px; color: var(--ink-faint); }
+  .bar-track { display: inline-block; vertical-align: middle; width: 90px; height: 5px; background: #eee; border-radius: 3px; overflow: hidden; margin-right: 6px; }
+  .bar-fill  { height: 5px; background: var(--green-mid); border-radius: 3px; }
+  .pct-lbl   { font-size: 11px; color: var(--ink-faint); }
   .empty-msg { font-size: 13px; color: var(--ink-faint); padding: 8px 0; }
 
-  /* ── Print button ────────────────────────────────────── */
-  .print-bar {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 28px;
-  }
-  .btn-print {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--green-deep);
-    color: var(--white);
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 10px 20px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    letter-spacing: 0.02em;
-    transition: background 0.2s;
-  }
+  .print-bar { display: flex; justify-content: flex-end; margin-bottom: 28px; }
+  .btn-print { display: flex; align-items: center; gap: 8px; background: var(--green-deep); color: var(--white); border: none; border-radius: var(--radius-sm); padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; letter-spacing: 0.02em; transition: background 0.2s; }
   .btn-print:hover { background: var(--green-dark); }
   .btn-print svg { width: 15px; height: 15px; }
 
-  /* ── Footer ──────────────────────────────────────────── */
-  footer {
-    text-align: center;
-    font-size: 11px;
-    color: var(--ink-faint);
-    padding: 20px 0 32px;
-    border-top: 1px solid var(--border);
-    letter-spacing: 0.04em;
-  }
+  footer { text-align: center; font-size: 11px; color: var(--ink-faint); padding: 20px 0 32px; border-top: 1px solid var(--border); letter-spacing: 0.04em; }
 
-  /* ── Print styles ────────────────────────────────────── */
   @media print {
     @page { size: A4; margin: 18mm 16mm; }
     body { background: #fff; }
-    header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .pot-bar, .total-strip, .pot-seg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .btn-print, .print-bar { display: none !important; }
+    header, .pot-bar, .total-strip, .pot-seg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .anc-icon, .place-badge, .alloc-row-num, .alloc-progress-fill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .btn-print, .print-bar, .btn-add-player, .alloc-delete, .alloc-add-row { display: none !important; }
     main { padding: 20px 0; }
-    .cards-row { break-inside: avoid; }
-    .ladder-wrap { break-inside: avoid; }
+    .anc-grid { break-inside: avoid; }
+    .ladder-wrap, .alloc-wrap { break-inside: avoid; }
     .bar-track, .bar-fill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
@@ -388,7 +210,8 @@
   <div class="print-bar">
     <button class="btn-print" onclick="window.print()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
         <rect x="6" y="14" width="12" height="8"/>
       </svg>
       Print / Save as PDF
@@ -426,31 +249,137 @@
     <div class="pot-seg s3">Anc — 10%</div>
   </div>
 
-  <div class="cards-row">
-    <div class="payout-card">
-      <div class="card-head"><span class="dot dot-s"></span><span class="card-head-label">Skins</span></div>
-      <div id="skins-val" class="big-val">GHS 240.00</div>
-      <div id="skins-sub" class="sub-lbl">per skin (6 skins)</div>
-      <div class="pot-footer">Skins pot: <span id="skins-pot">GHS 1,440.00</span></div>
+  <p class="section-label">Skins</p>
+  <div class="payout-card" style="margin-bottom:28px;">
+    <div class="card-head"><span class="dot dot-s"></span><span class="card-head-label">Skins</span></div>
+    <div id="skins-val" class="big-val">GHS 240.00</div>
+    <div id="skins-sub" class="sub-lbl">per skin (6 skins)</div>
+    <div class="pot-footer">Skins pot: <span id="skins-pot">GHS 1,440.00</span></div>
+  </div>
+
+  <p class="section-label">Stroke play winners</p>
+  <div class="payout-card" style="margin-bottom:28px;">
+    <div class="card-head">
+      <span class="dot dot-sp"></span>
+      <span class="card-head-label">Stroke play</span>
+      <span style="margin-left:auto; font-size:11px; color:var(--ink-faint);">Pot: <span id="sp-pot">GHS 720.00</span></span>
     </div>
-    <div class="payout-card">
-      <div class="card-head"><span class="dot dot-sp"></span><span class="card-head-label">Stroke play</span></div>
-      <div class="prow"><span class="pl">1st place (50%)</span><span id="sp1" class="pv">GHS 360.00</span></div>
-      <div class="prow"><span class="pl">2nd place (30%)</span><span id="sp2" class="pv">GHS 216.00</span></div>
-      <div class="prow"><span class="pl">3rd place (20%)</span><span id="sp3" class="pv">GHS 144.00</span></div>
-      <div class="pot-footer">Stroke pot: <span id="sp-pot">GHS 720.00</span></div>
+    <div class="winner-row">
+      <span class="place-badge place-1">1</span>
+      <input class="winner-name-input" type="text" id="sp1-name" placeholder="1st place — winner name" />
+      <span id="sp1" class="winner-payout">GHS 360.00</span>
     </div>
-    <div class="payout-card">
-      <div class="card-head"><span class="dot dot-a"></span><span class="card-head-label">Ancillaries</span></div>
-      <div id="anc-val" class="big-val">GHS 30.00</div>
-      <div class="sub-lbl">per prize (8 prizes)</div>
-      <hr class="card-divider" />
-      <div class="prow"><span class="pl">4 longest drives</span><span id="anc-ld" class="pv">GHS 30.00</span></div>
-      <div class="prow"><span class="pl">4 closest to pin</span><span id="anc-cp" class="pv">GHS 30.00</span></div>
-      <div class="pot-footer">Ancillary pot: <span id="anc-pot">GHS 240.00</span></div>
+    <div class="winner-row">
+      <span class="place-badge place-2">2</span>
+      <input class="winner-name-input" type="text" id="sp2-name" placeholder="2nd place — winner name" />
+      <span id="sp2" class="winner-payout">GHS 216.00</span>
+    </div>
+    <div class="winner-row">
+      <span class="place-badge place-3">3</span>
+      <input class="winner-name-input" type="text" id="sp3-name" placeholder="3rd place — winner name" />
+      <span id="sp3" class="winner-payout">GHS 144.00</span>
     </div>
   </div>
 
+  <p class="section-label">Ancillaries</p>
+  <p class="anc-subsection-label">Longest drives</p>
+  <div class="anc-grid">
+    <div class="anc-card">
+      <div class="anc-card-head"><span class="anc-type-label">Longest drive 1</span><span id="ld-prize-1" class="anc-prize-amt">GHS 30.00</span></div>
+      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld1-hole" placeholder="Hole number" /></div>
+      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld1-winner" placeholder="Winner name" /></div>
+    </div>
+    <div class="anc-card">
+      <div class="anc-card-head"><span class="anc-type-label">Longest drive 2</span><span id="ld-prize-2" class="anc-prize-amt">GHS 30.00</span></div>
+      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld2-hole" placeholder="Hole number" /></div>
+      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld2-winner" placeholder="Winner name" /></div>
+    </div>
+    <div class="anc-card">
+      <div class="anc-card-head"><span class="anc-type-label">Longest drive 3</span><span id="ld-prize-3" class="anc-prize-amt">GHS 30.00</span></div>
+      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld3-hole" placeholder="Hole number" /></div>
+      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld3-winner" placeholder="Winner name" /></div>
+    </div>
+    <div class="anc-card">
+      <div class="anc-card-head"><span class="anc-type-label">Longest drive 4</span><span id="ld-prize-4" class="anc-prize-amt">GHS 30.00</span></div>
+      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="ld4-hole" placeholder="Hole number" /></div>
+      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="ld4-winner" placeholder="Winner name" /></div>
+    </div>
+  </div>
+
+  <p class="anc-subsection-label">Closest to pin</p>
+  <div class="anc-grid">
+    <div class="anc-card">
+      <div class="anc-card-head"><span class="anc-type-label">Closest to pin 1</span><span id="cp-prize-1" class="anc-prize-amt">GHS 30.00</span></div>
+      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp1-hole" placeholder="Hole number" /></div>
+      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp1-winner" placeholder="Winner name" /></div>
+    </div>
+    <div class="anc-card">
+      <div class="anc-card-head"><span class="anc-type-label">Closest to pin 2</span><span id="cp-prize-2" class="anc-prize-amt">GHS 30.00</span></div>
+      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp2-hole" placeholder="Hole number" /></div>
+      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp2-winner" placeholder="Winner name" /></div>
+    </div>
+    <div class="anc-card">
+      <div class="anc-card-head"><span class="anc-type-label">Closest to pin 3</span><span id="cp-prize-3" class="anc-prize-amt">GHS 30.00</span></div>
+      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp3-hole" placeholder="Hole number" /></div>
+      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp3-winner" placeholder="Winner name" /></div>
+    </div>
+    <div class="anc-card">
+      <div class="anc-card-head"><span class="anc-type-label">Closest to pin 4</span><span id="cp-prize-4" class="anc-prize-amt">GHS 30.00</span></div>
+      <div class="anc-entry"><span class="anc-icon hole-icon">#</span><input type="text" id="cp4-hole" placeholder="Hole number" /></div>
+      <div class="anc-entry"><span class="anc-icon win-icon">W</span><input type="text" id="cp4-winner" placeholder="Winner name" /></div>
+    </div>
+  </div>
+  <div class="anc-total-row" style="margin-bottom:32px;">
+    Ancillary pot: <span id="anc-pot">GHS 240.00</span> &mdash; <span id="anc-per">GHS 30.00</span> per prize (8 prizes)
+  </div>
+
+  <!-- Skins allocation -->
+  <p class="section-label">Skins allocation</p>
+  <div class="alloc-wrap">
+    <div class="alloc-status-bar">
+      <div class="alloc-pill total">
+        <span id="alloc-total" class="pill-num">6</span>
+        <span class="pill-lbl">Total skins</span>
+      </div>
+      <div class="alloc-pill used">
+        <span id="alloc-used" class="pill-num">0</span>
+        <span class="pill-lbl">Assigned</span>
+      </div>
+      <div class="alloc-pill remain" id="alloc-remain-pill">
+        <span id="alloc-remain" class="pill-num">6</span>
+        <span class="pill-lbl">Remaining</span>
+      </div>
+      <div class="alloc-progress">
+        <div class="alloc-progress-track">
+          <div class="alloc-progress-fill" id="alloc-bar" style="width:0%"></div>
+        </div>
+        <div class="alloc-progress-lbl" id="alloc-progress-lbl">0 of 6 skins assigned</div>
+      </div>
+    </div>
+
+    <div class="alloc-done-banner" id="alloc-done-banner">All skins have been assigned</div>
+
+    <table class="alloc-table">
+      <thead>
+        <tr>
+          <th style="width:32px;"></th>
+          <th>Player name</th>
+          <th style="width:110px;">Skins won</th>
+          <th style="text-align:right;">Payout</th>
+          <th style="width:30px;"></th>
+        </tr>
+      </thead>
+      <tbody id="alloc-tbody"></tbody>
+    </table>
+
+    <div class="alloc-add-row">
+      <button class="btn-add-player" id="btn-add-player" onclick="addAllocRow()">+ Add player</button>
+      <span class="alloc-over-warn" id="alloc-over-warn">Skins assigned exceed total — please correct</span>
+      <span class="alloc-remaining-hint" id="alloc-hint"><strong id="alloc-hint-num">6</strong> skins remaining</span>
+    </div>
+  </div>
+
+  <!-- Skins payout ladder -->
   <p class="section-label">Skins payout ladder</p>
   <div class="ladder-wrap">
     <div class="ladder-header">
@@ -464,24 +393,33 @@
 <footer>Secopp Advisory Services &mdash; Golf Skins Payout Calculator</footer>
 
 <script>
-  const fmt = v => 'GHS ' + v.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var skinVal = 0;
+  var skinsPot = 0;
+  var totalSkins = 0;
+  var rowCount = 0;
+
+  var fmt = function(v) {
+    return 'GHS ' + v.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
 
   function calc() {
-    const players  = Math.max(2, parseInt(document.getElementById('inp-players').value) || 2);
-    const buyin    = Math.max(1, parseFloat(document.getElementById('inp-buyin').value) || 200);
-    const skinsWon = Math.max(0, parseInt(document.getElementById('inp-skins').value) || 0);
+    var players  = Math.max(2, parseInt(document.getElementById('inp-players').value) || 2);
+    var buyin    = Math.max(1, parseFloat(document.getElementById('inp-buyin').value) || 200);
+    var skinsWon = Math.max(0, parseInt(document.getElementById('inp-skins').value) || 0);
 
-    const total    = players * buyin;
-    const skinsPot = total * 0.60;
-    const spPot    = total * 0.30;
-    const ancPot   = total * 0.10;
-    const ancPrize = ancPot / 8;
-    const skinVal  = skinsWon > 0 ? skinsPot / skinsWon : 0;
+    totalSkins = skinsWon;
+    var total  = players * buyin;
+    skinsPot   = total * 0.60;
+    var spPot  = total * 0.30;
+    var ancPot = total * 0.10;
+    var ancPrize = ancPot / 8;
+    skinVal    = skinsWon > 0 ? skinsPot / skinsWon : 0;
 
     document.getElementById('tv-total').textContent  = fmt(total);
     document.getElementById('skins-pot').textContent = fmt(skinsPot);
     document.getElementById('sp-pot').textContent    = fmt(spPot);
     document.getElementById('anc-pot').textContent   = fmt(ancPot);
+    document.getElementById('anc-per').textContent   = fmt(ancPrize);
     document.getElementById('skins-val').textContent = skinsWon > 0 ? fmt(skinVal) : 'GHS 0.00';
     document.getElementById('skins-sub').textContent = skinsWon > 0
       ? 'per skin (' + skinsWon + ' skin' + (skinsWon !== 1 ? 's' : '') + ')'
@@ -489,49 +427,140 @@
     document.getElementById('sp1').textContent = fmt(spPot * 0.50);
     document.getElementById('sp2').textContent = fmt(spPot * 0.30);
     document.getElementById('sp3').textContent = fmt(spPot * 0.20);
-    document.getElementById('anc-val').textContent = fmt(ancPrize);
-    document.getElementById('anc-ld').textContent  = fmt(ancPrize);
-    document.getElementById('anc-cp').textContent  = fmt(ancPrize);
 
-    const ladderBody = document.getElementById('ladder-body');
+    for (var i = 1; i <= 4; i++) {
+      document.getElementById('ld-prize-' + i).textContent = fmt(ancPrize);
+      document.getElementById('cp-prize-' + i).textContent = fmt(ancPrize);
+    }
 
+    updateAlloc();
+    updateLadder(skinsWon);
+  }
+
+  function getUsedSkins() {
+    var total = 0;
+    var rows = document.querySelectorAll('.alloc-skins-input');
+    for (var i = 0; i < rows.length; i++) {
+      var v = parseInt(rows[i].value) || 0;
+      total += v;
+    }
+    return total;
+  }
+
+  function updateAlloc() {
+    var used   = getUsedSkins();
+    var remain = totalSkins - used;
+    var pct    = totalSkins > 0 ? Math.min(100, (used / totalSkins) * 100) : 0;
+    var over   = used > totalSkins;
+
+    document.getElementById('alloc-total').textContent  = totalSkins;
+    document.getElementById('alloc-used').textContent   = used;
+    document.getElementById('alloc-remain').textContent = Math.max(0, remain);
+    document.getElementById('alloc-bar').style.width    = pct + '%';
+    document.getElementById('alloc-progress-lbl').textContent = used + ' of ' + totalSkins + ' skins assigned';
+    document.getElementById('alloc-hint-num').textContent = Math.max(0, remain);
+
+    var remainPill = document.getElementById('alloc-remain-pill');
+    if (remain === 0 && !over) {
+      remainPill.classList.add('done');
+    } else {
+      remainPill.classList.remove('done');
+    }
+
+    var done = (remain === 0 && !over && totalSkins > 0);
+    document.getElementById('alloc-done-banner').classList.toggle('show', done);
+    document.getElementById('alloc-over-warn').classList.toggle('show', over);
+    document.getElementById('alloc-hint').style.display = over ? 'none' : '';
+
+    var addBtn = document.getElementById('btn-add-player');
+    if (remain <= 0 || over) {
+      addBtn.classList.add('disabled');
+    } else {
+      addBtn.classList.remove('disabled');
+    }
+
+    // update each row's payout live
+    var rows = document.querySelectorAll('#alloc-tbody tr');
+    for (var i = 0; i < rows.length; i++) {
+      var inp  = rows[i].querySelector('.alloc-skins-input');
+      var cell = rows[i].querySelector('.alloc-payout-cell');
+      if (inp && cell) {
+        var s = parseInt(inp.value) || 0;
+        var payout = s * skinVal;
+        cell.textContent = s > 0 ? fmt(payout) : '—';
+        cell.classList.toggle('zero', s === 0);
+      }
+    }
+  }
+
+  function addAllocRow() {
+    var used   = getUsedSkins();
+    var remain = totalSkins - used;
+    if (remain <= 0) return;
+
+    rowCount++;
+    var idx = rowCount;
+    var tbody = document.getElementById('alloc-tbody');
+    var tr = document.createElement('tr');
+    tr.id = 'alloc-row-' + idx;
+    tr.innerHTML =
+      '<td><span class="alloc-row-num">' + idx + '</span></td>' +
+      '<td class="alloc-name-td"><input class="alloc-input" type="text" placeholder="Player name" /></td>' +
+      '<td class="alloc-skins-td"><input class="alloc-input alloc-skins-input" type="number" min="0" placeholder="Skins" /></td>' +
+      '<td class="alloc-payout-cell zero">—</td>' +
+      '<td class="alloc-del-td"><button class="alloc-delete" onclick="deleteAllocRow(' + idx + ')" title="Remove">&#x2715;</button></td>';
+    tbody.appendChild(tr);
+
+    var skinInp = tr.querySelector('.alloc-skins-input');
+    skinInp.addEventListener('input', updateAlloc);
+
+    tr.querySelector('input[type="text"]').focus();
+    updateAlloc();
+  }
+
+  function deleteAllocRow(idx) {
+    var row = document.getElementById('alloc-row-' + idx);
+    if (row) { row.parentNode.removeChild(row); }
+    updateAlloc();
+  }
+
+  function updateLadder(skinsWon) {
+    var ladderBody = document.getElementById('ladder-body');
     if (skinsWon === 0) {
       ladderBody.innerHTML = '<p class="empty-msg">Set skins won above to see the payout ladder.</p>';
       document.getElementById('ladder-title').textContent = 'Player payout by skins won';
       return;
     }
-
     document.getElementById('ladder-title').textContent =
       'If ' + skinsWon + ' skin' + (skinsWon !== 1 ? 's' : '') + ' are won — each skin = ' + fmt(skinVal);
 
-    let rows = '';
-    for (let i = 1; i <= skinsWon; i++) {
-      const payout = i * skinVal;
-      const pct    = (payout / skinsPot) * 100;
-      const isLast = i === skinsWon;
+    var rows = '';
+    for (var j = 1; j <= skinsWon; j++) {
+      var payout = j * skinVal;
+      var pct    = (payout / skinsPot) * 100;
+      var isLast = j === skinsWon;
       rows +=
         '<tr' + (isLast ? ' class="full-pot"' : '') + '>' +
-        '<td><span class="badge">' + i + (i === 1 ? ' skin' : ' skins') + '</span></td>' +
-        '<td class="muted">' + fmt(skinVal) + ' &times; ' + i + '</td>' +
+        '<td><span class="badge">' + j + (j === 1 ? ' skin' : ' skins') + '</span></td>' +
+        '<td class="muted">' + fmt(skinVal) + ' &times; ' + j + '</td>' +
         '<td>' + fmt(payout) + '</td>' +
         '<td><span class="bar-track"><span class="bar-fill" style="width:' + pct + '%"></span></span>' +
         '<span class="pct-lbl">' + pct.toFixed(2) + '%</span></td>' +
         '</tr>';
     }
-
     ladderBody.innerHTML =
       '<table class="ltable">' +
-        '<thead><tr>' +
-          '<th>Skins won</th><th>Calculation</th><th>Payout</th><th>Share of skins pot</th>' +
-        '</tr></thead>' +
+        '<thead><tr><th>Skins won</th><th>Calculation</th><th>Payout</th><th>Share of skins pot</th></tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>';
   }
 
-  ['inp-players','inp-buyin','inp-skins'].forEach(id =>
-    document.getElementById(id).addEventListener('input', calc)
-  );
+  ['inp-players','inp-buyin','inp-skins'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', calc);
+  });
+
   calc();
+  addAllocRow();
 </script>
 </body>
 </html>
