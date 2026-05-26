@@ -45,7 +45,8 @@
       "react":            "https://esm.sh/react@18.3.1",
       "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
       "lucide-react":     "https://esm.sh/lucide-react@0.383.0?deps=react@18.3.1",
-      "xlsx":             "https://esm.sh/xlsx@0.18.5"
+      "xlsx":             "https://esm.sh/xlsx@0.18.5",
+      "html-to-image":    "https://esm.sh/html-to-image@1.11.11"
     }
   }
   </script>
@@ -56,14 +57,15 @@
   </div>
 
   <script type="text/babel" data-type="module" data-presets="react">
-    import React, { useState, useEffect, useMemo } from 'react';
+    import React, { useState, useEffect, useMemo, useRef } from 'react';
     import { createRoot } from 'react-dom/client';
     import {
       Star, Plus, Users, BarChart3, ChevronLeft, Lock, Calendar, Trophy,
       Trash2, Award, CheckCircle2, AlertCircle, ChevronRight, Flag, X,
-      Settings, Upload, Download, KeyRound, FileSpreadsheet,
+      Settings, Upload, Download, KeyRound, FileSpreadsheet, Camera,
     } from 'lucide-react';
     import * as XLSX from 'xlsx';
+    import { toPng } from 'html-to-image';
 
     /* ============================================================
        CONFIG
@@ -105,6 +107,50 @@
        ============================================================ */
     const uid  = (p) => `${p}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const fmt1 = (n) => (Math.round(n * 10) / 10).toFixed(1);
+
+    // Resize an uploaded image to a small JPEG data URL (keeps localStorage manageable)
+    const resizeImage = (file, maxDim = 400, quality = 0.82) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width >= height && width > maxDim) { height = Math.round(height * maxDim / width); width = maxDim; }
+          else if (height > maxDim) { width = Math.round(width * maxDim / height); height = maxDim; }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+
+    function Avatar({ caddie, size = 48 }) {
+      if (caddie.photo) {
+        return (
+          <img
+            src={caddie.photo}
+            alt={caddie.name}
+            style={{ width: size, height: size }}
+            className="rounded-full object-cover border border-stone-200 flex-shrink-0"
+          />
+        );
+      }
+      return (
+        <div
+          style={{ width: size, height: size, fontSize: size * 0.36 }}
+          className="rounded-full bg-[#1f3a2e] text-amber-300 font-display flex items-center justify-center flex-shrink-0"
+        >
+          {initials(caddie.name) || '?'}
+        </div>
+      );
+    }
 
     /* ============================================================
        STAR RATING
@@ -337,9 +383,208 @@
     /* ============================================================
        ADMIN VIEW
        ============================================================ */
-    function AdminView({ caddies, ratings, addCaddie, addCaddiesBulk, deleteCaddie, deleteRating }) {
+    /* ============================================================
+       ID CARD (rendered for download + on-screen)
+       ============================================================ */
+    function IdCard({ caddie, stats, cardRef }) {
+      const rating = stats.count ? fmt1(stats.overall) : null;
+      const rounded = Math.round(stats.overall);
+      return (
+        <div
+          ref={cardRef}
+          style={{
+            width: 420,
+            fontFamily: "'Outfit', sans-serif",
+            background: 'linear-gradient(135deg, #1f3a2e 0%, #2a4f3e 60%, #1a3327 100%)',
+            borderRadius: 14,
+            padding: 24,
+            color: '#fff',
+            boxShadow: '0 10px 40px rgba(31,58,46,0.3)',
+            border: '1px solid rgba(184,147,90,0.4)',
+          }}
+        >
+          {/* header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(184,147,90,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Flag size={15} color="#f0c674" strokeWidth={2} />
+              </div>
+              <span style={{ fontSize: 13, letterSpacing: 1.5, textTransform: 'uppercase', color: '#e7dcc6' }}>
+                Achimota Golf Club
+              </span>
+            </div>
+            <span style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: '#b8935a' }}>
+              Caddie ID
+            </span>
+          </div>
+
+          {/* body */}
+          <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
+            {caddie.photo ? (
+              <img src={caddie.photo} alt={caddie.name}
+                style={{ width: 104, height: 104, borderRadius: 12, objectFit: 'cover', border: '2px solid rgba(184,147,90,0.6)' }} />
+            ) : (
+              <div style={{ width: 104, height: 104, borderRadius: 12, background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(184,147,90,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Cormorant Garamond', serif", fontSize: 40, color: '#f0c674' }}>
+                {initials(caddie.name) || '?'}
+              </div>
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {caddie.bib && (
+                <div style={{ fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', color: '#b8935a', marginBottom: 2 }}>
+                  Bib #{caddie.bib}
+                </div>
+              )}
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, lineHeight: 1.05, fontWeight: 600, marginBottom: 8 }}>
+                {caddie.name}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 14px', fontSize: 12, color: '#cdd9d0' }}>
+                {caddie.age && <span>Age {caddie.age}</span>}
+                {caddie.sex && <span>{caddie.sex}</span>}
+                {caddie.phone && <span>{caddie.phone}</span>}
+              </div>
+            </div>
+          </div>
+
+          {/* rating footer */}
+          <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.12)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: 1.5, textTransform: 'uppercase', color: '#9fb0a4', marginBottom: 4 }}>
+                Average Rating
+              </div>
+              <div style={{ display: 'flex', gap: 3 }}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Star key={n} size={18}
+                    color={n <= rounded ? '#f0c674' : 'rgba(255,255,255,0.2)'}
+                    fill={n <= rounded ? '#f0c674' : 'transparent'}
+                    strokeWidth={1.5} />
+                ))}
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 46, fontWeight: 700, color: '#f0c674', lineHeight: 1 }}>
+                {rating || '—'}
+              </span>
+              <div style={{ fontSize: 10, letterSpacing: 1, textTransform: 'uppercase', color: '#9fb0a4' }}>
+                {stats.count} {stats.count === 1 ? 'rating' : 'ratings'}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ============================================================
+       CADDIE DETAIL (ID card + metric breakdown + ratings feed)
+       ============================================================ */
+    function CaddieDetail({ caddie, stats, caddieRatings, onBack, onEdit, deleteRating }) {
+      const cardRef = useRef(null);
+      const [busy, setBusy] = useState(false);
+
+      const downloadCard = async () => {
+        if (!cardRef.current) return;
+        setBusy(true);
+        try {
+          const dataUrl = await toPng(cardRef.current, { pixelRatio: 2, cacheBust: true, backgroundColor: '#f7f4ec' });
+          const a = document.createElement('a');
+          a.download = `${caddie.name.replace(/\s+/g, '_')}_caddie_id.png`;
+          a.href = dataUrl;
+          a.click();
+        } catch (e) {
+          console.error(e);
+          alert('Could not generate the ID card image. Try again.');
+        }
+        setBusy(false);
+      };
+
+      return (
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <button onClick={onBack}
+              className="font-body text-sm text-stone-600 hover:text-[#1f3a2e] flex items-center gap-1">
+              <ChevronLeft size={16} /> Back to overview
+            </button>
+            <button onClick={onEdit}
+              className="font-body text-sm text-[#1f3a2e] hover:text-[#b8935a] border border-[#1f3a2e] hover:border-[#b8935a] px-4 py-2 rounded-sm flex items-center gap-1.5 uppercase tracking-[0.12em] transition-colors">
+              <Settings size={14} /> Edit Details
+            </button>
+          </div>
+
+          {/* ID card + download */}
+          <div className="flex flex-col items-center mb-6">
+            <IdCard caddie={caddie} stats={stats} cardRef={cardRef} />
+            <button onClick={downloadCard} disabled={busy}
+              className="mt-4 bg-[#b8935a] hover:bg-[#a07c45] disabled:bg-stone-300 text-white px-5 py-2.5 font-body text-sm uppercase tracking-[0.15em] rounded-sm flex items-center gap-2 transition-colors">
+              <Download size={16} /> {busy ? 'Generating…' : 'Download ID Card'}
+            </button>
+          </div>
+
+          {/* metric breakdown */}
+          <div className="bg-white rounded-sm border border-stone-200 p-6 md:p-10 mb-6">
+            <h3 className="font-display text-2xl text-[#1f3a2e] mb-5">Performance Breakdown</h3>
+            <div className="space-y-4">
+              {METRICS.map((m) => {
+                const v = stats.byMetric[m.key] || 0;
+                return (
+                  <div key={m.key}>
+                    <div className="flex justify-between items-baseline mb-1.5">
+                      <span className="font-body text-stone-800 text-sm">{m.label}</span>
+                      <span className="font-display text-lg text-[#1f3a2e]">{stats.count ? fmt1(v) : '—'}</span>
+                    </div>
+                    <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-[#1f3a2e] to-[#b8935a] transition-all"
+                        style={{ width: `${(v / 5) * 100}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ratings feed */}
+          <div className="bg-white rounded-sm border border-stone-200 p-6 md:p-10">
+            <h3 className="font-display text-2xl text-[#1f3a2e] mb-5">Recent Ratings</h3>
+            {caddieRatings.length === 0 ? (
+              <p className="font-body text-stone-500 text-sm italic">No ratings yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {caddieRatings.slice(0, 20).map((r) => {
+                  const avg = METRICS.reduce((s, m) => s + r[m.key], 0) / METRICS.length;
+                  return (
+                    <div key={r.id} className="border border-stone-100 rounded-sm p-4 hover:bg-stone-50 transition-colors">
+                      <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
+                        <div>
+                          <div className="font-body text-sm text-stone-800 font-medium">
+                            {r.raterName || 'Anonymous'} <span className="text-stone-400 font-normal">·</span> {r.roundType}
+                          </div>
+                          <div className="font-body text-xs text-stone-500">{r.date}</div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="font-display text-xl text-[#b8935a]">{fmt1(avg)}</div>
+                          <button onClick={() => { if (confirm('Delete this rating?')) deleteRating(r.id); }}
+                            className="text-stone-300 hover:text-rose-600 transition-colors" title="Delete rating">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                      {r.comments && (
+                        <p className="font-body text-sm text-stone-600 italic mt-2 pl-3 border-l-2 border-stone-200">
+                          "{r.comments}"
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    function AdminView({ caddies, ratings, addCaddie, addCaddiesBulk, updateCaddie, deleteCaddie, deleteRating }) {
       const [tab, setTab] = useState('overview');
       const [selectedId, setSelectedId] = useState(null);
+      const [editId, setEditId] = useState(null);
 
       const statsByCaddie = useMemo(() => {
         const map = {};
@@ -369,115 +614,29 @@
           .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
 
         return (
-          <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
-            <button
-              onClick={() => { setTab('overview'); setSelectedId(null); }}
-              className="font-body text-sm text-stone-600 hover:text-[#1f3a2e] flex items-center gap-1 mb-6"
-            >
-              <ChevronLeft size={16} /> Back to overview
-            </button>
-
-            <div className="bg-white rounded-sm border border-stone-200 p-6 md:p-10 mb-6">
-              <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
-                <div>
-                  <div className="font-body text-xs uppercase tracking-wider text-stone-500 mb-1">
-                    {caddie.bib ? `Bib #${caddie.bib}` : 'Caddie'}
-                  </div>
-                  <h2 className="font-display text-4xl text-[#1f3a2e]">{caddie.name}</h2>
-                </div>
-                <div className="text-right">
-                  <div className="font-display text-5xl text-[#b8935a]">{fmt1(stats.overall)}</div>
-                  <div className="font-body text-xs uppercase tracking-wider text-stone-500">
-                    {stats.count} {stats.count === 1 ? 'rating' : 'ratings'}
-                  </div>
-                </div>
-              </div>
-
-              {(caddie.age || caddie.sex || caddie.phone) && (
-                <div className="flex flex-wrap gap-x-8 gap-y-2 pb-6 mb-8 border-b border-stone-100">
-                  {caddie.age && (
-                    <div>
-                      <div className="font-body text-[10px] uppercase tracking-wider text-stone-500">Age</div>
-                      <div className="font-body text-stone-800">{caddie.age}</div>
-                    </div>
-                  )}
-                  {caddie.sex && (
-                    <div>
-                      <div className="font-body text-[10px] uppercase tracking-wider text-stone-500">Sex</div>
-                      <div className="font-body text-stone-800">{caddie.sex}</div>
-                    </div>
-                  )}
-                  {caddie.phone && (
-                    <div>
-                      <div className="font-body text-[10px] uppercase tracking-wider text-stone-500">Phone</div>
-                      <a href={`tel:${caddie.phone}`} className="font-body text-[#1f3a2e] hover:underline">{caddie.phone}</a>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="space-y-4">
-                {METRICS.map((m) => {
-                  const v = stats.byMetric[m.key] || 0;
-                  return (
-                    <div key={m.key}>
-                      <div className="flex justify-between items-baseline mb-1.5">
-                        <span className="font-body text-stone-800 text-sm">{m.label}</span>
-                        <span className="font-display text-lg text-[#1f3a2e]">{stats.count ? fmt1(v) : '—'}</span>
-                      </div>
-                      <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-[#1f3a2e] to-[#b8935a] transition-all"
-                          style={{ width: `${(v / 5) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-sm border border-stone-200 p-6 md:p-10">
-              <h3 className="font-display text-2xl text-[#1f3a2e] mb-5">Recent Ratings</h3>
-              {caddieRatings.length === 0 ? (
-                <p className="font-body text-stone-500 text-sm italic">No ratings yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {caddieRatings.slice(0, 20).map((r) => {
-                    const avg = METRICS.reduce((s, m) => s + r[m.key], 0) / METRICS.length;
-                    return (
-                      <div key={r.id} className="border border-stone-100 rounded-sm p-4 hover:bg-stone-50 transition-colors">
-                        <div className="flex justify-between items-start mb-2 flex-wrap gap-2">
-                          <div>
-                            <div className="font-body text-sm text-stone-800 font-medium">
-                              {r.raterName || 'Anonymous'} <span className="text-stone-400 font-normal">·</span> {r.roundType}
-                            </div>
-                            <div className="font-body text-xs text-stone-500">{r.date}</div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="font-display text-xl text-[#b8935a]">{fmt1(avg)}</div>
-                            <button
-                              onClick={() => { if (confirm('Delete this rating?')) deleteRating(r.id); }}
-                              className="text-stone-300 hover:text-rose-600 transition-colors"
-                              title="Delete rating"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                        {r.comments && (
-                          <p className="font-body text-sm text-stone-600 italic mt-2 pl-3 border-l-2 border-stone-200">
-                            "{r.comments}"
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
+          <CaddieDetail
+            caddie={caddie}
+            stats={stats}
+            caddieRatings={caddieRatings}
+            onBack={() => { setTab('overview'); setSelectedId(null); }}
+            onEdit={() => { setEditId(caddie.id); setTab('edit'); }}
+            deleteRating={deleteRating}
+          />
         );
+      }
+
+      if (tab === 'edit' && editId) {
+        const caddie = caddies.find((c) => c.id === editId);
+        if (caddie) {
+          return <AddCaddieForm
+            initial={caddie}
+            onSave={(data) => {
+              updateCaddie(data);
+              setTab('caddie'); setSelectedId(caddie.id); setEditId(null);
+            }}
+            onCancel={() => { setTab('caddie'); setSelectedId(caddie.id); setEditId(null); }}
+          />;
+        }
       }
 
       if (tab === 'add') {
@@ -582,9 +741,10 @@
                       onClick={() => { setSelectedId(c.id); setTab('caddie'); }}
                     >
                       <div className="flex items-center gap-4 min-w-0">
-                        <div className="font-display text-2xl text-stone-300 w-8 flex-shrink-0">
+                        <div className="font-display text-xl text-stone-300 w-6 flex-shrink-0">
                           {String(idx + 1).padStart(2, '0')}
                         </div>
+                        <Avatar caddie={c} size={44} />
                         <div className="min-w-0">
                           <div className="font-body font-medium text-stone-800 truncate">
                             {c.bib && <span className="text-stone-400 mr-1">#{c.bib}</span>}
@@ -854,21 +1014,45 @@
       );
     }
 
-    function AddCaddieForm({ onSave, onCancel }) {
-      const empty = { name: '', age: '', sex: '', phone: '', bib: '' };
-      const [form, setForm] = useState(empty);
+    function AddCaddieForm({ onSave, onCancel, initial = null }) {
+      const isEdit = !!initial;
+      const empty = { name: '', age: '', sex: '', phone: '', bib: '', photo: '' };
+      const seed = isEdit
+        ? {
+            name: initial.name || '',
+            age: initial.age != null ? String(initial.age) : '',
+            sex: initial.sex || '',
+            phone: initial.phone || '',
+            bib: initial.bib || '',
+            photo: initial.photo || '',
+          }
+        : empty;
+      const [form, setForm] = useState(seed);
       const [justAdded, setJustAdded] = useState(null);
+      const [photoErr, setPhotoErr] = useState(null);
       const update = (k, v) => setForm({ ...form, [k]: v });
       const canSave = form.name.trim().length > 0;
 
+      const onPhoto = async (file) => {
+        setPhotoErr(null);
+        if (!file.type.startsWith('image/')) { setPhotoErr('Please choose an image file.'); return; }
+        try {
+          const dataUrl = await resizeImage(file);
+          setForm((f) => ({ ...f, photo: dataUrl }));
+        } catch {
+          setPhotoErr('Could not process that image.');
+        }
+      };
+
       const buildCaddie = () => ({
-        id: uid('cd'),
+        id: isEdit ? initial.id : uid('cd'),
         name: form.name.trim(),
         age: form.age ? Number(form.age) : null,
         sex: form.sex || null,
         phone: form.phone.trim() || null,
         bib: form.bib.trim() || null,
-        createdAt: new Date().toISOString(),
+        photo: form.photo || null,
+        createdAt: isEdit ? initial.createdAt : new Date().toISOString(),
       });
 
       const saveAndClose = () => { onSave(buildCaddie()); };
@@ -883,11 +1067,15 @@
       return (
         <div className="max-w-md mx-auto px-4 py-12">
           <button onClick={onCancel} className="font-body text-sm text-stone-600 hover:text-[#1f3a2e] flex items-center gap-1 mb-6">
-            <ChevronLeft size={16} /> Back to dashboard
+            <ChevronLeft size={16} /> {isEdit ? 'Back' : 'Back to dashboard'}
           </button>
           <div className="bg-white rounded-sm border border-stone-200 p-8">
-            <h2 className="font-display text-3xl text-[#1f3a2e] mb-1">Add Caddie</h2>
-            <p className="font-body text-sm text-stone-500 mb-6">Adding multiple caddies? Use <em>Save & Add Another</em>.</p>
+            <h2 className="font-display text-3xl text-[#1f3a2e] mb-1">{isEdit ? 'Edit Caddie' : 'Add Caddie'}</h2>
+            {isEdit ? (
+              <p className="font-body text-sm text-stone-500 mb-6">Update details. Ratings are unaffected.</p>
+            ) : (
+              <p className="font-body text-sm text-stone-500 mb-6">Adding multiple caddies? Use <em>Save & Add Another</em>.</p>
+            )}
 
             {justAdded && (
               <div className="mb-5 p-3 rounded-sm bg-emerald-50 border border-emerald-200 flex items-center gap-2 font-body text-sm text-emerald-800">
@@ -896,6 +1084,33 @@
             )}
 
             <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                {form.photo ? (
+                  <img src={form.photo} alt="preview" className="w-20 h-20 rounded-full object-cover border border-stone-200" />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-stone-100 flex items-center justify-center text-stone-400">
+                    <Camera size={24} />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <label className="font-body text-xs uppercase tracking-wider text-stone-500 block mb-2">Profile Photo <span className="text-stone-400 normal-case italic">(optional)</span></label>
+                  <div className="flex gap-2">
+                    <label className="cursor-pointer font-body text-sm text-[#1f3a2e] border border-[#1f3a2e] hover:bg-[#1f3a2e] hover:text-white px-3 py-2 rounded-sm transition-colors inline-flex items-center gap-1.5">
+                      <Upload size={14} /> {form.photo ? 'Replace' : 'Upload'}
+                      <input type="file" accept="image/*" className="hidden"
+                        onChange={(e) => e.target.files[0] && onPhoto(e.target.files[0])} />
+                    </label>
+                    {form.photo && (
+                      <button onClick={() => update('photo', '')}
+                        className="font-body text-sm text-stone-500 hover:text-rose-600 px-2 py-2 inline-flex items-center gap-1">
+                        <X size={14} /> Remove
+                      </button>
+                    )}
+                  </div>
+                  {photoErr && <p className="font-body text-xs text-rose-600 mt-1">{photoErr}</p>}
+                </div>
+              </div>
+
               <div>
                 <label className="font-body text-xs uppercase tracking-wider text-stone-500 block mb-2">Full Name</label>
                 <input
@@ -960,15 +1175,17 @@
                   onClick={saveAndClose}
                   className="w-full py-3 bg-[#1f3a2e] hover:bg-[#2a4f3e] disabled:bg-stone-300 text-white font-body uppercase tracking-[0.2em] text-sm rounded-sm"
                 >
-                  Save Caddie
+                  {isEdit ? 'Save Changes' : 'Save Caddie'}
                 </button>
-                <button
-                  disabled={!canSave}
-                  onClick={saveAndAddAnother}
-                  className="w-full py-3 bg-white border border-[#1f3a2e] text-[#1f3a2e] hover:bg-stone-50 disabled:border-stone-300 disabled:text-stone-300 disabled:cursor-not-allowed font-body uppercase tracking-[0.2em] text-sm rounded-sm flex items-center justify-center gap-2"
-                >
-                  <Plus size={14} /> Save & Add Another
-                </button>
+                {!isEdit && (
+                  <button
+                    disabled={!canSave}
+                    onClick={saveAndAddAnother}
+                    className="w-full py-3 bg-white border border-[#1f3a2e] text-[#1f3a2e] hover:bg-stone-50 disabled:border-stone-300 disabled:text-stone-300 disabled:cursor-not-allowed font-body uppercase tracking-[0.2em] text-sm rounded-sm flex items-center justify-center gap-2"
+                  >
+                    <Plus size={14} /> Save & Add Another
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -994,6 +1211,11 @@
       };
       const addCaddiesBulk = (newCaddies) => {
         const next = [...caddies, ...newCaddies];
+        setCaddies(next);
+        saveKey('caddies', next);
+      };
+      const updateCaddie = (updated) => {
+        const next = caddies.map((c) => (c.id === updated.id ? updated : c));
         setCaddies(next);
         saveKey('caddies', next);
       };
@@ -1043,6 +1265,7 @@
               ratings={ratings}
               addCaddie={addCaddie}
               addCaddiesBulk={addCaddiesBulk}
+              updateCaddie={updateCaddie}
               deleteCaddie={deleteCaddie}
               deleteRating={deleteRating}
             />
