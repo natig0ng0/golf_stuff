@@ -73,6 +73,9 @@
       { key: 'politeness',     label: 'Politeness' },
       { key: 'responsiveness', label: 'Responsiveness / Proactiveness' },
       { key: 'clubCare',       label: 'Golf Club Care' },
+      { key: 'bunkerCare',     label: 'Raking & Repairing Bunkers' },
+      { key: 'divotFilling',   label: 'Divot Filling' },
+      { key: 'pitchRepair',    label: 'Pitch Mark Repair' },
     ];
 
     const ROUND_TYPES = [
@@ -139,6 +142,7 @@
         date: new Date().toISOString().slice(0, 10),
         roundType: 'Stroke Play',
         knowledge: 0, ballVision: 0, politeness: 0, responsiveness: 0, clubCare: 0,
+        bunkerCare: 0, divotFilling: 0, pitchRepair: 0,
         comments: '', raterName: '',
       };
       const [form, setForm] = useState(empty);
