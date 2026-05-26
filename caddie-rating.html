@@ -44,7 +44,8 @@
     "imports": {
       "react":            "https://esm.sh/react@18.3.1",
       "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-      "lucide-react":     "https://esm.sh/lucide-react@0.383.0?deps=react@18.3.1"
+      "lucide-react":     "https://esm.sh/lucide-react@0.383.0?deps=react@18.3.1",
+      "xlsx":             "https://esm.sh/xlsx@0.18.5"
     }
   }
   </script>
@@ -60,12 +61,14 @@
     import {
       Star, Plus, Users, BarChart3, ChevronLeft, Lock, Calendar, Trophy,
       Trash2, Award, CheckCircle2, AlertCircle, ChevronRight, Flag, X,
+      Settings, Upload, Download, KeyRound, FileSpreadsheet,
     } from 'lucide-react';
+    import * as XLSX from 'xlsx';
 
     /* ============================================================
        CONFIG
        ============================================================ */
-    const ADMIN_PIN = '1960'; // change this
+    const DEFAULT_PASSWORD = 'admin1960'; // first-run password; change it in-app under Settings
 
     const METRICS = [
       { key: 'knowledge',      label: 'Knowledge of the Game' },
@@ -286,13 +289,14 @@
     }
 
     /* ============================================================
-       ADMIN: PIN GATE
+       ADMIN: PASSWORD GATE
        ============================================================ */
-    function PinGate({ onUnlock, onCancel }) {
-      const [pin, setPin] = useState('');
+    function PasswordGate({ onUnlock, onCancel }) {
+      const [pw, setPw] = useState('');
       const [err, setErr] = useState(false);
       const check = () => {
-        if (pin === ADMIN_PIN) onUnlock();
+        const stored = loadKey('adminPassword', DEFAULT_PASSWORD);
+        if (pw === stored) onUnlock();
         else { setErr(true); setTimeout(() => setErr(false), 1500); }
       };
       return (
@@ -309,15 +313,16 @@
             </div>
             <input
               type="password"
-              value={pin}
+              value={pw}
               autoFocus
-              onChange={(e) => setPin(e.target.value)}
+              onChange={(e) => setPw(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && check()}
-              placeholder="Enter PIN"
-              className={`font-body w-full px-4 py-3 border-2 rounded-sm focus:outline-none mb-4 text-center tracking-[0.4em] text-lg ${
+              placeholder="Enter password"
+              className={`font-body w-full px-4 py-3 border-2 rounded-sm focus:outline-none mb-4 ${
                 err ? 'border-rose-500 bg-rose-50' : 'border-stone-300 focus:border-[#1f3a2e]'
               }`}
             />
+            {err && <p className="font-body text-xs text-rose-600 -mt-2 mb-3">Incorrect password.</p>}
             <button
               onClick={check}
               className="w-full py-3 bg-[#1f3a2e] hover:bg-[#2a4f3e] text-white font-body uppercase tracking-[0.2em] text-sm rounded-sm"
@@ -332,7 +337,7 @@
     /* ============================================================
        ADMIN VIEW
        ============================================================ */
-    function AdminView({ caddies, ratings, addCaddie, deleteCaddie, deleteRating }) {
+    function AdminView({ caddies, ratings, addCaddie, addCaddiesBulk, deleteCaddie, deleteRating }) {
       const [tab, setTab] = useState('overview');
       const [selectedId, setSelectedId] = useState(null);
 
@@ -485,6 +490,18 @@
         />;
       }
 
+      if (tab === 'settings') {
+        return <SettingsView onBack={() => setTab('overview')} />;
+      }
+
+      if (tab === 'import') {
+        return <ImportCaddies
+          existing={caddies}
+          onImport={(rows) => { addCaddiesBulk(rows); setTab('overview'); }}
+          onCancel={() => setTab('overview')}
+        />;
+      }
+
       const sortedCaddies = [...caddies].sort((a, b) =>
         (statsByCaddie[b.id]?.overall || 0) - (statsByCaddie[a.id]?.overall || 0)
       );
@@ -496,12 +513,27 @@
               <div className="font-body text-xs uppercase tracking-wider text-stone-500 mb-1">Administration</div>
               <h1 className="font-display text-4xl text-[#1f3a2e]">Caddie Dashboard</h1>
             </div>
-            <button
-              onClick={() => setTab('add')}
-              className="bg-[#b8935a] hover:bg-[#a07c45] text-white px-6 py-3.5 font-body text-sm uppercase tracking-[0.18em] rounded-sm flex items-center gap-2 shadow-md shadow-amber-900/10 transition-all hover:shadow-lg hover:-translate-y-0.5"
-            >
-              <Plus size={18} strokeWidth={2.5} /> Add New Caddie
-            </button>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setTab('settings')}
+                className="text-stone-600 hover:text-[#1f3a2e] border border-stone-300 hover:border-[#1f3a2e] px-4 py-3.5 font-body text-sm uppercase tracking-[0.15em] rounded-sm flex items-center gap-2 transition-colors"
+                title="Settings"
+              >
+                <Settings size={16} /> Settings
+              </button>
+              <button
+                onClick={() => setTab('import')}
+                className="text-[#1f3a2e] border border-[#1f3a2e] hover:bg-[#1f3a2e] hover:text-white px-4 py-3.5 font-body text-sm uppercase tracking-[0.15em] rounded-sm flex items-center gap-2 transition-colors"
+              >
+                <Upload size={16} /> Import
+              </button>
+              <button
+                onClick={() => setTab('add')}
+                className="bg-[#b8935a] hover:bg-[#a07c45] text-white px-6 py-3.5 font-body text-sm uppercase tracking-[0.18em] rounded-sm flex items-center gap-2 shadow-md shadow-amber-900/10 transition-all hover:shadow-lg hover:-translate-y-0.5"
+              >
+                <Plus size={18} strokeWidth={2.5} /> Add Caddie
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3 md:gap-5 mb-8">
@@ -602,6 +634,221 @@
           </div>
           <div className={`font-display text-3xl md:text-4xl ${accent ? 'text-amber-400' : 'text-[#1f3a2e]'}`}>
             {value}
+          </div>
+        </div>
+      );
+    }
+
+    /* ============================================================
+       SETTINGS — change password
+       ============================================================ */
+    function SettingsView({ onBack }) {
+      const [cur, setCur] = useState('');
+      const [next, setNext] = useState('');
+      const [confirm, setConfirm] = useState('');
+      const [msg, setMsg] = useState(null);
+
+      const save = () => {
+        const stored = loadKey('adminPassword', DEFAULT_PASSWORD);
+        if (cur !== stored) return setMsg({ type: 'err', text: 'Current password is incorrect.' });
+        if (next.length < 4) return setMsg({ type: 'err', text: 'New password must be at least 4 characters.' });
+        if (next !== confirm) return setMsg({ type: 'err', text: 'New passwords do not match.' });
+        saveKey('adminPassword', next);
+        setCur(''); setNext(''); setConfirm('');
+        setMsg({ type: 'ok', text: 'Password updated.' });
+        setTimeout(() => setMsg(null), 3500);
+      };
+
+      return (
+        <div className="max-w-md mx-auto px-4 py-12">
+          <button onClick={onBack} className="font-body text-sm text-stone-600 hover:text-[#1f3a2e] flex items-center gap-1 mb-6">
+            <ChevronLeft size={16} /> Back to dashboard
+          </button>
+          <div className="bg-white rounded-sm border border-stone-200 p-8">
+            <div className="flex items-center gap-2 mb-1">
+              <KeyRound size={20} className="text-[#1f3a2e]" />
+              <h2 className="font-display text-3xl text-[#1f3a2e]">Change Password</h2>
+            </div>
+            <p className="font-body text-sm text-stone-500 mb-6">Applies to this browser's stored admin password.</p>
+
+            {msg && (
+              <div className={`mb-5 p-3 rounded-sm flex items-center gap-2 font-body text-sm ${
+                msg.type === 'ok'
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                  : 'bg-rose-50 text-rose-800 border border-rose-200'
+              }`}>
+                {msg.type === 'ok' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                {msg.text}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="font-body text-xs uppercase tracking-wider text-stone-500 block mb-2">Current Password</label>
+                <input type="password" value={cur} onChange={(e) => setCur(e.target.value)}
+                  className="font-body w-full px-4 py-3 border border-stone-300 rounded-sm focus:outline-none focus:border-[#1f3a2e]" />
+              </div>
+              <div>
+                <label className="font-body text-xs uppercase tracking-wider text-stone-500 block mb-2">New Password</label>
+                <input type="password" value={next} onChange={(e) => setNext(e.target.value)}
+                  className="font-body w-full px-4 py-3 border border-stone-300 rounded-sm focus:outline-none focus:border-[#1f3a2e]" />
+              </div>
+              <div>
+                <label className="font-body text-xs uppercase tracking-wider text-stone-500 block mb-2">Confirm New Password</label>
+                <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && save()}
+                  className="font-body w-full px-4 py-3 border border-stone-300 rounded-sm focus:outline-none focus:border-[#1f3a2e]" />
+              </div>
+              <button onClick={save}
+                className="w-full py-3 bg-[#1f3a2e] hover:bg-[#2a4f3e] text-white font-body uppercase tracking-[0.2em] text-sm rounded-sm mt-2">
+                Update Password
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ============================================================
+       IMPORT — bulk caddies from CSV / Excel
+       ============================================================ */
+    function ImportCaddies({ existing, onImport, onCancel }) {
+      const [parsed, setParsed] = useState(null); // { valid: [], skipped: number }
+      const [error, setError] = useState(null);
+      const [fileName, setFileName] = useState('');
+
+      const pick = (key, row) => {
+        // case-insensitive header match across a few aliases
+        const aliases = {
+          name:  ['name', 'full name', 'fullname', 'caddie', 'caddie name'],
+          age:   ['age'],
+          sex:   ['sex', 'gender'],
+          phone: ['phone', 'phone number', 'mobile', 'contact', 'tel'],
+          bib:   ['bib', 'bib number', 'number', 'no'],
+        };
+        const keys = Object.keys(row);
+        for (const a of aliases[key]) {
+          const found = keys.find((k) => k.trim().toLowerCase() === a);
+          if (found != null && String(row[found]).trim() !== '') return String(row[found]).trim();
+        }
+        return '';
+      };
+
+      const handleFile = async (file) => {
+        setError(null); setParsed(null); setFileName(file.name);
+        try {
+          const buf = await file.arrayBuffer();
+          const wb = XLSX.read(buf);
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+          const valid = [];
+          let skipped = 0;
+          rows.forEach((row) => {
+            const name = pick('name', row);
+            if (!name) { skipped++; return; }
+            const sexRaw = pick('sex', row).toLowerCase();
+            const sex = sexRaw.startsWith('m') ? 'Male' : sexRaw.startsWith('f') ? 'Female' : null;
+            const ageNum = Number(pick('age', row));
+            valid.push({
+              id: uid('cd'),
+              name,
+              age: Number.isFinite(ageNum) && ageNum > 0 ? ageNum : null,
+              sex,
+              phone: pick('phone', row) || null,
+              bib: pick('bib', row) || null,
+              createdAt: new Date().toISOString(),
+            });
+          });
+          if (valid.length === 0) {
+            setError('No valid rows found. Make sure there is a "name" column with values.');
+          } else {
+            setParsed({ valid, skipped });
+          }
+        } catch (e) {
+          console.error(e);
+          setError('Could not read that file. Use a .csv or .xlsx with a header row.');
+        }
+      };
+
+      const downloadTemplate = () => {
+        const ws = XLSX.utils.aoa_to_sheet([
+          ['name', 'age', 'sex', 'phone', 'bib'],
+          ['Kwame Mensah', 34, 'Male', '+233200000000', '12'],
+          ['Ama Boateng', 29, 'Female', '+233240000000', '7'],
+        ]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Caddies');
+        XLSX.writeFile(wb, 'caddie_import_template.xlsx');
+      };
+
+      return (
+        <div className="max-w-xl mx-auto px-4 py-12">
+          <button onClick={onCancel} className="font-body text-sm text-stone-600 hover:text-[#1f3a2e] flex items-center gap-1 mb-6">
+            <ChevronLeft size={16} /> Back to dashboard
+          </button>
+          <div className="bg-white rounded-sm border border-stone-200 p-8">
+            <div className="flex items-center gap-2 mb-1">
+              <FileSpreadsheet size={20} className="text-[#1f3a2e]" />
+              <h2 className="font-display text-3xl text-[#1f3a2e]">Bulk Import Caddies</h2>
+            </div>
+            <p className="font-body text-sm text-stone-500 mb-6">
+              Upload a <strong>.csv</strong> or <strong>.xlsx</strong> with a header row. Recognised columns: name, age, sex, phone, bib. Only <strong>name</strong> is required.
+            </p>
+
+            <button
+              onClick={downloadTemplate}
+              className="mb-5 text-[#1f3a2e] hover:text-[#b8935a] font-body text-sm flex items-center gap-1.5 transition-colors"
+            >
+              <Download size={15} /> Download a template
+            </button>
+
+            <label className="block border-2 border-dashed border-stone-300 hover:border-[#1f3a2e] rounded-sm p-8 text-center cursor-pointer transition-colors">
+              <Upload size={26} className="mx-auto text-stone-400 mb-2" />
+              <span className="font-body text-sm text-stone-600 block">
+                {fileName || 'Click to choose a CSV or Excel file'}
+              </span>
+              <input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                className="hidden"
+                onChange={(e) => e.target.files[0] && handleFile(e.target.files[0])}
+              />
+            </label>
+
+            {error && (
+              <div className="mt-4 p-3 rounded-sm bg-rose-50 border border-rose-200 flex items-center gap-2 font-body text-sm text-rose-800">
+                <AlertCircle size={16} /> {error}
+              </div>
+            )}
+
+            {parsed && (
+              <div className="mt-5">
+                <div className="p-3 rounded-sm bg-emerald-50 border border-emerald-200 font-body text-sm text-emerald-800 mb-4 flex items-center gap-2">
+                  <CheckCircle2 size={16} />
+                  {parsed.valid.length} caddie{parsed.valid.length === 1 ? '' : 's'} ready to import
+                  {parsed.skipped > 0 && ` · ${parsed.skipped} row${parsed.skipped === 1 ? '' : 's'} skipped (no name)`}
+                </div>
+                <div className="max-h-56 overflow-y-auto border border-stone-100 rounded-sm mb-4">
+                  {parsed.valid.slice(0, 100).map((c) => (
+                    <div key={c.id} className="px-4 py-2 border-b border-stone-100 last:border-b-0 font-body text-sm flex justify-between gap-3">
+                      <span className="text-stone-800">{c.bib ? `#${c.bib} · ` : ''}{c.name}</span>
+                      <span className="text-stone-400 text-xs">
+                        {[c.age, c.sex, c.phone].filter(Boolean).join(' · ') || '—'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => onImport(parsed.valid)}
+                  className="w-full py-3 bg-[#1f3a2e] hover:bg-[#2a4f3e] text-white font-body uppercase tracking-[0.2em] text-sm rounded-sm"
+                >
+                  Import {parsed.valid.length} Caddie{parsed.valid.length === 1 ? '' : 's'}
+                </button>
+                <p className="font-body text-xs text-stone-400 mt-2 text-center">
+                  Adds to the existing {existing.length} on record. Duplicates are not removed.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       );
@@ -745,6 +992,11 @@
         setCaddies(next);
         saveKey('caddies', next);
       };
+      const addCaddiesBulk = (newCaddies) => {
+        const next = [...caddies, ...newCaddies];
+        setCaddies(next);
+        saveKey('caddies', next);
+      };
       const deleteCaddie = (id) => {
         const nextC = caddies.filter((c) => c.id !== id);
         const nextR = ratings.filter((r) => r.caddieId !== id);
@@ -790,13 +1042,14 @@
               caddies={caddies}
               ratings={ratings}
               addCaddie={addCaddie}
+              addCaddiesBulk={addCaddiesBulk}
               deleteCaddie={deleteCaddie}
               deleteRating={deleteRating}
             />
           )}
 
           {showPin && (
-            <PinGate
+            <PasswordGate
               onUnlock={() => { setAdminUnlocked(true); setShowPin(false); setView('admin'); }}
               onCancel={() => setShowPin(false)}
             />
